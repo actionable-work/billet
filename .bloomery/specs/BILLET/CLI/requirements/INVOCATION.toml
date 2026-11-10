@@ -1,0 +1,12 @@
+group = "INVOCATION"
+
+[[requirements]]
+id = "BILLET-CLI-INVOCATION-001"
+title = "Argument-safe Nix tooling"
+manual = false
+design = "design/contract.md"
+
+[requirements.ears]
+type = "ubiquitous"
+system = "Billet"
+action = "invoke Nix with discrete arguments and preserve failure outcomes"

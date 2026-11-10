@@ -1,0 +1,12 @@
+group = "BUILD"
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-001"
+title = "Independent public build (BI009)"
+manual = false
+design = "design/contract.md"
+
+[requirements.ears]
+type = "ubiquitous"
+system = "Billet"
+action = "use public pinned dependencies and preserve a generic system interface"

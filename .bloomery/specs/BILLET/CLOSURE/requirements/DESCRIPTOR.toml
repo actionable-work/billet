@@ -1,0 +1,12 @@
+group = "DESCRIPTOR"
+
+[[requirements]]
+id = "BILLET-CLOSURE-DESCRIPTOR-001"
+title = "Complete runtime closure metadata (BI006)"
+manual = false
+design = "design/contract.md"
+
+[requirements.ears]
+type = "ubiquitous"
+system = "Billet"
+action = "enumerate all transitive runtime paths with NAR identities bound to manifest and system"

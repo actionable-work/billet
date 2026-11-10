@@ -1,0 +1,12 @@
+group = "NORMALIZATION"
+
+[[requirements]]
+id = "BILLET-IR-NORMALIZATION-001"
+title = "Canonical versioned IR (BI001, BI010)"
+manual = false
+design = "design/contract.md"
+
+[requirements.ears]
+type = "ubiquitous"
+system = "Billet"
+action = "produce deterministic canonical versioned IR and its SHA-256 digest"

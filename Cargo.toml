@@ -1,0 +1,6 @@
+[workspace]
+members = ["packages/rust/billet", "packages/rust/billet_core"]
+resolver = "2"
+
+[workspace.dependencies]
+billet_core = { default-features = false, path = "packages/rust/billet_core" }

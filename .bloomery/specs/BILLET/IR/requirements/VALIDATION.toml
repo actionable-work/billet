@@ -1,0 +1,12 @@
+group = "VALIDATION"
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-001"
+title = "Field-path diagnostics (BI002)"
+manual = false
+design = "design/contract.md"
+
+[requirements.ears]
+type = "ubiquitous"
+system = "Billet"
+action = "reject invalid definitions with a field path and value-free diagnostic"
