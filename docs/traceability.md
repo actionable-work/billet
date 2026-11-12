@@ -12,6 +12,8 @@ here nor inputs to evaluation, build or verification.
 | BI002 | BILLET-IR-VALIDATION-001 | Schema and field validation, including lifecycle declarations. |
 | BI003 | BILLET-IR-SECRETS-001 | Metadata only; no runtime secret resolver. |
 | BI006 | BILLET-CLOSURE-DESCRIPTOR-001 | Full transitive metadata; isolated guest proof remains VM gate. |
+| BI003, BI006, BI001, BI010 | BILLET-CLOSURE-OCI-001/002 | BI-P2.01: complete OCI filesystem/config and deterministic addressed provenance; no runtime conformance claim. |
+| BI004, BI011 | BILLET-IR-TARGETS-001 | BI-P2.01: pure capability report and explicit pre-build rejection; qualified Compose adapter remains later work. |
 | BI009 | BILLET-PUBLIC-BUILD-001 | Public-only pinned build and generic system interface. |
 | BI004, BI005, BI007, BI011 | BI-P2 / BI-P3 | Target conformance, probes, cleanup, policy and unsupported semantics. |
 | BI008 | BI-P3 | Reject persistent claims in initial Lineshaft profile. |

@@ -2,6 +2,7 @@
   pkgs,
   billetLib,
   cli,
+  harness,
 }: let
   inherit (pkgs) lib;
   fixtures = import ./fixtures.nix {inherit pkgs billetLib;};
@@ -82,16 +83,17 @@ in {
   "billet:cli-acceptance" =
     pkgs.runCommand "billet-cli-acceptance" {
       passthru.bloomery = ["BILLET-CLI-INVOCATION-001"];
-      nativeBuildInputs = [pkgs.python3];
+      nativeBuildInputs = [];
       cli = "${cli}/bin/billet";
+      testShell = pkgs.runtimeShell;
     } ''
-      python3 ${./verify.py} cli
+      ${harness}/bin/billet-acceptance cli
       touch "$out"
     '';
   "billet:ir-acceptance" = assert acceptance;
     pkgs.runCommand "billet-ir-acceptance" {
       passthru.bloomery = ["BILLET-IR-NORMALIZATION-001" "BILLET-IR-VALIDATION-001" "BILLET-IR-SECRETS-001" "BILLET-PUBLIC-BUILD-001"];
-      nativeBuildInputs = [pkgs.python3 pkgs.nix];
+      nativeBuildInputs = [pkgs.nix];
       source = ../.;
       nixpkgsSource = pkgs.path;
       manifest = sample.manifest;
@@ -100,13 +102,13 @@ in {
       derivationSpec = pkgs.writeText "billet-derivation-spec.json" (builtins.toJSON sample.closureDescriptor.drvAttrs);
       system = pkgs.stdenv.hostPlatform.system;
     } ''
-      python3 ${./verify.py} ir
+      ${harness}/bin/billet-acceptance ir
       touch "$out"
     '';
   "billet:closure-acceptance" =
     pkgs.runCommand "billet-closure-acceptance" {
       passthru.bloomery = ["BILLET-CLOSURE-DESCRIPTOR-001" "BILLET-IR-SECRETS-001"];
-      nativeBuildInputs = [pkgs.python3 pkgs.nix];
+      nativeBuildInputs = [pkgs.nix];
       descriptor = sample.closureDescriptor;
       expectedRoots = builtins.toJSON sample.runtimeRoots;
       expectedPaths = builtins.toJSON (map toString [fixtures.app fixtures.middle fixtures.leaf fixtures.data fixtures.initPackage fixtures.probePackage]);
@@ -117,7 +119,7 @@ in {
       ];
       forbiddenPath = toString (pkgs.writeText "billet-unrelated" "not a runtime dependency");
     } ''
-      python3 ${./verify.py} closure
+      ${harness}/bin/billet-acceptance closure
       touch "$out"
     '';
 }

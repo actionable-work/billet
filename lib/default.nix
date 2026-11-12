@@ -1,4 +1,7 @@
-{lib}: {
+{
+  lib,
+  nix2container ? null,
+}: {
   mkBillet = {
     pkgs,
     modules,
@@ -87,7 +90,28 @@
     closureDescriptor = import ./closure.nix {
       inherit pkgs system ir canonicalJSON manifestDigest runtimeRoots primaryCommands;
     };
-  in {
-    inherit ir canonicalJSON manifestDigest manifest runtimeRoots closureDescriptor;
-  };
+    billet = {inherit ir canonicalJSON manifestDigest manifest runtimeRoots closureDescriptor;};
+    targets = import ./targets.nix {inherit lib;};
+    imageEligibility = targets.oci {
+      inherit ir manifestDigest;
+      pkgsSystem = system;
+    };
+    capabilityReport = targets.compose {
+      inherit ir manifestDigest;
+      image = imageEligibility;
+    };
+    oci = import ./oci.nix {
+      inherit pkgs billet nix2container;
+      eligibility = imageEligibility;
+    };
+  in
+    billet
+    // {
+      ociImage = oci.image;
+      ociLayout = oci.layout;
+      dockerCompose = {
+        inherit capabilityReport;
+        configuration = throw ("billet: UnsupportedTarget dockerCompose: " + lib.concatMapStringsSep "; " (d: "${d.field}: ${d.reason}") capabilityReport.diagnostics);
+      };
+    };
 }

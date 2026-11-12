@@ -2,6 +2,10 @@
 
 ## BI-P2: Compose/OCI and Bloomery harness
 
+The OCI artifact (via pinned nix2container) and pure `compose-foundation-v1` rejection profile are implemented
+in BI-P2.01. That profile has no qualified runtime capabilities and produces no
+Compose configuration. The remaining work below requires a real lifecycle adapter.
+
 Consume the v1 IR and descriptor without defining a second schema. Begin with a
 single application container/replica and an OCI closure adapter. Report required
 capabilities before image construction. Use an explicit supported profile and
@@ -30,7 +34,8 @@ runner environment is declared; retain actual runtime evidence per capability.
   system. Keep that admission profile in the consuming adapter.
 - Choose the durable restart/rollout state owner for the Compose harness before
   claiming BI015–BI021. Define episode/start IDs and cleanup authority there.
-- Select OCI root filesystem/user mapping and supported termination signals;
+- OCI artifact v1 uses the exact closure store paths and numeric uid:gid mapping.
+  Qualify runtime user permissions and supported termination signals in the target;
   preserve package-relative executable containment and all descriptor roots.
 
 These are local handoffs only; adjacent repositories were not modified.

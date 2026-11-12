@@ -11,4 +11,7 @@ after dependency/layout changes, `bloomery check`, `nix fmt`, `nix flake check`.
 Prefer Bloomery CLI for spec records. Generate lock/health artifacts with their
 owning tools. Investigate retained failures; do not substitute native Cargo checks.
 Use `jj status` / `jj diff` to inspect changes. Stage task files for Git-backed Nix
-source visibility. Do not commit or push unless requested. Keep adjacent work intact.
+source visibility. Use Conventional Commit messages. Do not commit or push unless requested. Keep adjacent work intact.
+
+Prefer Rust for repository tooling and acceptance harnesses. Use pinned nix2container
+for container image construction; keep service evaluation in Nix.

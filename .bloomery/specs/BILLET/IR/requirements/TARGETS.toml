@@ -1,0 +1,9 @@
+schema_version = 1
+group = "TARGETS"
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-001"
+title = "Compose preflight rejects unsupported required semantics (BI004, BI011)"
+manual = false
+design = "design/targets.md"
+ears = { type = "ubiquitous", system = "Billet", action = "report required target capabilities with field paths and reject unsupported configuration before image preparation" }

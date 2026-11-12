@@ -1,27 +1,24 @@
-# BI-P1: independent foundation
+# BI-P2.01: OCI packaging and Compose preflight
 
-Owner: Taylor Hanken. Scope: public module schema, canonical IR, validator and
-versioned transitive closure descriptor. Code-facing requirements live under
-`.bloomery/specs/BILLET/`; implementation evidence belongs in docs/bi-p1.md.
+Owner: Taylor Hanken. Start after the committed BI-P1 foundation. The archived
+[BI-P1 plan](docs/plans/bi-p1.md) and its evidence remain intact.
 
-1. Inspect local/remote state and authoritative inputs; bootstrap the public basic
-   Bloomery template without modifying adjacent repositories.
-2. Establish self-contained public contracts and source-ID traceability, then this
-   bounded plan before implementation.
-3. Implement Nix module evaluation, value-free diagnostics, effective defaults,
-   canonical serialization and SHA-256 manifest identity. Export generic system API.
-4. Produce descriptors using Nix's real transitive reference graph, with NAR identity
-   and executable checks. Include primary/init/probe/config runtime roots.
-5. Replace Rust greeting examples with an argument-safe Nix tool driver. Supply a
-   runnable example and positive/negative acceptance fixtures tied to requirements.
-6. Generate locks/health through Bloomery, format, run bloomery check and full
-   nix flake check; inspect Jujutsu diff and record exact evidence/limitations.
+1. Define repository-owned OCI artifact and Compose preflight contracts, preserving
+   BI003/BI004/BI006/BI010/BI011 and all future runtime conformance gates.
+2. Integrate pinned public nix2container buildImage/buildLayer and supported OCI export from the existing canonical IR
+   and realized transitive descriptor. Preserve argv/env/user/cwd and immutable
+   provenance; reject unsupported image systems/users before image preparation.
+3. Add a pure versioned Compose capability report. Reject unimplemented/default
+   lifecycle and target policies explicitly before configuration/image realization.
+4. Use Rust for tooling and acceptance harnesses; remove Python helpers. Extend the thin CLI with image-build and capability-report actions. Keep Nix
+   module evaluation as the sole service-definition interface.
+5. Remove custom image serialization/transport code; add Bloomery checks for OCI bytes/digests, config, complete rootfs closure,
+   determinism, unsupported profiles and secret-reference preservation. Attempt
+   a bounded local engine image smoke if available; do not claim Compose conformance.
+6. Run nix fmt, bloomery check and nix flake check; inspect Jujutsu diff and record
+   evidence separately in docs/bi-p2-01.md. Update CLI help/docs and handoffs.
 
-Acceptance: repeat/order/default determinism, explicit old-version rejection,
-invalid paths/types/policies, reference-only secret artifacts, multi-level closure
-and independent public-only build checks. Only host-executed checks establish
-execution evidence. No commit, push, scheduler, hosted deployment or runtime target.
-
-Next slice BI-P2: Compose/OCI adapter and production-IR Bloomery lifecycle harness.
-Implement or explicitly reject required semantics before claiming conformance.
-Keep questions as repository-local handoffs; do not edit Platform or Bloomery.
+This slice supplies image artifacts and explicit rejection, not a runtime
+supervisor, renderer release, scheduler, deployment or VM/Kubernetes target.
+The next Compose slice must implement a bounded lifecycle adapter/harness and
+qualify each claimed capability rather than silently weakening required defaults.

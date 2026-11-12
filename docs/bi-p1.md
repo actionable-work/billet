@@ -1,7 +1,7 @@
 # BI-P1 implementation and verification
 
 Implemented November 10–11, 2026. Accountable owner: Taylor Hanken.
-The bounded [plan](../PLAN.md) followed public contract authoring before code.
+The archived [plan](plans/bi-p1.md) followed public contract authoring before code.
 This is implementation evidence; normative requirements remain in
 [repository specifications](../.bloomery/specs/BILLET/README.md).
 
@@ -90,4 +90,6 @@ arbitrary Nix code is not a sandbox for values mistakenly supplied as secrets.
 [Traceability](traceability.md) records requirement coverage. The
 [next Compose slice and interface handoffs](handoffs.md) preserve the remaining
 capability-specific gates. The adjacent Platform and Bloomery checkouts were
-read only. No commit or push was performed.
+read only. The verified foundation was subsequently committed as
+`bc181d4f112e83a6498107e48749989af9607a4e` with message
+`feat: add Billet schema, canonical IR and closure tooling`. No push was performed.

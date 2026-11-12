@@ -1,6 +1,16 @@
 [workspace]
-members = ["packages/rust/billet", "packages/rust/billet_core"]
+members = [
+  "packages/rust/billet",
+  "packages/rust/billet_acceptance",
+  "packages/rust/billet_core",
+]
 resolver = "2"
 
 [workspace.dependencies]
 billet_core = { default-features = false, path = "packages/rust/billet_core" }
+flate2 = { default-features = false, features = [
+  "rust_backend",
+], version = "1" }
+serde_json = { default-features = false, features = ["std"], version = "1" }
+sha2 = { default-features = false, features = ["std"], version = "0.10" }
+tar = { default-features = false, version = "0.4" }

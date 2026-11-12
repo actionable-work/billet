@@ -1,0 +1,16 @@
+schema_version = 1
+group = "OCI"
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-001"
+title = "OCI images contain the complete runtime closure (BI003, BI006)"
+manual = false
+design = "design/oci.md"
+ears = { type = "ubiquitous", system = "Billet", action = "package precisely the realized runtime closure with reference-only metadata and preserved execution parameters" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-002"
+title = "OCI images have deterministic versioned provenance (BI001, BI010)"
+manual = false
+design = "design/oci.md"
+ears = { type = "ubiquitous", system = "Billet", action = "produce reproducible OCI blobs and versioned provenance binding system, manifest and image identities" }

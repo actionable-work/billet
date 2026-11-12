@@ -12,16 +12,25 @@ pub struct Invocation {
 /// Build a Nix invocation from exactly one action and one installable.
 pub fn invocation(args: &[String]) -> Result<Invocation, &'static str> {
     if args.len() != 2 || args[1].is_empty() || args[1].starts_with('-') {
-        return Err("usage: billet <validate|manifest|closure> INSTALLABLE");
+        return Err(
+            "usage: billet <validate|manifest|closure|image|layout|capabilities> INSTALLABLE",
+        );
     }
     let (prefix, attribute): (&[&str], &str) = match args[0].as_str() {
         "validate" => (&["eval", "--json"], "ir"),
         "manifest" => (&["eval", "--raw"], "canonicalJSON"),
+        "capabilities" => (&["eval", "--json"], "dockerCompose.capabilityReport"),
+        "layout" => (&["build", "--no-link", "--print-out-paths"], "ociLayout"),
+        "image" => (&["build", "--no-link", "--print-out-paths"], "ociImage"),
         "closure" => (
             &["build", "--no-link", "--print-out-paths"],
             "closureDescriptor",
         ),
-        _ => return Err("usage: billet <validate|manifest|closure> INSTALLABLE"),
+        _ => {
+            return Err(
+                "usage: billet <validate|manifest|closure|image|layout|capabilities> INSTALLABLE",
+            );
+        }
     };
     let mut result: Vec<String> = prefix.iter().map(|arg| (*arg).to_owned()).collect();
     result.push(format!("{}.{attribute}", args[1]));
