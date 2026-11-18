@@ -21,5 +21,5 @@ metadata for a consumer to interpret.
 Consumers own admission profiles, credential resolution and artifact trust.
 Canonical metadata identifies contents and declared policy. Consumer-specific
 platform restrictions remain distinct from the portable `mkBillet` schema.
-The pinned public Bloomery flake composes the standalone test subflake with the
-parent build, including artifact acceptance and diagnostics.
+The test subflake consumes the public Billet library and runs artifact
+acceptance and diagnostics through its pinned Bloomery input.

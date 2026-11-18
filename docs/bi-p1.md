@@ -3,7 +3,7 @@
 Implemented November 10–11, 2026. Accountable owner: Taylor Hanken.
 The archived [plan](plans/bi-p1.md) followed public contract authoring before code.
 This is implementation evidence; normative requirements remain in
-[repository specifications](../.bloomery/specs/BILLET/README.md).
+[repository specifications](../tests/.bloomery/specs/BILLET/README.md).
 
 ## Delivered
 

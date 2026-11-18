@@ -11,21 +11,34 @@ policy.
 
 ## Try the example
 
-Requires Nix with `nix-command` and `flakes` enabled. From this checkout:
+Enable `nix-command` and `flakes` in Nix. From this checkout, run:
 
 ```sh
-nix develop --command nix run . -- validate .#billets.x86_64-linux.hello
-nix develop --command nix run . -- manifest .#billets.x86_64-linux.hello
-nix develop --command nix run . -- closure .#billets.x86_64-linux.hello
-nix develop --command nix build .#billets.x86_64-linux.hello.closureDescriptor -o result-hello
+nix build ./examples/hello#checks.x86_64-linux.billet:hello:validate
+nix eval --raw ./examples/hello#billets.x86_64-linux.hello.canonicalJSON
+nix build ./examples/hello#billets.x86_64-linux.hello.closureDescriptor -o result-hello
 cat result-hello/descriptor.json
-nix develop --command nix run .#example -- '--greeting=Hello from Billet'
+nix run ./examples/hello -- '--greeting=Hello from Billet'
 ```
 
 The last command runs the example executable with its declared argument.
 Replace `x86_64-linux` with your system for standalone evaluation. The flake
 exposes x86_64-linux, aarch64-linux and aarch64-darwin; execution evidence is
 recorded per system. A consumer may impose a narrower hosted profile.
+
+## Example repository layouts
+
+The public root flake exports the Nix library. The example flakes consume
+it independently and expose their own `billets` outputs.
+
+| Example | Start here |
+| --- | --- |
+| [hello](examples/hello/flake.nix) | A minimal flake that deploys a nixpkgs package using one [Billet module](examples/hello/application.nix). |
+| [catalog-report](examples/catalog-report/flake.nix) | A Bloomery Rust workspace with its own [Cargo manifest](examples/catalog-report/Cargo.toml), [Bloomery config](examples/catalog-report/.bloomery/config.toml), and [Billet definitions](examples/catalog-report/billets.nix). |
+
+The example flakes use `path:../..` to consume Billet from this checkout.
+When adapting one to a separate repository, point its `billet` input at a
+published Billet revision and regenerate its flake lock.
 
 ## Define an application
 
@@ -58,7 +71,7 @@ billets.${system}.hello = billet.lib.mkBillet {
 };
 ```
 
-Each instance exposes `ir`, `canonicalJSON`, `manifestDigest`, `manifest`,
+Each instance exposes `ir`, `canonicalJSON`, `manifestDigest`, `manifest`, `validationCheck`,
 `runtimeRoots`, `closureDescriptor`, `ociImage`, `ociLayout`, `dockerImage`,
 and `dockerCompose`.
 The descriptor output contains
@@ -77,7 +90,7 @@ Runtime secret delivery and authorization belong to the consumer.
 Build the bundle and load it with Docker and Compose:
 
 ```sh
-nix develop --command nix build .#billets.x86_64-linux.hello.dockerCompose.bundle -o result-compose
+nix build ./examples/hello#billets.x86_64-linux.hello.dockerCompose.bundle -o result-compose
 docker load --input result-compose/image.tar
 docker compose -f result-compose/compose.yaml up --no-build
 ```
@@ -88,15 +101,75 @@ the manifest and records its digest for a consuming runtime. Native Compose
 inherits the primary process configuration from the image. Lifecycle policies
 such as rollout, readiness and restart stay declarative in `manifest.json`.
 `dockerCompose.file` and `dockerImage` also expose the two artifacts individually.
-The `billet compose INSTALLABLE` command builds the bundle and prints its path.
+
+### Multi-service example
+
+`catalog-report` runs two Billets on a shared Compose network. Bloomery builds
+the [Rust catalog](examples/catalog-report/packages/rust/catalog/src/main.rs)
+as `packages.<system>.catalog`. The catalog Billet takes that derivation as
+`process.package` and packages its executable into the Docker image. The
+`report` service fetches inventory at
+`http://catalog:8080/items.json`, prints it, and exits. Each service has its own
+image archive and canonical manifest in the bundle.
+
+The application flake consumes Billet and Bloomery as siblings. Its
+`bloomery.mkFlake` arguments include:
+
+```nix
+billets = import ./billets.nix { billetLib = billet.lib; };
+```
+
+The definition receives `{ pkgs, packages }` for each system and returns
+`catalog`, `report`, and `catalog-report`. Bloomery exposes each entry at
+`billets.<system>.<name>` and registers `billet:<name>:validate` checks. The
+validation checks verify the normalized definitions without building images.
+
+To build and check the Rust workspace from the example directory:
 
 ```sh
-nix develop --command nix run . -- capabilities .#billets.x86_64-linux.hello
-nix develop --command nix run . -- image .#billets.x86_64-linux.hello
-nix develop --command nix build .#billets.x86_64-linux.hello.ociLayout -o result-oci
+cd examples/catalog-report
+nix develop --command nix build .#catalog
+nix develop --command bloomery check
+```
+
+To build and run the example's Docker Compose bundle from the repository root:
+
+```sh
+nix build \
+  ./examples/catalog-report#billets.x86_64-linux.catalog-report.dockerCompose.bundle \
+  -o result-catalog-report
+
+for image in result-catalog-report/images/*.tar; do
+  docker load --input "$image"
+done
+
+docker compose -p billet-catalog-report -f result-catalog-report/compose.yaml \
+  up --no-build --exit-code-from report
+docker compose -p billet-catalog-report -f result-catalog-report/compose.yaml down
+```
+
+The `report` log should contain `{"items":[{"inStock":true,"sku":"notebook"}]}`.
+
+To group your own evaluated Billets, export a bundle alongside individual
+Billets:
+
+```nix
+billets.${system}.catalog-report = billet.lib.mkBilletBundle {
+  inherit pkgs;
+  billets = { inherit catalog report; };
+};
+```
+
+Member keys must match the application identities. Bundles use the same
+`dockerCompose` selectors as individual Billets.
+
+```sh
+nix eval --json ./examples/hello#billets.x86_64-linux.hello.dockerCompose.capabilityReport
+nix build ./examples/hello#billets.x86_64-linux.hello.ociImage
+nix build ./examples/hello#billets.x86_64-linux.hello.ociLayout -o result-oci
 cat result-oci/image-digest
 # Opt-in local Docker image smoke, with bounded execution and fixture cleanup:
-nix develop --command nix run .#tests:oci-smoke -- ./result-oci
+nix run ./tests#oci-smoke -- ./result-oci
 ```
 
 `ociImage` is a native [nix2container](https://github.com/nlewo/nix2container) image
@@ -111,26 +184,33 @@ can be rendered before realizing packages. It also lists the runtime capabilitie
 declared in the canonical IR.
 
 The complete field/default/encoding contract is in the repository-owned
-[IR specification](.bloomery/specs/BILLET/IR/design/contract.md) and
-[closure specification](.bloomery/specs/BILLET/CLOSURE/design/contract.md).
-[OCI packaging](.bloomery/specs/BILLET/CLOSURE/design/oci.md) and
-[target preflight](.bloomery/specs/BILLET/IR/design/targets.md) have separate contracts.
+[IR specification](tests/.bloomery/specs/BILLET/IR/design/contract.md) and
+[closure specification](tests/.bloomery/specs/BILLET/CLOSURE/design/contract.md).
+[OCI packaging](tests/.bloomery/specs/BILLET/CLOSURE/design/oci.md) and
+[target preflight](tests/.bloomery/specs/BILLET/IR/design/targets.md) have separate contracts.
 [Traceability](docs/traceability.md) retains source requirement IDs.
 
 ## Develop and verify
 
-Bloomery and nixpkgs are public inputs pinned by `flake.lock`; no adjacent
-checkout or private service is required. Rust supplies the argument-safe Nix CLI and acceptance/smoke harnesses. Definitions and normalization remain in Nix.
+CI runs the public flake, both examples, and the qualification subflake. The
+Docker qualification check runs on Linux with KVM. The test subflake builds
+the Rust acceptance and smoke harnesses with Bloomery.
 
 ```sh
+nix run ./tests#ci   # runs ./tests/ci.sh from anywhere in the checkout
+cd tests
 nix develop --command bloomery sync
 nix develop --command nix fmt
 nix develop --command bloomery check
 nix develop --command nix flake check
-nix develop --command nix flake check ./tests
-jj status
-jj diff --stat
 ```
+
+The test flake's `nix fmt` formats `tests/`; `billet:public-format` checks the
+root flake, `lib/`, and the hello example.
+
+Set `BILLET_BLOOMERY_FLAKE` to a flake reference to exercise a different
+Bloomery revision in the example and qualification flakes. For an in-progress
+Bloomery checkout, use an absolute `path:` reference.
 
 Use `bloomery sync` after crate/dependency changes. Locks and health baselines are
 owned by Bloomery. A failed check provides a retained run and failure ID; inspect

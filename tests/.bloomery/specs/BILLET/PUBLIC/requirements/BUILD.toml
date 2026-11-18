@@ -1,0 +1,68 @@
+group = "BUILD"
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-001"
+title = "Independent public build (BI009)"
+manual = false
+design = "design/contract.md"
+
+[requirements.ears]
+type = "ubiquitous"
+system = "Billet"
+action = "use public pinned dependencies and preserve a generic system interface"
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-002"
+title = "Pin flake dependency identities (BI009)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "use flake-locked GitHub inputs for the public build" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-003"
+title = "Select the supplied package-set system (BI009)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "normalize the selected system from the caller-supplied pkgs rather than a hosted-profile constant" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-004"
+title = "Own integration wiring in the test subflake (BI009)"
+manual = false
+design = "design/contract.md#qualification"
+ears = { type = "ubiquitous", system = "Billet", action = "expose integration checks and smoke fixture composition from the independently invoked tests subflake" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-005"
+title = "Keep public library flake inputs independent of qualification (BI009)"
+manual = false
+design = "design/contract.md#public-library"
+ears = { type = "event", trigger = "the public library flake is consumed", system = "Billet", action = "expose the library through pinned nixpkgs and nix2container inputs" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-006"
+title = "Publish catalog example validation through Bloomery (BI009)"
+manual = false
+design = "design/validation-checks.md"
+ears = { type = "event", trigger = "the catalog example flake is evaluated", system = "Billet", action = "publish the two services and their bundle with their respective Bloomery validation checks" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-007"
+title = "Expose only the library from the public root (BI009)"
+manual = false
+design = "design/contract.md#public-library"
+ears = { type = "event", trigger = "the public root flake is consumed", system = "Billet", action = "export the Billet library as the only flake output" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-008"
+title = "Run CI from the enclosing checkout (BI009)"
+manual = false
+design = "design/contract.md#ci-app"
+ears = { type = "event", trigger = "the test flake ci app runs inside a Billet checkout", system = "Billet", action = "run that checkout's tests/ci.sh" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-009"
+title = "Reject CI outside a checkout (BI009)"
+manual = false
+design = "design/contract.md#ci-app"
+ears = { type = "unwanted_behavior", trigger = "the test flake ci app runs outside a Billet checkout", system = "Billet", action = "exit with an error without running CI" }

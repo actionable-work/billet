@@ -1,0 +1,170 @@
+schema_version = 1
+group = "TARGETS"
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-001"
+title = "Report Compose artifact eligibility (BI004, BI011)"
+manual = false
+design = "design/targets.md#artifact-preflight"
+ears = { type = "ubiquitous", system = "Billet", action = "report required IR capabilities and image eligibility with field-specific diagnostics" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-002"
+title = "Allow artifact rendering for an eligible image (BI004, BI011)"
+manual = false
+design = "design/targets.md#artifact-preflight"
+ears = { type = "ubiquitous", system = "Billet", action = "allow Compose artifact rendering for an eligible image without requiring runtime conformance" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-003"
+title = "Preserve required capability metadata (BI004, BI011)"
+manual = false
+design = "design/targets.md#artifact-preflight"
+ears = { type = "ubiquitous", system = "Billet", action = "echo every required IR capability without claiming it is enforced by the renderer" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-004"
+title = "Reject unsupported packaging before image realization (BI004, BI011)"
+manual = false
+design = "design/targets.md#artifact-preflight"
+ears = { type = "ubiquitous", system = "Billet", action = "reject invalid Compose artifact inputs before realizing the application package" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-005"
+title = "Apply the image platform profile (BI004, BI011)"
+manual = false
+design = "design/targets.md"
+ears = { type = "ubiquitous", system = "Billet", action = "reject image preparation for unsupported systems, mismatched package-set systems or unsupported numeric-user profiles" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-006"
+title = "Reference the exact exported Docker image (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-artifact"
+ears = { type = "ubiquitous", system = "Billet", action = "reference the exact image exported by the Docker archive in the generated Compose service" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-007"
+title = "Bind the Compose manifest identity (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-artifact"
+ears = { type = "ubiquitous", system = "Billet", action = "emit the canonical manifest path and digest in the Compose extension" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-008"
+title = "Preserve exact runtime-facing IR bytes (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-artifact"
+ears = { type = "ubiquitous", system = "Billet", action = "include canonical IR bytes verbatim with policy declarations and reference-only secrets" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-009"
+title = "Export a Docker-loadable archive (BI004, BI011)"
+manual = false
+design = "design/targets.md#docker-image"
+ears = { type = "ubiquitous", system = "Billet", action = "load the Docker archive under the exact image reference used by Compose" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-010"
+title = "Consume the Compose file with Docker Compose (BI004, BI011)"
+manual = false
+design = "design/targets.md#qualification"
+ears = { type = "ubiquitous", system = "Billet", action = "run the declared primary process using the bundled file and the loaded image" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-011"
+title = "Emit artifact-only Compose service fields (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-artifact"
+ears = { type = "ubiquitous", system = "Billet", action = "preserve the image execution settings by omitting additional execution and lifecycle overrides" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-012"
+title = "Render one named application service (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-artifact"
+ears = { type = "ubiquitous", system = "Billet", action = "render one primary Compose service keyed by the canonical application identity name" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-013"
+title = "Use the locally loaded image (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-artifact"
+ears = { type = "ubiquitous", system = "Billet", action = "set the Compose service pull policy to never for the locally loaded image" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-014"
+title = "Use each service’s exported image (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-example"
+ears = { type = "ubiquitous", system = "Billet", action = "reference the exact image exported by each independent Billet in the multi-service example" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-015"
+title = "Bundle each service’s canonical manifest (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-example"
+ears = { type = "ubiquitous", system = "Billet", action = "include the canonical IR of each Billet at the manifest path and digest identified for its service" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-016"
+title = "Exercise Compose service discovery (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-example"
+ears = { type = "ubiquitous", system = "Billet", action = "run the report service against the catalog by Compose service name and return the catalog response" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-017"
+title = "Use the same Compose output selectors (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-bundles"
+ears = { type = "ubiquitous", system = "Billet", action = "export a multi-service bundle through the same dockerCompose output selectors as one Billet" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-018"
+title = "Reject a mismatched member name (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-bundles"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a bundle when a member key differs from its canonical service name" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-019"
+title = "Reject a mismatched member system (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-bundles"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a bundle when a member system differs from the selected package-set system" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-020"
+title = "Reject an empty bundle (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-bundles"
+ears = { type = "ubiquitous", system = "Billet", action = "reject Compose rendering for a bundle with no members" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-021"
+title = "Propagate member preflight errors (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-bundles"
+ears = { type = "ubiquitous", system = "Billet", action = "make the bundle unrenderable when a member is ineligible and qualify its diagnostics with the service name" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-022"
+title = "Expose the hello subflake app (BI004, BI011)"
+manual = false
+design = "design/targets.md#example-subflakes"
+ears = { type = "event", trigger = "the hello example flake is consumed", system = "Billet", action = "expose the default app with the executable selected by its Billet" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-023"
+title = "Package the catalog workspace binary (BI004, BI011)"
+manual = false
+design = "design/targets.md#example-subflakes"
+ears = { type = "ubiquitous", system = "Billet", action = "select the catalog package exported from the Bloomery subflake as the catalog Billet package" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-024"
+title = "Run the Rust catalog from its exported image (BI004, BI011)"
+manual = false
+design = "design/targets.md#example-subflakes"
+ears = { type = "ubiquitous", system = "Billet", action = "use the Rust workspace binary as the catalog image entrypoint" }

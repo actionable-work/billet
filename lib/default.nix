@@ -2,6 +2,8 @@
   lib,
   nix2container ? null,
 }: {
+  mkBilletBundle = import ./compose-bundle.nix {inherit lib;};
+
   mkBillet = {
     pkgs,
     modules,
@@ -67,6 +69,9 @@
     canonicalJSON = builtins.toJSON ir;
     manifestDigest = "sha256:${builtins.hashString "sha256" canonicalJSON}";
     manifest = pkgs.writeText "billet-${c.identity.name}-manifest.json" canonicalJSON;
+    validationCheck = builtins.deepSeq ir (
+      pkgs.writeText "billet-${c.identity.name}-validation" (builtins.unsafeDiscardStringContext manifestDigest + "\n")
+    );
     primaryCommands =
       [
         {
@@ -90,7 +95,7 @@
     closureDescriptor = import ./closure.nix {
       inherit pkgs system ir canonicalJSON manifestDigest runtimeRoots primaryCommands;
     };
-    billet = {inherit ir canonicalJSON manifestDigest manifest runtimeRoots closureDescriptor;};
+    billet = {inherit ir canonicalJSON manifestDigest manifest runtimeRoots closureDescriptor validationCheck;};
     targets = import ./targets.nix {inherit lib;};
     imageEligibility = targets.oci {
       inherit ir manifestDigest;

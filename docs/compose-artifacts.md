@@ -44,3 +44,45 @@ full run.
 The normal Bloomery run `r112afd-18e90538f192f020-0` passed all 42 checks.
 Both `nix flake check` and `nix flake check ./tests` passed on x86_64-linux and
 reused the passing Compose VM derivation.
+
+## Catalog and report example
+
+The Docker VM exercises `billets.<system>.catalog-report.dockerCompose.bundle`. It checks that
+each archive loads under the corresponding Compose reference (TARGETS-014),
+that each image label matches the digest of its bundled manifest (TARGETS-015),
+and that the report prints the inventory fetched from the catalog over the
+Compose network (TARGETS-016).
+
+The first run `r2f8672-18e933dfec73aa36-0` logged the expected JSON in the VM
+and exited successfully from Compose. The assertion failed while parsing the
+output of a second command that read the stopped container's logs. The test
+now checks the attached `compose up` output directly.
+
+Bloomery run `r2f9bbb-18e93407cfb05d5d-0` passed all 42 checks on x86_64-linux.
+The Docker VM loaded both images, verified their manifest identities, and
+observed the report print the catalog response before exiting successfully.
+
+The bundle shares the individual Billet's `dockerCompose` selectors
+(TARGETS-017). Artifact preflight checks wrong member keys (TARGETS-018),
+different member systems (TARGETS-019), empty bundles (TARGETS-020), and
+member-specific diagnostic propagation (TARGETS-021).
+
+Bloomery run `r2fc934-18e9347a622bea3d-0` passed all 42 checks on x86_64-linux
+after the bundle moved under `billets`. Both flake checks passed with the
+Docker VM and bundle preflight enabled. The public Nix selector and
+`billet compose` command produced the same bundle store path.
+
+## Bloomery example subflakes
+
+The example output check verifies that Bloomery composes the hello app
+with the executable selected by its Billet (TARGETS-022) and that the
+catalog Billet selects the Rust workspace package elevated by Bloomery
+(TARGETS-023). The Docker VM asserts that the catalog image's entrypoint
+is that package's `bin/catalog` (TARGETS-024), then the report fetches and
+prints the inventory over the Compose network (TARGETS-016).
+
+Root Bloomery run `r3013a0-18e9351584090107-0` passed all 52 checks. The
+catalog-report workspace run `r300806-18e935092cb43e88-0` passed all 12.
+The root, both examples, and the test subflake passed `nix flake check`
+on x86_64-linux. Direct and root builds of each example returned identical
+bundle paths. The Billet CLI also built the catalog-report subflake's bundle.

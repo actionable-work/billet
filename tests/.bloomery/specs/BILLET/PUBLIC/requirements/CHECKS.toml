@@ -1,0 +1,51 @@
+schema_version = 1
+group = "CHECKS"
+
+[[requirements]]
+id = "BILLET-PUBLIC-CHECKS-001"
+title = "Validate a service without building its package (BI009)"
+manual = false
+design = "design/validation-checks.md"
+ears = { type = "event", trigger = "a service validation check is selected", system = "Billet", action = "validate its normalized IR without realizing the application package" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-CHECKS-002"
+title = "Reject invalid service IR during validation (BI009)"
+manual = false
+design = "design/validation-checks.md"
+ears = { type = "unwanted_behavior", trigger = "a service has invalid IR", system = "Billet", action = "fail its validation check" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-CHECKS-003"
+title = "Reject an empty bundle during validation (BI009)"
+manual = false
+design = "design/validation-checks.md"
+ears = { type = "unwanted_behavior", trigger = "a bundle contains no services", system = "Billet", action = "fail its validation check" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-CHECKS-004"
+title = "Reject a bundle member key that differs from its identity (BI009)"
+manual = false
+design = "design/validation-checks.md"
+ears = { type = "unwanted_behavior", trigger = "a bundle member key differs from the member identity", system = "Billet", action = "fail its validation check" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-CHECKS-005"
+title = "Reject a bundle member on another system (BI009)"
+manual = false
+design = "design/validation-checks.md"
+ears = { type = "unwanted_behavior", trigger = "a bundle member system differs from the selected package set", system = "Billet", action = "fail its validation check" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-CHECKS-006"
+title = "Allow structurally valid bundles independent of target eligibility (BI009)"
+manual = false
+design = "design/validation-checks.md"
+ears = { type = "event", trigger = "a structurally valid bundle member cannot render for Compose", system = "Billet", action = "pass structural bundle validation" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-CHECKS-007"
+title = "Reject invalid member IR during bundle validation (BI009)"
+manual = false
+design = "design/validation-checks.md"
+ears = { type = "unwanted_behavior", trigger = "a bundle contains a member with invalid IR", system = "Billet", action = "fail its validation check" }

@@ -8,10 +8,31 @@
   sample = fixtures.sample;
   targets = import ../lib/targets.nix {inherit lib;};
   trapped = fixtures.evaluate (lib.recursiveUpdate fixtures.base {
+    identity.name = "trapped";
     process.package = pkgs.runCommand "billet-preflight-must-not-build" {} "exit 99";
     process.executable = "bin/trap";
   });
   badUser = fixtures.evaluate (lib.recursiveUpdate fixtures.base {process.user = "nobody";});
+  composeBundle = billets: (billetLib.mkBilletBundle {inherit pkgs billets;}).dockerCompose;
+  grouped = composeBundle {
+    inherit trapped;
+    ${sample.ir.identity.name} = sample;
+  };
+  otherSystem =
+    if pkgs.stdenv.hostPlatform.system == "aarch64-linux"
+    then "x86_64-linux"
+    else "aarch64-linux";
+  foreign = billetLib.mkBillet {
+    pkgs = import pkgs.path {system = otherSystem;};
+    modules = [../examples/hello/application.nix];
+  };
+  rejectsBundle = billets: code: field: let
+    compose = composeBundle billets;
+  in
+    !compose.capabilityReport.canRender
+    && builtins.any (diagnostic: diagnostic.code == code && diagnostic.field == field) compose.capabilityReport.diagnostics
+    && !(builtins.tryEval compose.configuration).success
+    && !(builtins.tryEval compose.bundle).success;
   reports = {
     full = sample.dockerCompose.capabilityReport;
     trap = trapped.dockerCompose.capabilityReport;
@@ -32,18 +53,24 @@
     };
   };
   supported = pkgs.stdenv.hostPlatform.isLinux;
-  registration = (builtins.fromTOML (builtins.readFile ../.bloomery/config.toml)).flakes.tests;
-  acceptance = assert registration.path == "tests" && registration.checks == "individual" && registration.apps;
-  assert reports.trap.canRender == supported;
+  acceptance = assert reports.trap.canRender == supported;
   assert reports.full.requiredCapabilities == sample.ir.requiredCapabilities;
   assert !(builtins.tryEval badUser.ociImage).success;
   assert !(builtins.tryEval badUser.dockerCompose.configuration).success;
-  assert !supported || !builtins.hasContext (builtins.toJSON trapped.dockerCompose.configuration); true;
+  assert !supported || !builtins.hasContext (builtins.toJSON trapped.dockerCompose.configuration);
+  assert builtins.attrNames grouped == builtins.attrNames sample.dockerCompose;
+  assert grouped.capabilityReport.canRender == supported;
+  assert grouped.capabilityReport.requiredCapabilities == sample.ir.requiredCapabilities;
+  assert !supported || !builtins.hasContext (builtins.toJSON grouped.configuration);
+  assert rejectsBundle {} "EmptyBilletBundle" "billets";
+  assert rejectsBundle {wrong = sample;} "BundleMemberNameMismatch" "services.wrong.identity.name";
+  assert rejectsBundle {hello = foreign;} "BundleMemberSystemMismatch" "services.hello.system";
+  assert rejectsBundle {${badUser.ir.identity.name} = badUser;} "UnsupportedImageUser" "services.${badUser.ir.identity.name}.process.user"; true;
 in
   {
     "billet:compose-preflight" = assert acceptance;
       pkgs.runCommand "billet-compose-preflight" {
-        passthru.bloomery = ["BILLET-IR-TARGETS-001" "BILLET-IR-TARGETS-002" "BILLET-IR-TARGETS-003" "BILLET-IR-TARGETS-004" "BILLET-IR-TARGETS-005" "BILLET-PUBLIC-BUILD-004"];
+        passthru.bloomery = ["BILLET-IR-TARGETS-001" "BILLET-IR-TARGETS-002" "BILLET-IR-TARGETS-003" "BILLET-IR-TARGETS-004" "BILLET-IR-TARGETS-005" "BILLET-IR-TARGETS-017" "BILLET-IR-TARGETS-018" "BILLET-IR-TARGETS-019" "BILLET-IR-TARGETS-020" "BILLET-IR-TARGETS-021"];
         nativeBuildInputs = [pkgs.nix];
         reportsJSON = builtins.unsafeDiscardStringContext (builtins.toJSON reports);
         source = ../.;
@@ -53,8 +80,13 @@ in
           if supported
           then trapped.dockerCompose.file
           else "";
+        trapBundleConfiguration =
+          if supported
+          then grouped.file
+          else "";
       } ''
         if [ -n "$trapConfiguration" ]; then test -s "$trapConfiguration"; fi
+        if [ -n "$trapBundleConfiguration" ]; then test -s "$trapBundleConfiguration"; fi
         ${harness}/bin/billet-acceptance preflight
         touch "$out"
       '';

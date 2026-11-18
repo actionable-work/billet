@@ -22,7 +22,7 @@ here. Test fixtures may invoke the actual artifact consumer in isolation.
 
 ## Development workflow
 
-Use the code-facing specifications in `.bloomery/specs/BILLET/`. Write design,
+Use the code-facing specifications in `tests/.bloomery/specs/BILLET/`. Write design,
 then bounded root PLAN.md, then implementation. Keep progress/evidence in docs.
 Write fine-grained Bloomery requirements: one independently verifiable behavior
 per record, with an explicit condition/outcome, source BI lineage, and a precise
@@ -40,8 +40,8 @@ silently narrowing old IDs.
 Preserve BI source IDs and public/private boundaries. Never pass secret values to
 Nix; use runtime references only. One Billet has one primary application.
 
-Use `nix develop --command <command> ...` for each tool invocation; do not keep a
-running shell. Run Bloomery natively inside that environment: `bloomery sync`
+Use the relevant subflake's `nix develop --command <command> ...` for
+development tools. Run Bloomery inside that environment with `bloomery sync`
 after dependency/layout changes, `bloomery check`, `nix fmt`, `nix flake check`.
 Prefer Bloomery CLI for spec records. Generate lock/health artifacts with their
 owning tools. Investigate retained failures; do not substitute native Cargo checks.
@@ -51,6 +51,6 @@ source visibility. Use Conventional Commit messages. Do not commit or push unles
 Prefer Rust for repository tooling and acceptance harnesses. Use pinned nix2container
 for container image construction; keep service evaluation in Nix.
 
-Keep integration checks, fixtures and smoke app wiring in `tests/flake.nix`,
-registered by `[flakes.tests]` in `.bloomery/config.toml`. Use Bloomery's subflake
-composition instead of adding test definitions to the root flake.
+Keep integration checks, fixtures and smoke app wiring in `tests/flake.nix`.
+Keep Bloomery and Rust dependencies under the test and example subflakes. Run
+`./tests/ci.sh` to verify the root and all subflakes.

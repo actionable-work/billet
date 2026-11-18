@@ -1,0 +1,79 @@
+{
+  "algorithm_version": 2,
+  "crates": [
+    {
+      "manifest_path": "packages/rust/billet/Cargo.toml",
+      "name": "billet",
+      "overall_score": 100.0,
+      "sloc": 5,
+      "subscores": {
+        "complexity": 0.0,
+        "crateSize": 0.0,
+        "duplication": 0.0,
+        "nesting": 0.0,
+        "size": 0.0
+      }
+    },
+    {
+      "manifest_path": "packages/rust/billet_acceptance/Cargo.toml",
+      "name": "billet-acceptance",
+      "overall_score": 94.65,
+      "sloc": 945,
+      "subscores": {
+        "complexity": 3.46,
+        "crateSize": 0.0,
+        "duplication": 0.0,
+        "nesting": 0.0,
+        "size": 1.88
+      }
+    },
+    {
+      "manifest_path": "packages/rust/billet_core/Cargo.toml",
+      "name": "billet_core",
+      "overall_score": 99.17,
+      "sloc": 52,
+      "subscores": {
+        "complexity": 0.83,
+        "crateSize": 0.0,
+        "duplication": 0.0,
+        "nesting": 0.0,
+        "size": 0.0
+      }
+    }
+  ],
+  "input_digest": "812d5d9242eed34a23b72c99a424b2c0df0b7e0542b28a1983c72f8de5a4c178",
+  "policy": {
+    "scoring": {
+      "crateSlocLimit": 1500,
+      "cyclomaticLimit": 10,
+      "duplicateMinTokens": 64,
+      "duplicationFreeRatio": 0.02,
+      "functionTokensLimit": 250,
+      "nestingLimit": 4,
+      "weights": {
+        "complexity": 25.0,
+        "crateSize": 30.0,
+        "duplication": 15.0,
+        "nesting": 10.0,
+        "size": 20.0
+      }
+    },
+    "selection": {
+      "manifest": "Cargo.toml",
+      "members": null
+    }
+  },
+  "schema_version": 4,
+  "workspace": {
+    "crate_count": 3,
+    "overall_score": 94.91,
+    "sloc": 1002,
+    "subscores": {
+      "complexity": 3.31,
+      "crateSize": 0.0,
+      "duplication": 0.0,
+      "nesting": 0.0,
+      "size": 1.78
+    }
+  }
+}

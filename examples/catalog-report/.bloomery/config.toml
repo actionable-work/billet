@@ -1,0 +1,40 @@
+version = 2
+
+[checks]
+enable = true
+
+[checks.clippySuppressions]
+enable = true
+
+[checks.codeHealth]
+enable = true
+
+[checks.crates]
+enable = true
+
+[checks.lockFreshness]
+enable = true
+
+[checks.noDefaultFeatures]
+enable = true
+
+[checks.packages]
+enable = true
+
+[checks.unusedDependencies]
+enable = true
+
+[checks.workspaceDependencies]
+enable = true
+
+[devShell]
+enable = true
+
+[formatters.alejandra]
+enable = true
+
+[formatters.rustfmt]
+enable = true
+
+[formatters.toml-sort]
+enable = true

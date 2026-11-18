@@ -3,7 +3,7 @@
   billetLib,
 }: let
   lib = pkgs.lib;
-  base = import ../examples/hello.nix {inherit pkgs;};
+  base = import ../examples/hello/application.nix {inherit pkgs;};
   leaf = pkgs.writeText "billet-runtime-leaf" "transitive runtime data\n";
   middle = pkgs.writeText "billet-runtime-middle" "${leaf}\n";
   data = pkgs.writeText "billet-config-data" "non-secret configuration\n";
@@ -135,4 +135,14 @@
 in {
   inherit base full leaf middle data app initPackage probePackage invalid evaluate;
   sample = evaluate full;
+  validation = {
+    service = evaluate (lib.recursiveUpdate base {
+      identity.name = "trap";
+      process = {
+        package = pkgs.runCommand "billet-validation-must-not-build" {} "exit 99";
+        user = "named-user";
+      };
+    });
+    invalid = evaluate (lib.recursiveUpdate invalid.cpu {identity.name = "invalid";});
+  };
 }
