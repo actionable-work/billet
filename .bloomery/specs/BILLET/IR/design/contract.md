@@ -59,6 +59,7 @@ invalid policies or excluded systems. Executable *existence and execute bits*
 are checked when building the closure descriptor, after packages are realized.
 That includes initialization and exec probes. Entrypoints must resolve inside
 their declared package output; runtime dependencies belong to that output closure.
-No target renderer is implied by a valid IR. Each future renderer must preserve
-required semantics, use an explicit adapter or fail with a field path before
-image preparation. Compose/OCI and the Bloomery harness precede VM targets.
+A valid IR is input to target-specific artifact rendering. Renderers preserve
+policy declarations for the consuming runtime and report unsupported artifact
+inputs with field paths before build. Credential resolution, application
+supervision and lifecycle decisions belong to the runtime.

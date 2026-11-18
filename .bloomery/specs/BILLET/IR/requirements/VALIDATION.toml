@@ -10,3 +10,171 @@ design = "design/contract.md"
 type = "ubiquitous"
 system = "Billet"
 action = "reject invalid definitions with a field path and value-free diagnostic"
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-002"
+title = "Reject unknown definition fields (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject unknown definition fields before producing IR" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-003"
+title = "Report value-free validation errors (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "report invalid definitions with their owning field path without echoing rejected values" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-004"
+title = "Reject wrong definition types (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject definition values that do not match their declared schema types" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-005"
+title = "Reject unsupported schema versions (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject module schemaVersion values other than 1 before artifact construction" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-006"
+title = "Reject missing probe ports (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a network probe naming an undeclared port" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-007"
+title = "Bound declared CPU requests (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject declared cpuRequest greater than cpuLimit" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-008"
+title = "Require positive declared memory limits (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a nonpositive declared memoryLimit" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-009"
+title = "Contain declared executable syntax (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a package-relative executable containing a parent traversal segment" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-010"
+title = "Require a process package (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a process declaration without a package derivation" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-011"
+title = "Require the selected system (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a systems declaration that excludes the selected package-set system" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-012"
+title = "Require unique numeric ports (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject duplicate declared network port numbers" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-013"
+title = "Forbid overlapping storage mounts (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a storage mount nested inside another declared mount" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-014"
+title = "Bound declared memory scratch (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject total declared memory scratch exceeding the declared memoryLimit" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-015"
+title = "Forbid persistent memory scratch (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a persistent storage declaration with medium memory" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-016"
+title = "Contain the declared initialization budget (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject an initialization budget smaller than the sum of declared step timeouts" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-017"
+title = "Require unique initialization IDs (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject duplicate declared initialization step IDs" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-018"
+title = "Require a finite retry declaration (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a negative declared maxRetries" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-019"
+title = "Require positive restart delay bounds (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject nonpositive restart delay bounds" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-020"
+title = "Require an increasing restart multiplier (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a declared restart multiplier no greater than one" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-021"
+title = "Require nonnegative shutdown grace (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a negative declared stop grace period" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-022"
+title = "Require a positive rollout deadline (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a nonpositive declared rollout progress deadline" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-023"
+title = "Require rollout progress allowance (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a rollout declaration with zero surge and zero unavailable allowance" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-024"
+title = "Validate singleton surge compatibility (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject a strict-singleton declaration with positive rollout surge" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-025"
+title = "Order declared replica bounds (BI002)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "ubiquitous", system = "Billet", action = "reject declared minimum replicas greater than maximum replicas" }

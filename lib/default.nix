@@ -109,9 +109,7 @@
     // {
       ociImage = oci.image;
       ociLayout = oci.layout;
-      dockerCompose = {
-        inherit capabilityReport;
-        configuration = throw ("billet: UnsupportedTarget dockerCompose: " + lib.concatMapStringsSep "; " (d: "${d.field}: ${d.reason}") capabilityReport.diagnostics);
-      };
+      dockerImage = oci.archive;
+      dockerCompose = import ./compose.nix {inherit pkgs billet oci capabilityReport;};
     };
 }

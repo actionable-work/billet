@@ -10,3 +10,45 @@ design = "design/contract.md"
 type = "ubiquitous"
 system = "Billet"
 action = "invoke Nix with discrete arguments and preserve failure outcomes"
+
+[[requirements]]
+id = "BILLET-CLI-INVOCATION-002"
+title = "Preserve one installable argument (BI002)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "preserve spaces and shell metacharacters in an installable as one Nix process argument" }
+
+[[requirements]]
+id = "BILLET-CLI-INVOCATION-003"
+title = "Reject ambiguous CLI requests (BI002)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "reject an unknown action or a missing, extra, empty or option-position installable before invoking Nix" }
+
+[[requirements]]
+id = "BILLET-CLI-INVOCATION-004"
+title = "Propagate the child exit status (BI002)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "return the Nix child exit code when its process terminates normally" }
+
+[[requirements]]
+id = "BILLET-CLI-INVOCATION-005"
+title = "Map each action to its Nix output (BI002)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "select the documented Nix command flags and output suffix for each supported CLI action" }
+
+[[requirements]]
+id = "BILLET-CLI-INVOCATION-006"
+title = "Fail when Nix cannot be launched (BI002)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "return exit status 1 when the Nix executable cannot be launched" }
+
+[[requirements]]
+id = "BILLET-CLI-INVOCATION-007"
+title = "Build the Compose artifact bundle (BI002, BI011)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "invoke a Nix build of dockerCompose.bundle for the compose command" }

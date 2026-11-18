@@ -31,24 +31,30 @@
       pkgsSystem = "aarch64-linux";
     };
   };
-  acceptance =
-    builtins.deepSeq [
-      (assert !reports.trap.canRender; true)
-      (assert !(builtins.tryEval trapped.dockerCompose.configuration).success; true)
-      (assert !(builtins.tryEval badUser.ociImage).success; true)
-    ]
-    true;
+  supported = pkgs.stdenv.hostPlatform.isLinux;
+  registration = (builtins.fromTOML (builtins.readFile ../.bloomery/config.toml)).flakes.tests;
+  acceptance = assert registration.path == "tests" && registration.checks == "individual" && registration.apps;
+  assert reports.trap.canRender == supported;
+  assert reports.full.requiredCapabilities == sample.ir.requiredCapabilities;
+  assert !(builtins.tryEval badUser.ociImage).success;
+  assert !(builtins.tryEval badUser.dockerCompose.configuration).success;
+  assert !supported || !builtins.hasContext (builtins.toJSON trapped.dockerCompose.configuration); true;
 in
   {
     "billet:compose-preflight" = assert acceptance;
       pkgs.runCommand "billet-compose-preflight" {
-        passthru.bloomery = ["BILLET-IR-TARGETS-001"];
+        passthru.bloomery = ["BILLET-IR-TARGETS-001" "BILLET-IR-TARGETS-002" "BILLET-IR-TARGETS-003" "BILLET-IR-TARGETS-004" "BILLET-IR-TARGETS-005" "BILLET-PUBLIC-BUILD-004"];
         nativeBuildInputs = [pkgs.nix];
         reportsJSON = builtins.unsafeDiscardStringContext (builtins.toJSON reports);
         source = ../.;
         nixpkgsSource = pkgs.path;
         system = pkgs.stdenv.hostPlatform.system;
+        trapConfiguration =
+          if supported
+          then trapped.dockerCompose.file
+          else "";
       } ''
+        if [ -n "$trapConfiguration" ]; then test -s "$trapConfiguration"; fi
         ${harness}/bin/billet-acceptance preflight
         touch "$out"
       '';
@@ -56,7 +62,7 @@ in
   // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
     "billet:oci-acceptance" =
       pkgs.runCommand "billet-oci-acceptance" {
-        passthru.bloomery = ["BILLET-CLOSURE-OCI-001" "BILLET-CLOSURE-OCI-002" "BILLET-IR-SECRETS-001"];
+        passthru.bloomery = ["BILLET-CLOSURE-OCI-001" "BILLET-CLOSURE-OCI-002" "BILLET-IR-SECRETS-001" "BILLET-IR-SECRETS-004" "BILLET-CLOSURE-OCI-003" "BILLET-CLOSURE-OCI-004" "BILLET-CLOSURE-OCI-005" "BILLET-CLOSURE-OCI-006" "BILLET-CLOSURE-OCI-007" "BILLET-CLOSURE-OCI-008" "BILLET-CLOSURE-OCI-009" "BILLET-CLOSURE-OCI-010" "BILLET-CLOSURE-OCI-011" "BILLET-CLOSURE-OCI-012" "BILLET-CLOSURE-OCI-013"];
         nativeBuildInputs = [];
         image = sample.ociLayout;
         nativeImage = sample.ociImage;

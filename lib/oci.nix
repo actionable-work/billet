@@ -57,6 +57,13 @@ else let
       };
     };
   };
+  reference = image.imageRefUnsafe;
+  archive =
+    pkgs.runCommand "billet-${billet.ir.identity.name}-docker-image.tar" {
+      imageReference = reference;
+    } ''
+      ${lib.getExe image.copyTo} --tmpdir="$TMPDIR" --format v2s2 "docker-archive:$out:$imageReference"
+    '';
   layout =
     pkgs.runCommand "billet-${billet.ir.identity.name}-oci-layout-v1" {
       nativeBuildInputs = [pkgs.jq pkgs.coreutils];
@@ -75,4 +82,4 @@ else let
           backend: "nix2container", backendRevision: $backend, billetManifestDigest: $billet,
           imageManifestDigest: $image, closureDescriptorDigest: $descriptor}' > "$out/provenance.json"
     '';
-in {inherit image layout;}
+in {inherit image layout reference archive;}

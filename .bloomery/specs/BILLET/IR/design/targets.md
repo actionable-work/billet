@@ -1,27 +1,48 @@
-# Target capability preflight v1
+# Target artifact boundary
 
-`mkBillet.dockerCompose.capabilityReport` is pure evaluation over canonical IR.
-The report contains schemaVersion 1, target `dockerCompose`, profileVersion 1,
-rendererVersion 1, selected system, manifestDigest, requiredCapabilities, image
-packaging eligibility, and deterministic diagnostics. Each diagnostic includes
-code, field, capability and a reason without echoing field values. Unknown
-required capabilities fail explicitly at requiredCapabilities.
+Billet produces target artifacts from canonical Nix IR. Docker, Compose,
+Kubernetes, Nix microVM and Hammerworks-native are separate renderer families.
+A consuming runtime owns application execution and all lifecycle policy.
+Required capabilities remain part of the canonical IR even when a native
+artifact consumer ignores that metadata.
 
-Preflight never realizes a package, constructs an image, allocates a resource,
-reads credentials or calls an engine. Linux image eligibility and runtime target
-conformance are separate results. The generic system interface is not limited to
-a consumer's initial x86_64-linux hosted profile.
+## Docker image
 
-The `compose-foundation-v1` profile claims no runtime capability. It returns
-`canRender=false` and rejects required lifecycle, resource, probe, secret,
-network, scaling/placement and storage semantics explicitly. Required defaults
-are requirements too. `dockerCompose.configuration` throws an UnsupportedTarget
-error containing owning field paths before forcing any image build. There is no
-caller override that can assert unverified capability support. A new supported
-profile needs actual target acceptance and a versioned capability change.
+The existing pinned nix2container image and OCI layout retain their application
+closure, primary process configuration and identity. Export that same image to
+a Docker-loadable archive using its exact content-derived image reference.
+The archive build operates without a Docker daemon.
 
-An OCI artifact may be built independently for image-content testing; its
-existence does not make this profile renderable. Native Compose restart or
-healthcheck settings alone cannot establish bounded durable recovery, complete
-process-tree cleanup or rollout/rollback conformance. Generated configuration,
-static validation and image smoke tests are not runtime capability evidence.
+## Compose artifact
+
+Render one application service keyed by the IR identity name. Reference the
+exact exported image and require a locally loaded image with pull policy
+`never`. Compose inherits the entrypoint, argv, environment, user, and working
+directory from the image. The native service has no injected lifecycle control
+or secret values. A top-level `x-billet` extension gives the configured runtime
+the canonical manifest's relative path and exact digest. Write the Compose
+document as JSON, a YAML subset accepted by the pinned Compose consumer.
+
+Provide the configuration as a pure Nix value, the standalone Compose file,
+and a bundle directory containing `compose.yaml`, `image.tar`, and
+`manifest.json`. The bundle contains the canonical IR bytes including policy
+declarations and reference-only secret metadata.
+
+## Artifact preflight
+
+The versioned capability report measures artifact eligibility. It echoes the
+IR-required capabilities for the consumer and claims no runtime capabilities.
+Use the shared image diagnostics for an unsupported system or user. Diagnose
+such inputs during evaluation before image construction. Evaluating a supported
+configuration does not realize the application package. Runtime capabilities,
+including required defaults, remain declared in the manifest.
+
+## Qualification
+
+Verify the pure configuration against an unrealizable fixture, including image
+reference, one service, preserved required capabilities, and redacted field
+diagnostics. In an automated isolated Linux VM, load the exported archive,
+validate the rendered configuration with the pinned Compose CLI, and run the
+declared primary process through that Compose file. Assert exact canonical
+manifest bytes and verify that no lifecycle controller or credential value is
+added to the artifacts.

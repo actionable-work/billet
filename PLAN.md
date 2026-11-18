@@ -1,24 +1,18 @@
-# BI-P2.01: OCI packaging and Compose preflight
+# Docker and Compose artifact delivery
 
-Owner: Taylor Hanken. Start after the committed BI-P1 foundation. The archived
-[BI-P1 plan](docs/plans/bi-p1.md) and its evidence remain intact.
+Own the rendering and packaging contract in
+`.bloomery/specs/BILLET/IR/design/targets.md`. Implement Docker and Compose
+from the unchanged canonical Billet IR. Runtime lifecycle and other renderer
+families are outside this slice.
 
-1. Define repository-owned OCI artifact and Compose preflight contracts, preserving
-   BI003/BI004/BI006/BI010/BI011 and all future runtime conformance gates.
-2. Integrate pinned public nix2container buildImage/buildLayer and supported OCI export from the existing canonical IR
-   and realized transitive descriptor. Preserve argv/env/user/cwd and immutable
-   provenance; reject unsupported image systems/users before image preparation.
-3. Add a pure versioned Compose capability report. Reject unimplemented/default
-   lifecycle and target policies explicitly before configuration/image realization.
-4. Use Rust for tooling and acceptance harnesses; remove Python helpers. Extend the thin CLI with image-build and capability-report actions. Keep Nix
-   module evaluation as the sole service-definition interface.
-5. Remove custom image serialization/transport code; add Bloomery checks for OCI bytes/digests, config, complete rootfs closure,
-   determinism, unsupported profiles and secret-reference preservation. Attempt
-   a bounded local engine image smoke if available; do not claim Compose conformance.
-6. Run nix fmt, bloomery check and nix flake check; inspect Jujutsu diff and record
-   evidence separately in docs/bi-p2-01.md. Update CLI help/docs and handoffs.
-
-This slice supplies image artifacts and explicit rejection, not a runtime
-supervisor, renderer release, scheduler, deployment or VM/Kubernetes target.
-The next Compose slice must implement a bounded lifecycle adapter/harness and
-qualify each claimed capability rather than silently weakening required defaults.
+1. Preserve granular artifact requirements and update Compose requirements
+   to describe artifact eligibility, exact image binding, and preserved
+   runtime declarations.
+2. Expose a Docker-loadable archive and a Compose configuration/file plus a
+   directory with both and the canonical manifest. Add a build-only CLI
+   action for the bundle.
+3. Keep integration wiring in the registered test subflake. Verify the
+   preflight and consume the actual archive and Compose bundle in a Docker
+   VM. Retain the OCI and IR acceptance cases.
+4. Record evidence, run the full native Bloomery and both flake checks, and
+   commit the passing artifact-only slice.

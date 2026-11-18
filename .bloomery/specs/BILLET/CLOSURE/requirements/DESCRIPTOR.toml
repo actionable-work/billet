@@ -10,3 +10,59 @@ design = "design/contract.md"
 type = "ubiquitous"
 system = "Billet"
 action = "enumerate all transitive runtime paths with NAR identities bound to manifest and system"
+
+[[requirements]]
+id = "BILLET-CLOSURE-DESCRIPTOR-002"
+title = "Bind descriptor identity (BI006)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "bind a closure descriptor to the canonical manifest digest and selected system" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-DESCRIPTOR-003"
+title = "Include the declared runtime roots (BI006)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "include primary, initialization, exec-probe and non-secret configuration-context roots in the descriptor" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-DESCRIPTOR-004"
+title = "Close the reachable reference graph (BI006)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "include exactly the paths reachable transitively from the declared runtime roots" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-DESCRIPTOR-005"
+title = "Verify NAR identities (BI006)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "describe each runtime path with the SHA-256 NAR identity and size of its actual NAR bytes" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-DESCRIPTOR-006"
+title = "Order descriptor graph collections (BI006)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "emit unique sorted descriptor paths and direct-reference collections" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-DESCRIPTOR-007"
+title = "Reject missing declared executables (BI002, BI006)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "reject descriptor construction when a primary, initialization or exec-probe executable does not exist" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-DESCRIPTOR-008"
+title = "Reject executable package escapes (BI002, BI006)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "reject descriptor construction when a resolved executable escapes its declared package output" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-DESCRIPTOR-009"
+title = "Reject non-executable files (BI002, BI006)"
+manual = false
+design = "design/contract.md"
+ears = { type = "ubiquitous", system = "Billet", action = "reject descriptor construction when a declared executable lacks the executable regular-file property" }

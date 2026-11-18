@@ -59,30 +59,35 @@
       expectedBuilderLogEntries = [message];
     };
 in {
-  "billet:missing-executable" = failure "missing-executable" (lib.recursiveUpdate fixtures.base {
+  "billet:missing-executable" = (failure "missing-executable" (lib.recursiveUpdate fixtures.base {
     process.executable = "bin/missing";
-  }) "billet: process.executable: executable does not exist";
-  "billet:missing-init-executable" = failure "missing-init-executable" (lib.recursiveUpdate fixtures.full {
+  }) "billet: process.executable: executable does not exist").overrideAttrs (_: {passthru.bloomery = ["BILLET-CLOSURE-DESCRIPTOR-007"];});
+
+  "billet:missing-init-executable" = (failure "missing-init-executable" (lib.recursiveUpdate fixtures.full {
     initialization.steps = [(builtins.head fixtures.full.initialization.steps // {executable = "bin/missing";})];
-  }) "billet: initialization.steps.0.executable: executable does not exist";
-  "billet:missing-probe-executable" = failure "missing-probe-executable" (lib.recursiveUpdate fixtures.full {
+  }) "billet: initialization.steps.0.executable: executable does not exist").overrideAttrs (_: {passthru.bloomery = ["BILLET-CLOSURE-DESCRIPTOR-007"];});
+
+  "billet:missing-probe-executable" = (failure "missing-probe-executable" (lib.recursiveUpdate fixtures.full {
     probes.readiness.command.executable = "bin/missing";
-  }) "billet: probes.readiness.command.executable: executable does not exist";
-  "billet:escaping-executable" = failure "escaping-executable" (lib.recursiveUpdate fixtures.base {
+  }) "billet: probes.readiness.command.executable: executable does not exist").overrideAttrs (_: {passthru.bloomery = ["BILLET-CLOSURE-DESCRIPTOR-007"];});
+
+  "billet:escaping-executable" = (failure "escaping-executable" (lib.recursiveUpdate fixtures.base {
     process.package = pkgs.runCommand "billet-escaping-executable" {} ''
       mkdir -p "$out/bin"
       ln -s ${pkgs.hello}/bin/hello "$out/bin/hello"
     '';
-  }) "billet: process.executable: executable escapes package output";
-  "billet:non-executable" = failure "non-executable" (lib.recursiveUpdate fixtures.base {
+  }) "billet: process.executable: executable escapes package output").overrideAttrs (_: {passthru.bloomery = ["BILLET-CLOSURE-DESCRIPTOR-008"];});
+
+  "billet:non-executable" = (failure "non-executable" (lib.recursiveUpdate fixtures.base {
     process.package = pkgs.runCommand "billet-non-executable" {} ''
       mkdir -p "$out/bin"
       echo 'non-executable' > "$out/bin/hello"
     '';
-  }) "billet: process.executable: expected executable regular file";
+  }) "billet: process.executable: expected executable regular file").overrideAttrs (_: {passthru.bloomery = ["BILLET-CLOSURE-DESCRIPTOR-009"];});
+
   "billet:cli-acceptance" =
     pkgs.runCommand "billet-cli-acceptance" {
-      passthru.bloomery = ["BILLET-CLI-INVOCATION-001"];
+      passthru.bloomery = ["BILLET-CLI-INVOCATION-001" "BILLET-CLI-INVOCATION-003" "BILLET-CLI-INVOCATION-004" "BILLET-CLI-INVOCATION-005" "BILLET-CLI-INVOCATION-006"];
       nativeBuildInputs = [];
       cli = "${cli}/bin/billet";
       testShell = pkgs.runtimeShell;
@@ -92,7 +97,7 @@ in {
     '';
   "billet:ir-acceptance" = assert acceptance;
     pkgs.runCommand "billet-ir-acceptance" {
-      passthru.bloomery = ["BILLET-IR-NORMALIZATION-001" "BILLET-IR-VALIDATION-001" "BILLET-IR-SECRETS-001" "BILLET-PUBLIC-BUILD-001"];
+      passthru.bloomery = ["BILLET-IR-NORMALIZATION-001" "BILLET-IR-VALIDATION-001" "BILLET-IR-SECRETS-001" "BILLET-PUBLIC-BUILD-001" "BILLET-PUBLIC-BUILD-002" "BILLET-PUBLIC-BUILD-003" "BILLET-IR-NORMALIZATION-002" "BILLET-IR-NORMALIZATION-003" "BILLET-IR-NORMALIZATION-004" "BILLET-IR-NORMALIZATION-005" "BILLET-IR-NORMALIZATION-006" "BILLET-IR-VALIDATION-002" "BILLET-IR-VALIDATION-003" "BILLET-IR-VALIDATION-004" "BILLET-IR-VALIDATION-005" "BILLET-IR-SECRETS-002" "BILLET-IR-SECRETS-003" "BILLET-IR-SECRETS-004" "BILLET-IR-VALIDATION-006" "BILLET-IR-VALIDATION-007" "BILLET-IR-VALIDATION-008" "BILLET-IR-VALIDATION-009" "BILLET-IR-VALIDATION-010" "BILLET-IR-VALIDATION-011" "BILLET-IR-VALIDATION-012" "BILLET-IR-VALIDATION-013" "BILLET-IR-VALIDATION-014" "BILLET-IR-VALIDATION-015" "BILLET-IR-VALIDATION-016" "BILLET-IR-VALIDATION-017" "BILLET-IR-VALIDATION-018" "BILLET-IR-VALIDATION-019" "BILLET-IR-VALIDATION-020" "BILLET-IR-VALIDATION-021" "BILLET-IR-VALIDATION-022" "BILLET-IR-VALIDATION-023" "BILLET-IR-VALIDATION-024" "BILLET-IR-VALIDATION-025" "BILLET-IR-SECRETS-005" "BILLET-IR-SECRETS-006" "BILLET-IR-SECRETS-007" "BILLET-IR-SECRETS-008"];
       nativeBuildInputs = [pkgs.nix];
       source = ../.;
       nixpkgsSource = pkgs.path;
@@ -107,7 +112,7 @@ in {
     '';
   "billet:closure-acceptance" =
     pkgs.runCommand "billet-closure-acceptance" {
-      passthru.bloomery = ["BILLET-CLOSURE-DESCRIPTOR-001" "BILLET-IR-SECRETS-001"];
+      passthru.bloomery = ["BILLET-CLOSURE-DESCRIPTOR-001" "BILLET-IR-SECRETS-001" "BILLET-CLOSURE-DESCRIPTOR-002" "BILLET-CLOSURE-DESCRIPTOR-003" "BILLET-CLOSURE-DESCRIPTOR-004" "BILLET-CLOSURE-DESCRIPTOR-005" "BILLET-CLOSURE-DESCRIPTOR-006"];
       nativeBuildInputs = [pkgs.nix];
       descriptor = sample.closureDescriptor;
       expectedRoots = builtins.toJSON sample.runtimeRoots;

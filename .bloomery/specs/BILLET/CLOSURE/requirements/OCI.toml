@@ -14,3 +14,80 @@ title = "OCI images have deterministic versioned provenance (BI001, BI010)"
 manual = false
 design = "design/oci.md"
 ears = { type = "ubiquitous", system = "Billet", action = "produce reproducible OCI blobs and versioned provenance binding system, manifest and image identities" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-003"
+title = "Preserve OCI command arrays (BI003, BI006, BI010)"
+manual = false
+design = "design/oci.md#contents-and-execution-parameters"
+ears = { type = "ubiquitous", system = "Billet", action = "preserve the declared executable and argv as OCI Entrypoint and Cmd arrays" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-004"
+title = "Include the exact runtime filesystem (BI003, BI006, BI010)"
+manual = false
+design = "design/oci.md#contents-and-execution-parameters"
+ears = { type = "ubiquitous", system = "Billet", action = "include the descriptor runtime filesystem with unchanged file bytes, modes and symlinks and no unrelated store paths" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-005"
+title = "Bind OCI blob identities (BI003, BI006, BI010)"
+manual = false
+design = "design/oci.md#determinism-and-provenance"
+ears = { type = "ubiquitous", system = "Billet", action = "bind OCI config and layer references to their exact SHA-256 blob digests and lengths" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-006"
+title = "Bind layer DiffIDs (BI003, BI006, BI010)"
+manual = false
+design = "design/oci.md#determinism-and-provenance"
+ears = { type = "ubiquitous", system = "Billet", action = "set OCI rootfs DiffIDs to the digests of the actual uncompressed layer bytes" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-007"
+title = "Bind versioned provenance (BI003, BI006, BI010)"
+manual = false
+design = "design/oci.md#determinism-and-provenance"
+ears = { type = "ubiquitous", system = "Billet", action = "bind versioned OCI provenance to manifest, closure, image and pinned backend identities" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-008"
+title = "Export deterministic OCI bytes (BI003, BI006, BI010)"
+manual = false
+design = "design/oci.md#determinism-and-provenance"
+ears = { type = "ubiquitous", system = "Billet", action = "produce the same OCI inventory and file bytes on independent exports of one image" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-009"
+title = "Avoid inferred runtime policies (BI003, BI006, BI010)"
+manual = false
+design = "design/oci.md#contents-and-execution-parameters"
+ears = { type = "ubiquitous", system = "Billet", action = "omit image healthchecks and volume declarations that would silently imply unqualified runtime policy" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-010"
+title = "Preserve OCI environment (BI003, BI006)"
+manual = false
+design = "design/oci.md#contents-and-execution-parameters"
+ears = { type = "ubiquitous", system = "Billet", action = "preserve the declared non-secret environment in OCI Env" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-011"
+title = "Preserve OCI user (BI003, BI006)"
+manual = false
+design = "design/oci.md#contents-and-execution-parameters"
+ears = { type = "ubiquitous", system = "Billet", action = "preserve the declared numeric user in OCI User" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-012"
+title = "Preserve OCI working directory (BI003, BI006)"
+manual = false
+design = "design/oci.md#contents-and-execution-parameters"
+ears = { type = "ubiquitous", system = "Billet", action = "preserve the declared working directory in OCI WorkingDir" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-013"
+title = "Preserve OCI stop signal (BI003, BI006)"
+manual = false
+design = "design/oci.md#contents-and-execution-parameters"
+ears = { type = "ubiquitous", system = "Billet", action = "preserve the declared stop signal in OCI StopSignal" }

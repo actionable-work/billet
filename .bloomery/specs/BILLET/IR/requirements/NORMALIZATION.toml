@@ -10,3 +10,38 @@ design = "design/contract.md"
 type = "ubiquitous"
 system = "Billet"
 action = "produce deterministic canonical versioned IR and its SHA-256 digest"
+
+[[requirements]]
+id = "BILLET-IR-NORMALIZATION-002"
+title = "Encode stable canonical bytes (BI001, BI010)"
+manual = false
+design = "design/contract.md#encoding-and-identity"
+ears = { type = "ubiquitous", system = "Billet", action = "emit canonical IR as compact UTF-8 JSON with no final newline and schemaVersion and normalizationVersion equal to 1" }
+
+[[requirements]]
+id = "BILLET-IR-NORMALIZATION-003"
+title = "Bind the digest to exact IR bytes (BI001, BI010)"
+manual = false
+design = "design/contract.md#encoding-and-identity"
+ears = { type = "ubiquitous", system = "Billet", action = "compute manifestDigest as lowercase SHA-256 over the exact canonical JSON bytes" }
+
+[[requirements]]
+id = "BILLET-IR-NORMALIZATION-004"
+title = "Normalize unordered declarations (BI001, BI010)"
+manual = false
+design = "design/contract.md#encoding-and-identity"
+ears = { type = "ubiquitous", system = "Billet", action = "produce identical canonical bytes for semantically equivalent reordered or duplicated unordered declarations" }
+
+[[requirements]]
+id = "BILLET-IR-NORMALIZATION-005"
+title = "Materialize effective defaults (BI001, BI010)"
+manual = false
+design = "design/contract.md#encoding-and-identity"
+ears = { type = "ubiquitous", system = "Billet", action = "produce identical canonical bytes for implicit and explicitly declared effective defaults" }
+
+[[requirements]]
+id = "BILLET-IR-NORMALIZATION-006"
+title = "Retain process argument arrays (BI001, BI010)"
+manual = false
+design = "design/contract.md#encoding-and-identity"
+ears = { type = "ubiquitous", system = "Billet", action = "preserve argument order, empty arguments, spaces and metacharacters in canonical process argv" }

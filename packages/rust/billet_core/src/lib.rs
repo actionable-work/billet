@@ -11,10 +11,10 @@ pub struct Invocation {
 
 /// Build a Nix invocation from exactly one action and one installable.
 pub fn invocation(args: &[String]) -> Result<Invocation, &'static str> {
+    const USAGE: &str =
+        "usage: billet <validate|manifest|closure|image|layout|compose|capabilities> INSTALLABLE";
     if args.len() != 2 || args[1].is_empty() || args[1].starts_with('-') {
-        return Err(
-            "usage: billet <validate|manifest|closure|image|layout|capabilities> INSTALLABLE",
-        );
+        return Err(USAGE);
     }
     let (prefix, attribute): (&[&str], &str) = match args[0].as_str() {
         "validate" => (&["eval", "--json"], "ir"),
@@ -22,15 +22,15 @@ pub fn invocation(args: &[String]) -> Result<Invocation, &'static str> {
         "capabilities" => (&["eval", "--json"], "dockerCompose.capabilityReport"),
         "layout" => (&["build", "--no-link", "--print-out-paths"], "ociLayout"),
         "image" => (&["build", "--no-link", "--print-out-paths"], "ociImage"),
+        "compose" => (
+            &["build", "--no-link", "--print-out-paths"],
+            "dockerCompose.bundle",
+        ),
         "closure" => (
             &["build", "--no-link", "--print-out-paths"],
             "closureDescriptor",
         ),
-        _ => {
-            return Err(
-                "usage: billet <validate|manifest|closure|image|layout|capabilities> INSTALLABLE",
-            );
-        }
+        _ => return Err(USAGE),
     };
     let mut result: Vec<String> = prefix.iter().map(|arg| (*arg).to_owned()).collect();
     result.push(format!("{}.{attribute}", args[1]));
@@ -61,6 +61,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(any(), bloomery("BILLET-CLI-INVOCATION-001"))]
+    #[cfg_attr(any(), bloomery("BILLET-CLI-INVOCATION-002"))]
     fn preserves_an_installable_as_one_argument() {
         let request = vec![
             "manifest".to_owned(),
@@ -78,6 +79,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(any(), bloomery("BILLET-CLI-INVOCATION-001"))]
+    #[cfg_attr(any(), bloomery("BILLET-CLI-INVOCATION-003"))]
     fn selects_outputs_and_rejects_ambiguous_requests() {
         for (action, expected) in [("validate", "ir"), ("closure", "closureDescriptor")] {
             let request = vec![action.to_owned(), ".#billets.x.hello".to_owned()];
@@ -88,9 +90,25 @@ mod tests {
             vec![],
             vec!["unknown", ".#x"],
             vec!["validate", "--impure"],
+            vec!["validate", ""],
             vec!["validate", ".#x", "extra"],
         ] {
             assert!(invocation(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).is_err());
         }
+    }
+
+    #[test]
+    #[cfg_attr(any(), bloomery("BILLET-CLI-INVOCATION-007"))]
+    fn compose_builds_the_bundle() {
+        let request = vec!["compose".into(), ".#billets.x.hello".into()];
+        assert_eq!(
+            invocation(&request).unwrap().args,
+            [
+                "build",
+                "--no-link",
+                "--print-out-paths",
+                ".#billets.x.hello.dockerCompose.bundle",
+            ]
+        );
     }
 }

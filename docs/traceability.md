@@ -13,11 +13,11 @@ here nor inputs to evaluation, build or verification.
 | BI003 | BILLET-IR-SECRETS-001 | Metadata only; no runtime secret resolver. |
 | BI006 | BILLET-CLOSURE-DESCRIPTOR-001 | Full transitive metadata; isolated guest proof remains VM gate. |
 | BI003, BI006, BI001, BI010 | BILLET-CLOSURE-OCI-001/002 | BI-P2.01: complete OCI filesystem/config and deterministic addressed provenance; no runtime conformance claim. |
-| BI004, BI011 | BILLET-IR-TARGETS-001 | BI-P2.01: pure capability report and explicit pre-build rejection; qualified Compose adapter remains later work. |
+| BI004, BI011 | BILLET-IR-TARGETS-001–013 | Compose artifact eligibility, exact Docker image references and canonical manifest handoff. |
 | BI009 | BILLET-PUBLIC-BUILD-001 | Public-only pinned build and generic system interface. |
-| BI004, BI005, BI007, BI011 | BI-P2 / BI-P3 | Target conformance, probes, cleanup, policy and unsupported semantics. |
-| BI008 | BI-P3 | Reject persistent claims in initial Lineshaft profile. |
-| BI012–BI021 | IR declarations in BI-P1; execution in BI-P2/BI-P3 | One primary, init, restart, shutdown, rollout/rollback including current secret bindings. |
+| BI004, BI005, BI007, BI011 | IR declarations and target artifacts | Preserve probe and policy intent for consumer conformance. |
+| BI008 | IR storage declarations | The consuming runtime owns storage admission and enforcement. |
+| BI012–BI021 | IR declarations | One primary, initialization, restart, shutdown, and rollout/rollback intent for the runtime. |
 
 DR50–DR61 inform target order and lifecycle defaults; DR86–DR87 inform directional
 private connections and egress intent. DR12's hosted restriction is a consumer

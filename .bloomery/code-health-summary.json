@@ -17,23 +17,23 @@
     {
       "manifest_path": "packages/rust/billet_acceptance/Cargo.toml",
       "name": "billet-acceptance",
-      "overall_score": 94.81,
-      "sloc": 951,
+      "overall_score": 94.65,
+      "sloc": 945,
       "subscores": {
-        "complexity": 3.35,
+        "complexity": 3.46,
         "crateSize": 0.0,
         "duplication": 0.0,
         "nesting": 0.0,
-        "size": 1.84
+        "size": 1.88
       }
     },
     {
       "manifest_path": "packages/rust/billet_core/Cargo.toml",
       "name": "billet_core",
-      "overall_score": 100.0,
+      "overall_score": 99.17,
       "sloc": 52,
       "subscores": {
-        "complexity": 0.0,
+        "complexity": 0.83,
         "crateSize": 0.0,
         "duplication": 0.0,
         "nesting": 0.0,
@@ -41,7 +41,7 @@
       }
     }
   ],
-  "input_digest": "8d9422db23dd4cb36ed99934f77ae9163dbe80ffb7b149eab389ea28603b4041",
+  "input_digest": "a0f49949f6532ee94f8336cd2141a9ad3c29a352480eb1c927a7773c70296572",
   "policy": {
     "scoring": {
       "crateSlocLimit": 1500,
@@ -66,14 +66,14 @@
   "schema_version": 4,
   "workspace": {
     "crate_count": 3,
-    "overall_score": 95.1,
-    "sloc": 1008,
+    "overall_score": 94.91,
+    "sloc": 1002,
     "subscores": {
-      "complexity": 3.16,
+      "complexity": 3.31,
       "crateSize": 0.0,
       "duplication": 0.0,
       "nesting": 0.0,
-      "size": 1.73
+      "size": 1.78
     }
   }
 }

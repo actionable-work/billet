@@ -1,5 +1,5 @@
 {
-  description = "Billet: portable Nix application contracts and runtime closures";
+  description = "Billet: Nix application IR and deployment artifacts";
 
   inputs = {
     bloomery.url = "github:actionable-work/bloomery";
@@ -10,7 +10,8 @@
     };
   };
 
-  outputs = {
+  outputs = inputs @ {
+    self,
     nixpkgs,
     bloomery,
     nix2container,
@@ -20,54 +21,31 @@
       lib = nixpkgs.lib;
       inherit nix2container;
     };
-  in
-    bloomery.mkFlake {
+    flake = bloomery.mkFlake {
       inherit nixpkgs;
       root = ./.;
-      extraOutputs = {
-        eachSystem,
-        perSystemWorkspace,
-      }: let
-        examples = eachSystem (system: {
+      self.inputs = inputs // {billet = self;};
+      extraOutputs = {eachSystem, ...}: {
+        lib = billetLib;
+        billets = eachSystem (system: {
           hello = billetLib.mkBillet {
             pkgs = nixpkgs.legacyPackages.${system};
             modules = [./examples/hello.nix];
           };
         });
-      in {
-        lib = billetLib;
-        billets = examples;
-        apps = eachSystem (system:
-          perSystemWorkspace.${system}.apps
-          // {
-            example = {
-              type = "app";
-              program = examples.${system}.hello.ir.process.executable;
-            };
-            oci-smoke = let
-              pkgs = nixpkgs.legacyPackages.${system};
-              smoke = pkgs.writeShellApplication {
-                name = "billet-oci-smoke";
-                runtimeInputs = [pkgs.docker-client nix2container.packages.${system}.skopeo-nix2container];
-                text = ''exec ${perSystemWorkspace.${system}.packages.billet-acceptance}/bin/billet-acceptance smoke "$@"'';
-              };
-            in {
-              type = "app";
-              program = "${smoke}/bin/billet-oci-smoke";
-            };
-          });
-        checks = eachSystem (system:
-          (import ./tests/acceptance.test.nix {
-            pkgs = nixpkgs.legacyPackages.${system};
-            inherit billetLib;
-            cli = perSystemWorkspace.${system}.packages.billet;
-            harness = perSystemWorkspace.${system}.packages.billet-acceptance;
-          })
-          // (import ./tests/oci.test.nix {
-            pkgs = nixpkgs.legacyPackages.${system};
-            inherit billetLib;
-            harness = perSystemWorkspace.${system}.packages.billet-acceptance;
-          }));
       };
+    };
+  in
+    flake
+    // {
+      apps = nixpkgs.lib.mapAttrs (system: apps:
+        apps
+        // {
+          example = {
+            type = "app";
+            program = flake.billets.${system}.hello.ir.process.executable;
+          };
+        })
+      flake.apps;
     };
 }

@@ -181,67 +181,61 @@ fn verify_nar(path: &str, node: &Value) -> Result {
 
 pub fn preflight() -> Result {
     let reports: Value = serde_json::from_str(&env("reportsJSON"))?;
+    let supported = env("system").ends_with("-linux");
     for name in ["full", "trap", "invalidUser"] {
         let report = &reports[name];
         check(
             report["schemaVersion"] == 1
+                && report["profile"] == "compose-artifact-v1"
                 && report["profileVersion"] == 1
                 && report["rendererVersion"] == 1
-                && report["canRender"] == false
+                && report["mode"] == "artifact-only"
+                && report["canRender"] == (supported && name != "invalidUser")
                 && array(&report["supportedCapabilities"]).is_empty(),
-            "preflight claimed conformance",
-        )?;
-        let rejected: BTreeSet<&str> = array(&report["diagnostics"])
-            .iter()
-            .filter(|d| d["code"] == "UnsupportedCapability")
-            .map(|d| text(&d["capability"]))
-            .collect();
-        check(
-            rejected
-                == array(&report["requiredCapabilities"])
-                    .iter()
-                    .map(text)
-                    .collect(),
-            "required capability silently omitted",
+            "Compose artifact eligibility report differs",
         )?;
     }
-    let fields: BTreeSet<&str> = array(&reports["full"]["diagnostics"])
+    let capabilities: BTreeSet<&str> = array(&reports["full"]["requiredCapabilities"])
         .iter()
-        .map(|d| text(&d["field"]))
+        .map(text)
         .collect();
     check(
         [
-            "restart",
-            "initialization.steps",
+            "bounded-durable-restart",
+            "rolling-rollout",
+            "initialization-every-start",
             "probes",
-            "secrets",
-            "storage",
-            "requiredCapabilities",
+            "runtime-secrets",
         ]
         .iter()
-        .all(|f| fields.contains(f)),
-        "owning field diagnostics missing",
+        .all(|capability| capabilities.contains(capability)),
+        "runtime declarations disappeared from the report",
     )?;
     check(
         reports["arm"]["supported"] == true
             && reports["arm"]["architecture"] == "arm64"
             && reports["darwin"]["supported"] == false
             && reports["mismatch"]["supported"] == false
-            && reports["invalidUser"]["image"]["supported"] == false,
+            && reports["invalidUser"]["image"]["supported"] == false
+            && array(&reports["invalidUser"]["diagnostics"])
+                .iter()
+                .any(|diagnostic| diagnostic["field"] == "process.user"),
         "system/user profile weakened",
     )?;
     let result = evaluate(&format!(
-        "{}f.sample.dockerCompose.configuration",
+        "{}(f.evaluate (pkgs.lib.recursiveUpdate f.base {{ process.user = \"nobody\"; }})).dockerCompose.configuration",
         nix_expression()
     ))?;
     let error = String::from_utf8(result.stderr)?;
     check(
         !result.status.success()
             && error.contains("UnsupportedTarget dockerCompose")
-            && error.contains("restart:")
+            && error.contains("process.user")
             && !error.contains("DO-NOT-ECHO-SECRET"),
-        "configuration did not reject with redacted fields",
+        "artifact configuration did not reject with redacted fields",
     )?;
-    println!("Pure preflight, required defaults, systems/users and pre-build rejection verified");
+    println!(
+        "Artifact preflight, runtime declarations, image platforms and field diagnostics verified"
+    );
     Ok(())
 }

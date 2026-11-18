@@ -41,57 +41,18 @@
     ir,
     manifestDigest,
     image,
-  }: let
-    fields = {
-      resources = "resources";
-      process-tree-cleanup = "process";
-      shutdown = "shutdown";
-      rolling-rollout = "rollout";
-      readiness-hold = "rollout.minReadySeconds";
-      rollout-deadline = "rollout.progressDeadlineSeconds";
-      bounded-durable-restart = "restart";
-      bounded-rollback-current-secrets = "rollout.automaticRollback";
-      initialization-every-start = "initialization.steps";
-      probes = "probes";
-      runtime-secrets = "secrets";
-      network-ports = "network.ports";
-      directional-private-network-policy = "network.privateConnections";
-      egress-policy = "network";
-      scaling = "resources.replicas";
-      placement = "resources.placement";
-      storage-ephemeral-memory = "storage";
-      storage-ephemeral-disk = "storage";
-      storage-persistent-disk = "storage";
-    };
-    unsupported =
-      map (capability: {
-        code = "UnsupportedCapability";
-        field = fields.${capability} or "requiredCapabilities";
-        inherit capability;
-        reason = "Compose foundation profile has no qualified adapter for this required semantic";
-      })
-      ir.requiredCapabilities;
-  in {
+  }: {
     schemaVersion = 1;
     target = "dockerCompose";
-    profile = "compose-foundation-v1";
+    profile = "compose-artifact-v1";
     profileVersion = 1;
     rendererVersion = 1;
+    mode = "artifact-only";
     system = ir.system;
     inherit manifestDigest image;
     requiredCapabilities = ir.requiredCapabilities;
     supportedCapabilities = [];
-    canRender = false;
-    diagnostics =
-      image.diagnostics
-      ++ unsupported
-      ++ [
-        {
-          code = "TargetAdapterUnavailable";
-          field = "rollout";
-          capability = "runtime-conformance";
-          reason = "a qualified lifecycle adapter is required before Compose configuration can be produced";
-        }
-      ];
+    canRender = image.supported;
+    inherit (image) diagnostics;
   };
 }

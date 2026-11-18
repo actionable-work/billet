@@ -4,10 +4,10 @@ Billet is a portable Nix module library and renderer toolchain. One Billet
 describes one application. Nix modules normalize into versioned, canonical,
 secret-free IR and a complete transitive runtime closure descriptor.
 
-BI-P1 provides the public schema, validator, normalized IR and closure tooling.
-The first BI-P2 slice adds deterministic OCI artifacts and Compose preflight.
-Lifecycle declarations are preserved; runtime enforcement requires a conforming
-renderer. Lineshaft, standalone MicroVM and Kubernetes outputs follow later.
+Billet generates deployment artifacts from IR. Docker images and Docker Compose
+are implemented. Kubernetes, Nix microVM, and Hammerworks-native are renderer
+families for future slices. The consuming runtime owns execution and lifecycle
+policy.
 
 ## Try the example
 
@@ -59,7 +59,8 @@ billets.${system}.hello = billet.lib.mkBillet {
 ```
 
 Each instance exposes `ir`, `canonicalJSON`, `manifestDigest`, `manifest`,
-`runtimeRoots`, `closureDescriptor`, `ociImage`, `ociLayout` and `dockerCompose.capabilityReport`.
+`runtimeRoots`, `closureDescriptor`, `ociImage`, `ociLayout`, `dockerImage`,
+and `dockerCompose`.
 The descriptor output contains
 `descriptor.json`, `manifest.json` and `store-paths`, with NAR hashes/sizes and
 direct edges for every transitive runtime path. Package executable existence,
@@ -69,9 +70,25 @@ does not replace independent NAR verification or runtime admission.
 Never pass secret values to Nix. `secrets` accepts reference metadata only and
 Billet never resolves it. Nix modules and ordinary environment/argv strings are
 trusted public build inputs, so do not read credentials or put secrets in them.
-Runtime secret delivery and authorization belong to the target adapter.
+Runtime secret delivery and authorization belong to the consumer.
 
-## OCI artifacts and Compose preflight
+## Docker and Compose artifacts
+
+Build the bundle and load it with Docker and Compose:
+
+```sh
+nix develop --command nix build .#billets.x86_64-linux.hello.dockerCompose.bundle -o result-compose
+docker load --input result-compose/image.tar
+docker compose -f result-compose/compose.yaml up --no-build
+```
+
+The bundle contains `image.tar`, `compose.yaml` and canonical `manifest.json`.
+Compose uses the exact locally loaded image. The `x-billet` extension points to
+the manifest and records its digest for a consuming runtime. Native Compose
+inherits the primary process configuration from the image. Lifecycle policies
+such as rollout, readiness and restart stay declarative in `manifest.json`.
+`dockerCompose.file` and `dockerImage` also expose the two artifacts individually.
+The `billet compose INSTALLABLE` command builds the bundle and prints its path.
 
 ```sh
 nix develop --command nix run . -- capabilities .#billets.x86_64-linux.hello
@@ -79,7 +96,7 @@ nix develop --command nix run . -- image .#billets.x86_64-linux.hello
 nix develop --command nix build .#billets.x86_64-linux.hello.ociLayout -o result-oci
 cat result-oci/image-digest
 # Opt-in local Docker image smoke, with bounded execution and fixture cleanup:
-nix develop --command nix run .#oci-smoke -- ./result-oci
+nix develop --command nix run .#tests:oci-smoke -- ./result-oci
 ```
 
 `ociImage` is a native [nix2container](https://github.com/nlewo/nix2container) image
@@ -89,12 +106,9 @@ arrays, non-secret environment, user and working directory. Packaging supports
 x86_64-linux and aarch64-linux with numeric `uid:gid` users. Other image systems
 and user forms fail explicitly; the Nix module interface remains generic.
 
-The `compose-foundation-v1` preflight reports `canRender=false` and field-path
-diagnostics for required semantics without realizing packages. Accessing
-`dockerCompose.configuration` fails before image construction. OCI artifacts and
-successful image smoke do not implement init/probes, durable restart, full-tree
-shutdown, rollout, runtime secrets or resource/network/storage enforcement.
-Those require the next qualified Compose lifecycle adapter and harness.
+The `compose-artifact-v1` report checks whether the Docker and Compose artifacts
+can be rendered before realizing packages. It also lists the runtime capabilities
+declared in the canonical IR.
 
 The complete field/default/encoding contract is in the repository-owned
 [IR specification](.bloomery/specs/BILLET/IR/design/contract.md) and
@@ -113,6 +127,7 @@ nix develop --command bloomery sync
 nix develop --command nix fmt
 nix develop --command bloomery check
 nix develop --command nix flake check
+nix develop --command nix flake check ./tests
 jj status
 jj diff --stat
 ```
@@ -121,7 +136,7 @@ Use `bloomery sync` after crate/dependency changes. Locks and health baselines a
 owned by Bloomery. A failed check provides a retained run and failure ID; inspect
 it with `nix develop --command bloomery check details <failure> --run <run>`.
 See [BI-P1 evidence](docs/bi-p1.md),
-[BI-P2.01 evidence](docs/bi-p2-01.md), and
-[next milestone handoffs](docs/handoffs.md).
+[Docker and Compose evidence](docs/compose-artifacts.md), and
+[artifact consumer handoffs](docs/handoffs.md).
 
 Licensed under either [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
