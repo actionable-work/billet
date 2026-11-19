@@ -76,11 +76,12 @@ executable regular file, and resolves inside its package.
 
 Each runtime's artifacts are described in its guide.
 
-| Attribute                                                               | Guide                                        |
-| ----------------------------------------------------------------------- | -------------------------------------------- |
-| `ociImage`, `ociLayout`, `dockerImage`                                  | [Docker](runtimes/docker.md)                 |
-| `dockerCompose` (`capabilityReport`, `configuration`, `file`, `bundle`) | [Docker Compose](runtimes/docker-compose.md) |
-| `kubernetes` (`capabilityReport`, `configuration`, `file`, `bundle`)    | [Kubernetes](runtimes/kubernetes.md)         |
+| Attribute                                                                   | Guide                                        |
+| --------------------------------------------------------------------------- | -------------------------------------------- |
+| `ociImage`, `ociLayout`, `dockerImage`                                      | [Docker](runtimes/docker.md)                 |
+| `dockerCompose` (`capabilityReport`, `configuration`, `file`, `bundle`)     | [Docker Compose](runtimes/docker-compose.md) |
+| `kubernetes` (`capabilityReport`, `configuration`, `file`, `bundle`)        | [Kubernetes](runtimes/kubernetes.md)         |
+| `microvm` (`capabilityReport`, `configuration`, `file`, `runner`, `bundle`) | [Nix microVM](runtimes/microvm.md)           |
 
 ## `mkBilletBundle`
 
@@ -95,10 +96,11 @@ billet.lib.mkBilletBundle {
 
 ### Arguments
 
-| Argument  | Description                                                                                        |
-| --------- | -------------------------------------------------------------------------------------------------- |
-| `pkgs`    | The package set shared by every member.                                                            |
-| `billets` | A non-empty attribute set of `mkBillet` results. Each key must match the member's `identity.name`. |
+| Argument  | Description                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pkgs`    | The package set shared by every member.                                                                                                     |
+| `billets` | A non-empty attribute set of `mkBillet` results. Each key must match the member's `identity.name`.                                          |
+| `microvm` | Optional microVM bundle settings. `hostPortBase` sets the first host loopback port for mapped links, `18080` by default. Defaults to `{ }`. |
 
 Every member must use the same system as `pkgs`.
 
@@ -110,6 +112,7 @@ Every member must use the same system as `pkgs`.
 | `validationCheck` | Validates every member and the bundle structure, then writes each member's manifest digest.                                     |
 | `dockerCompose`   | One Compose project with a service per member. See [Docker Compose](runtimes/docker-compose.md#bundles).                        |
 | `kubernetes`      | One Kubernetes List with each member's native resources, image, and manifest. See [Kubernetes](runtimes/kubernetes.md#bundles). |
+| `microvm`         | A runner per guest, link settings, manifests, and a native NixOS host module. See [Nix microVM](runtimes/microvm.md#bundles).   |
 
 `validationCheck` rejects an empty bundle and identifies members with mismatched
 keys or systems.

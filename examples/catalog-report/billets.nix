@@ -10,6 +10,7 @@
       modules = [
         {
           identity.name = name;
+          microvm.acceleration = "tcg";
           resources = {
             cpuRequest = 100;
             cpuLimit = 1000;

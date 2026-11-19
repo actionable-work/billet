@@ -1,0 +1,555 @@
+schema_version = 1
+group = "MICROVM"
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-001"
+title = "Version microVM preflight (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "microVM preflight is evaluated", system = "Billet", action = "report the artifact-only microvm-artifact-v1 target with v1 schema, profile and renderer versions" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-002"
+title = "Report the selected guest system (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "microVM preflight is evaluated", system = "Billet", action = "report the Billet package-set system" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-003"
+title = "Bind preflight to the manifest (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "microVM preflight is evaluated", system = "Billet", action = "report the digest of the canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-004"
+title = "Echo required capabilities (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "a Billet supplies capabilities to the microVM target", system = "Billet", action = "report every required IR capability" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-005"
+title = "Report native mappings with advisories (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "the microVM profile is eligible and has consumer-policy warnings", system = "Billet", action = "permit rendering and list the mapped resource limits, process-tree cleanup and shutdown" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-006"
+title = "Reject unsupported guest platforms (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "microVM preflight receives a non-Linux platform", system = "Billet", action = "report a systems error and gate the configuration, file, runner and bundle" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-007"
+title = "Reject unrepresentable service identities (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "process.user is named, noncanonical, reserved or out of range", system = "Billet", action = "report a process.user error and gate microVM rendering" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-008"
+title = "Reject unrepresentable executable paths (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the executable path contains a control character", system = "Billet", action = "report a process.executable error and gate microVM rendering" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-009"
+title = "Reject ambiguous working directories (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the working directory ends in a backslash", system = "Billet", action = "report a process.workingDirectory error and gate microVM rendering" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-010"
+title = "Reject excess vCPUs (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the application CPU limit exceeds 64000 millicores", system = "Billet", action = "report a resources.cpuLimit error and gate microVM rendering" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-011"
+title = "Reject excess application memory (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the application memory limit exceeds 1 TiB", system = "Billet", action = "report a resources.memoryLimit error and gate microVM rendering" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-012"
+title = "Reject unrepresentable stop timeouts (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the declared stop grace period exceeds the systemd duration range", system = "Billet", action = "report a shutdown.stopGracePeriodSeconds error and gate microVM rendering" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-013"
+title = "Default to QEMU with KVM (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the Billet uses default microVM acceleration", system = "Billet", action = "select the QEMU backend with its stock hardware-accelerated settings" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-014"
+title = "Select QEMU software emulation (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the Billet selects tcg acceleration", system = "Billet", action = "configure QEMU to emulate the guest CPU with TCG" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-015"
+title = "Round vCPUs up (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the application CPU limit has a fractional core", system = "Billet", action = "allocate the next whole vCPU count" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-016"
+title = "Size memory with guest overhead (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the application memory limit has a partial MiB", system = "Billet", action = "round it up to MiB and add 512 MiB to the guest memory allocation" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-017"
+title = "Map zero stop grace (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the stop grace period is zero seconds", system = "Billet", action = "set the native stop timeout to one microsecond" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-018"
+title = "Clean up the application control group (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the microVM service renders", system = "Billet", action = "set the systemd kill mode to control-group" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-019"
+title = "Render an isolated guest network (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the stock microVM guest is rendered", system = "Billet", action = "configure no virtual network interfaces" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-020"
+title = "Escape working directory specifiers (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the working directory contains percent characters", system = "Billet", action = "escape them in the WorkingDirectory directive" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-021"
+title = "Package the Nix store on disk (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "the stock microVM guest is rendered", system = "Billet", action = "enable the native read-only store disk" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-022"
+title = "Leave durable retries to the consumer (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet requests restart policy", system = "Billet", action = "declare a native service with automatic restart disabled" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-023"
+title = "Diagnose CPU reservation policy (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares a CPU request", system = "Billet", action = "warn at resources.cpuRequest that the consumer must apply the reservation" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-024"
+title = "Diagnose memory reservation policy (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares a memory request", system = "Billet", action = "warn at resources.memoryRequest that the consumer must apply the reservation" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-025"
+title = "Diagnose rollout policy (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares rolling rollout", system = "Billet", action = "warn at rollout that the consumer must apply the policy" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-026"
+title = "Diagnose initialization policy (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares initialization steps", system = "Billet", action = "warn at initialization.steps that the consumer must map the steps" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-027"
+title = "Diagnose each declared probe (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "a probe is declared for a phase", system = "Billet", action = "warn at that phase that the consumer must map probe scheduling" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-028"
+title = "Diagnose enabled restart policy (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet enables durable restart", system = "Billet", action = "warn at restart that the consumer must apply the policy" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-029"
+title = "Diagnose requested replica counts (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the requested minimum or maximum replica count differs from one", system = "Billet", action = "warn at resources.replicas that the consumer must apply the counts" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-030"
+title = "Diagnose scaling metrics (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares a scaling metric", system = "Billet", action = "warn at resources.targetMetric that the consumer must apply the metric" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-031"
+title = "Diagnose placement constraints (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares placement constraints", system = "Billet", action = "warn at resources.placement that the consumer must apply them" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-032"
+title = "Diagnose strict singleton policy (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet requests strict singleton", system = "Billet", action = "warn at resources.strictSingleton that the consumer must apply the policy" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-033"
+title = "Diagnose declared ports (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares service ports", system = "Billet", action = "warn at network.ports that the consumer must map the ports" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-034"
+title = "Diagnose private connections (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares directional private connections", system = "Billet", action = "warn at network.privateConnections that the consumer must apply the policy" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-035"
+title = "Diagnose disabled public egress (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet disables public egress", system = "Billet", action = "warn at network.publicEgress that the consumer must map egress policy" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-036"
+title = "Diagnose egress restrictions (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares egress restrictions", system = "Billet", action = "warn at network.egressRestrictions that the consumer must apply the restrictions" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-037"
+title = "Diagnose storage claims (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares a storage claim", system = "Billet", action = "warn at the claim field that the consumer must map it" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-038"
+title = "Diagnose secret references (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares a secret reference", system = "Billet", action = "warn at the secret field that delivery requires a consumer mapping" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-039"
+title = "Keep guest environment limited to ordinary values (BI004, BI011)"
+manual = false
+design = "design/microvm.md#consumer-policy"
+ears = { type = "event", trigger = "the Billet declares file and environment secret references", system = "Billet", action = "emit environment directives for ordinary environment entries only" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-040"
+title = "Build settings without realizing the application (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "the standalone microVM settings file is built", system = "Billet", action = "write the rendered settings as JSON without building application packages" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-041"
+title = "Bundle the exact settings file (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "the microVM bundle is built", system = "Billet", action = "include the standalone settings bytes as microvm.json" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-042"
+title = "Bundle the exact canonical manifest (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "the microVM bundle is built", system = "Billet", action = "include the canonical manifest bytes as manifest.json" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-043"
+title = "Bundle the native runner (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "the microVM bundle is built", system = "Billet", action = "include the exact published MicroVM.nix runner under runner" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-044"
+title = "Start the declared guest service (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the packaged native runner boots the guest", system = "Billet", action = "start the primary executable under systemd" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-045"
+title = "Preserve literal guest arguments (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the primary service starts with special arguments", system = "Billet", action = "pass each argument verbatim, including empty arguments and substitutions" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-046"
+title = "Preserve literal guest environment (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the primary service starts with a multiline environment value", system = "Billet", action = "deliver the exact ordinary value, including quotes, dollar signs and percent specifiers" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-047"
+title = "Apply the guest working directory (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the primary service starts", system = "Billet", action = "start it in the declared working directory" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-048"
+title = "Apply the guest UID (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the primary service starts", system = "Billet", action = "run it under the declared numeric UID" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-049"
+title = "Apply the guest GID (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the primary service starts", system = "Billet", action = "run it under the declared numeric GID" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-050"
+title = "Include transitive runtime data (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "the application reads a transitive store reference in the guest", system = "Billet", action = "provide that store path in the packaged guest closure" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-051"
+title = "Apply the native CPU quota (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the primary service starts with a CPU limit", system = "Billet", action = "set its control group quota to the declared millicores over the one-second period" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-052"
+title = "Apply the native memory limit (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the primary service starts with a page-aligned memory limit", system = "Billet", action = "expose the declared byte limit in its control group" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-053"
+title = "Expose the canonical manifest in the guest (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "the packaged microVM boots", system = "Billet", action = "expose the canonical manifest bytes at /etc/billet/manifest.json" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-054"
+title = "Deliver the configured stop signal (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the stock runner shuts down the guest", system = "Billet", action = "deliver the declared stop signal to the primary process" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-055"
+title = "Map a positive stop grace period (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the Billet declares a positive stop grace period", system = "Billet", action = "write the declared seconds to the systemd stop timeout" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-056"
+title = "Redact rejected preflight values (BI004, BI011)"
+manual = false
+design = "design/microvm.md#public-artifacts"
+ears = { type = "event", trigger = "a microVM input fails eligibility", system = "Billet", action = "report the field and reason without echoing the rejected value" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-057"
+title = "Reuse existing guest user IDs (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the service UID already exists in the guest", system = "Billet", action = "use the existing UID without declaring a duplicate user" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-058"
+title = "Reuse existing guest group IDs (BI004, BI011)"
+manual = false
+design = "design/microvm.md#guest-service"
+ears = { type = "event", trigger = "the service GID already exists in the guest", system = "Billet", action = "use the existing GID without declaring a duplicate group" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-059"
+title = "Version microVM bundle preflight (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "bundle preflight is evaluated", system = "Billet", action = "report the microvm-artifact-bundle-v1 profile" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-060"
+title = "Retain member preflight (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "bundle preflight is evaluated", system = "Billet", action = "include the catalog member's preflight report" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-061"
+title = "Report mapped private links (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "the bundle configures a local link", system = "Billet", action = "advertise the loopback-private-links mapping" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-062"
+title = "Reject a mismatched link protocol (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "a link's protocol differs from its destination port", system = "Billet", action = "reject rendering with a scoped link diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-063"
+title = "Reject an invalid host port range (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "the host port base places an allocation outside 1024..65535", system = "Billet", action = "reject rendering with a host-port diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-064"
+title = "Reject restrictive egress on a connected guest (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "a participating member disables public egress", system = "Billet", action = "reject QEMU user-network rendering with an egress diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-065"
+title = "Reject a member name outside the hostname profile (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "a member's identity contains uppercase letters", system = "Billet", action = "reject bundle rendering at the member identity" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-066"
+title = "Diagnose external connections (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "a link names a member outside the bundle", system = "Billet", action = "report that the link needs consumer wiring and allow rendering" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-067"
+title = "Keep unconnected guests on loopback (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "a member has no locally mapped link", system = "Billet", action = "render an empty virtual interface list" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-068"
+title = "Name the bundled guests (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "two guests are bundled", system = "Billet", action = "set their NixOS hostnames to their distinct member identities" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-069"
+title = "Bind the catalog on host loopback (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "a link selects the catalog's HTTP port and a custom host port base", system = "Billet", action = "render the destination forward from that loopback port to guest port 8080" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-070"
+title = "Resolve destination names inside the source guest (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "the report links to the catalog", system = "Billet", action = "publish the catalog alias at its forwarding address in report's host table" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-071"
+title = "Start networked services after network readiness (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "a member participates in a mapped link", system = "Billet", action = "order its application service after network-online.target" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-072"
+title = "Expose the native host units (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "a NixOS host imports the bundle host module", system = "Billet", action = "register both guests with the upstream microvms target" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-073"
+title = "Build the settings file independently (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "the standalone microVM bundle file is built", system = "Billet", action = "write the exact rendered settings and relative runner path without realizing the guests" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-074"
+title = "Package the exact bundle settings (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "the microVM bundle is built", system = "Billet", action = "include the standalone settings bytes as microvm.json" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-075"
+title = "Package the canonical member manifests (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "the microVM bundle is built", system = "Billet", action = "include each member's exact canonical manifest under manifests" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-076"
+title = "Package the native guest runners (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "the microVM bundle is built", system = "Billet", action = "reference the same guest runner used by each native host module entry" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-077"
+title = "Serve the catalog on the configured local port (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#local-guest-links"
+ears = { type = "event", trigger = "the packaged catalog guest boots", system = "Billet", action = "return the inventory on the assigned host loopback endpoint" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-078"
+title = "Run the report through the prewired guest link (BI004, BI011)"
+manual = false
+design = "design/microvm-bundle.md#catalog-and-report"
+ears = { type = "event", trigger = "the packaged report guest starts", system = "Billet", action = "fetch the catalog inventory and print it to the guest console" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-079"
+title = "Avoid the exact 2 GiB guest allocation (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "the application memory limit plus guest overhead is exactly 2048 MiB", system = "Billet", action = "allocate 2049 MiB of guest memory" }

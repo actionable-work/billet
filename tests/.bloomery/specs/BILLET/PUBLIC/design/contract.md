@@ -1,8 +1,8 @@
 # Public build boundary
 
 Billet's public root exports the Nix library and the repository formatter. It
-pins nixpkgs, nix2container, and treefmt-nix directly. Test and example
-subflakes have their own entry points and locks.
+pins nixpkgs, nix2container, MicroVM.nix, and treefmt-nix directly. Test and
+example subflakes have their own entry points and locks.
 
 ## Qualification
 

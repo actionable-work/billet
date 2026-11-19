@@ -115,6 +115,8 @@ The same Billet now builds artifacts for each runtime:
   images in a compose environment.
 - [Kubernetes](runtimes/kubernetes.md): build a Kubernetes List with the image
   and apply it to a cluster.
+- [Nix microVM](runtimes/microvm.md): build and boot a QEMU guest that runs the
+  service.
 
 See [Runtimes](runtimes.md) for every runtime and its status.
 

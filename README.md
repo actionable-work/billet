@@ -49,7 +49,7 @@ definition.
 | Docker                                 | OCI image, OCI layout, Docker archive            | Supported   |
 | Docker Compose                         | `compose.yaml` bundle with images and manifests  | Supported   |
 | Kubernetes                             | `kubernetes.json` bundle with image and manifest | Supported   |
-| Nix microVM                            | microVM configuration                            | Coming soon |
+| Nix microVM                            | QEMU guest runner, settings, and manifest        | Supported   |
 | [Hammerworks](https://hammerworks.dev) | Native manifest                                  | Coming soon |
 
 Images build for `x86_64-linux` and `aarch64-linux`. See

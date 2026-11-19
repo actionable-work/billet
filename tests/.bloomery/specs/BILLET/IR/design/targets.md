@@ -147,6 +147,11 @@ package. The report fetches inventory from the Rust catalog in Compose.
 The [Kubernetes profile](kubernetes.md) defines resource rendering, packaging,
 preflight, and qualification for one Billet.
 
+## Nix microVM artifact
+
+The [Nix microVM profile](microvm.md) defines the guest, its MicroVM.nix runner,
+preflight, and qualification for one Billet.
+
 ## Artifact preflight
 
 The versioned capability report measures artifact eligibility. It echoes the

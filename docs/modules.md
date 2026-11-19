@@ -42,6 +42,12 @@ These settings apply to the Kubernetes artifacts.
 See
 [Kubernetes namespace setup](runtimes/kubernetes.md#namespace-and-other-dependencies).
 
+## `microvm`
+
+`microvm.acceleration` selects `"kvm"` (default) or `"tcg"` for the QEMU guest.
+See the [Nix microVM guide](runtimes/microvm.md) for host requirements and
+native settings.
+
 ## `process`
 
 The single primary process. Additional workers run as its children.

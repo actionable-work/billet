@@ -7,6 +7,11 @@
       url = "github:nlewo/nix2container";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    microvm = {
+      url = "github:microvm-nix/microvm.nix";
+      # The QEMU guest module uses the caller's package set directly.
+      flake = false;
+    };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -17,6 +22,7 @@
     self,
     nixpkgs,
     nix2container,
+    microvm,
     treefmt-nix,
     ...
   }: let
@@ -25,7 +31,7 @@
   in {
     lib = import ./lib {
       lib = nixpkgs.lib;
-      inherit nix2container;
+      inherit nix2container microvm;
     };
     formatter = eachSystem (system: treefmt.${system}.config.build.wrapper);
     checks = eachSystem (system: {

@@ -111,6 +111,21 @@ maxRequirements = 20
 path = "kubernetes-vm.test.nix"
 reason = "The K3s VM has separate bundle comparisons, strict API validation, and live workload assertions. The Kubernetes design identifies the witnesses."
 
+[checks.specifications.testExceptions.microvm_boot]
+maxRequirements = 14
+path = "microvm-boot.test.nix"
+reason = "The runner check uses separate artifact comparisons and live guest assertions. The microVM design identifies the witnesses."
+
+[checks.specifications.testExceptions.microvm_bundle]
+maxRequirements = 20
+path = "microvm-bundle.test.nix"
+reason = "Pure checks exercise report, link and host settings. Bundled runners boot both guests and verify the catalog response."
+
+[checks.specifications.testExceptions.microvm_configuration]
+maxRequirements = 45
+path = "microvm.test.nix"
+reason = "Each requirement has a keyed configuration assertion or a standalone file comparison that builds with an unrealizable package."
+
 [checks.specifications.testExceptions.oci_fixtures]
 maxRequirements = 34
 path = "oci.test.nix"

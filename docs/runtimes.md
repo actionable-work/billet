@@ -10,7 +10,7 @@ artifact, not rewriting the service.
 | Docker                                 | OCI image, OCI layout, Docker archive            | Supported   | [Docker](runtimes/docker.md)                 |
 | Docker Compose                         | `compose.yaml` bundle with images and manifests  | Supported   | [Docker Compose](runtimes/docker-compose.md) |
 | Kubernetes                             | `kubernetes.json` bundle with image and manifest | Supported   | [Kubernetes](runtimes/kubernetes.md)         |
-| Nix microVM                            | microVM configuration                            | Coming soon |                                              |
+| Nix microVM                            | QEMU guest runner, settings, and manifest        | Supported   | [Nix microVM](runtimes/microvm.md)           |
 | [Hammerworks](https://hammerworks.dev) | Native manifest                                  | Coming soon |                                              |
 
 ## What Billet does and what the runtime does
@@ -20,9 +20,10 @@ owns execution, health checks, restarts, rollout, admission, network and
 resource enforcement, and secret delivery.
 
 Built images embed the manifest. Compose and Kubernetes bundles also ship it
-alongside the native configuration. Compose identifies it in `x-billet`.
-Consumers can read the manifest for additional policy. The runtime guides
-describe which declarations each target supports.
+alongside the native configuration. Compose identifies it in `x-billet`. The
+microVM bundle includes it alongside the runner and inside the guest. Consumers
+can read the manifest for additional policy. The runtime guides describe which
+declarations each target supports.
 
 ## Contracts
 

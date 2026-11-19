@@ -10,11 +10,12 @@
     self = {};
     nixpkgs = {inherit lib;};
     nix2container = {};
+    microvm = {};
     treefmt-nix = {};
   };
   publicSystems = ["aarch64-darwin" "aarch64-linux" "x86_64-linux"];
   lock = builtins.fromJSON (builtins.readFile ../flake.lock);
-  publicInputs = ["nix2container" "nixpkgs" "treefmt-nix"];
+  publicInputs = ["microvm" "nix2container" "nixpkgs" "treefmt-nix"];
 in {
   "billet:public-flake" = assert builtins.attrNames publicFlake.inputs == publicInputs;
   assert builtins.attrNames lock.nodes.${lock.root}.inputs == publicInputs;

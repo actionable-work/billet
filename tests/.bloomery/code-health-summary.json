@@ -17,14 +17,14 @@
     {
       "manifest_path": "packages/rust/billet_acceptance/Cargo.toml",
       "name": "billet-acceptance",
-      "overall_score": 94.65,
-      "sloc": 945,
+      "overall_score": 95.1,
+      "sloc": 994,
       "subscores": {
-        "complexity": 3.46,
+        "complexity": 3.17,
         "crateSize": 0.0,
         "duplication": 0.0,
         "nesting": 0.0,
-        "size": 1.88
+        "size": 1.73
       }
     },
     {
@@ -41,7 +41,7 @@
       }
     }
   ],
-  "input_digest": "812d5d9242eed34a23b72c99a424b2c0df0b7e0542b28a1983c72f8de5a4c178",
+  "input_digest": "aaab7c5bda376f1630c28e3ad751bf87ec238d6a2167df0a07612ff6f638ddf0",
   "policy": {
     "scoring": {
       "crateSlocLimit": 1500,
@@ -66,14 +66,14 @@
   "schema_version": 4,
   "workspace": {
     "crate_count": 3,
-    "overall_score": 94.91,
-    "sloc": 1002,
+    "overall_score": 95.32,
+    "sloc": 1051,
     "subscores": {
-      "complexity": 3.31,
+      "complexity": 3.04,
       "crateSize": 0.0,
       "duplication": 0.0,
       "nesting": 0.0,
-      "size": 1.78
+      "size": 1.63
     }
   }
 }

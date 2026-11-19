@@ -69,6 +69,9 @@
       createNamespace = bool false;
       workload = enum ["deployment" "job"] "deployment";
     };
+    microvm = record {
+      acceleration = enum ["kvm" "tcg"] "kvm";
+    };
     systems = (list str) // {default = [system];};
     process = record (command.fields
       // {

@@ -1,8 +1,12 @@
 {
   lib,
   nix2container ? null,
+  microvm ? null,
 }: {
-  mkBilletBundle = import ./bundle.nix {inherit lib;};
+  mkBilletBundle = import ./bundle.nix {
+    inherit lib;
+    microvmInput = microvm;
+  };
 
   mkBillet = {
     pkgs,
@@ -131,6 +135,10 @@
       kubernetes = import ./kubernetes.nix {
         inherit pkgs billet oci imageEligibility;
         settings = c.kubernetes;
+      };
+      microvm = import ./microvm.nix {
+        inherit pkgs billet microvm;
+        settings = c.microvm;
       };
     };
 }

@@ -76,6 +76,15 @@
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes-vm.test.nix {
             inherit pkgs billetLib;
           })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./microvm.test.nix {
+            inherit pkgs billetLib;
+          })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./microvm-boot.test.nix {
+            inherit pkgs billetLib;
+          })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./microvm-bundle.test.nix {
+            inherit pkgs billetLib catalogBillets;
+          })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./compose.test.nix {
             inherit pkgs billetLib;
             catalogReport = catalogBillets.catalog-report.dockerCompose.bundle;

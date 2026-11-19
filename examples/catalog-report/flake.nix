@@ -1,5 +1,5 @@
 {
-  description = "Compose artifacts for a Bloomery Rust catalog and its report client";
+  description = "Deployment artifacts for a Bloomery Rust catalog and its report client";
 
   inputs = {
     billet = {

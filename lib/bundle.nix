@@ -1,6 +1,10 @@
-{lib}: {
+{
+  lib,
+  microvmInput,
+}: {
   pkgs,
   billets,
+  microvm ? {},
 }: let
   system = pkgs.stdenv.hostPlatform.system;
   members = lib.mapAttrs (_: billet: billet.ir) billets;
@@ -27,4 +31,9 @@ in {
       );
   dockerCompose = import ./compose-bundle.nix context;
   kubernetes = import ./kubernetes-bundle.nix context;
+  microvm = import ./microvm-bundle.nix (context
+    // {
+      microvm = microvmInput;
+      settings = microvm;
+    });
 }
