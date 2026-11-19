@@ -67,6 +67,15 @@
             helloApp = hello.apps.${system}.default;
             catalogChecks = catalog.checks.${system};
           })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes.test.nix {
+            inherit pkgs billetLib;
+          })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes-bundle.test.nix {
+            inherit pkgs billetLib catalogBillets;
+          })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes-vm.test.nix {
+            inherit pkgs billetLib;
+          })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./compose.test.nix {
             inherit pkgs billetLib;
             catalogReport = catalogBillets.catalog-report.dockerCompose.bundle;

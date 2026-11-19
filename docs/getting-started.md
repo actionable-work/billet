@@ -113,6 +113,8 @@ The same Billet now builds artifacts for each runtime:
 - [Docker](runtimes/docker.md): build and run the OCI image.
 - [Docker Compose](runtimes/docker-compose.md): build and run one or more OCI
   images in a compose environment.
+- [Kubernetes](runtimes/kubernetes.md): build a Kubernetes List with the image
+  and apply it to a cluster.
 
 See [Runtimes](runtimes.md) for every runtime and its status.
 

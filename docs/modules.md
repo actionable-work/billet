@@ -29,6 +29,19 @@ declarations.
 See [Docker image contents](runtimes/docker.md#image-contents) for how the
 budget affects layer grouping and image tags.
 
+## `kubernetes`
+
+These settings apply to the Kubernetes artifacts.
+
+| Field             | Default        | Description                                                                                     |
+| ----------------- | -------------- | ----------------------------------------------------------------------------------------------- |
+| `namespace`       | `null`         | Namespace written into each namespaced resource. With `null`, the Kubernetes client selects it. |
+| `createNamespace` | `false`        | Include a Namespace object for the explicitly set namespace.                                    |
+| `workload`        | `"deployment"` | Select `"job"` for a one-shot workload with one replica.                                        |
+
+See
+[Kubernetes namespace setup](runtimes/kubernetes.md#namespace-and-other-dependencies).
+
 ## `process`
 
 The single primary process. Additional workers run as its children.

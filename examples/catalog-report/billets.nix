@@ -31,9 +31,18 @@
         port = 8080;
         protocol = "http";
       };
+      network.privateConnections = [
+        {
+          sourceService = "report";
+          destinationService = "catalog";
+          destinationPort = "http";
+          protocol = "http";
+        }
+      ];
     };
     report = {
       identity.version = "0.1.0";
+      kubernetes.workload = "job";
       process = {
         package = pkgs.curl;
         executable = "bin/curl";

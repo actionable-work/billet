@@ -44,13 +44,13 @@ definition.
 
 ## Supported runtimes
 
-| Runtime                                | Artifacts                                       | Status      |
-| -------------------------------------- | ----------------------------------------------- | ----------- |
-| Docker                                 | OCI image, OCI layout, Docker archive           | Supported   |
-| Docker Compose                         | `compose.yaml` bundle with images and manifests | Supported   |
-| Kubernetes                             | Workload manifests                              | Coming soon |
-| Nix microVM                            | microVM configuration                           | Coming soon |
-| [Hammerworks](https://hammerworks.dev) | Native manifest                                 | Coming soon |
+| Runtime                                | Artifacts                                        | Status      |
+| -------------------------------------- | ------------------------------------------------ | ----------- |
+| Docker                                 | OCI image, OCI layout, Docker archive            | Supported   |
+| Docker Compose                         | `compose.yaml` bundle with images and manifests  | Supported   |
+| Kubernetes                             | `kubernetes.json` bundle with image and manifest | Supported   |
+| Nix microVM                            | microVM configuration                            | Coming soon |
+| [Hammerworks](https://hammerworks.dev) | Native manifest                                  | Coming soon |
 
 Images build for `x86_64-linux` and `aarch64-linux`. See
 [Runtimes](docs/runtimes.md) for a guide to each runtime.

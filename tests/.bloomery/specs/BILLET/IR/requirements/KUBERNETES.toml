@@ -1,0 +1,779 @@
+schema_version = 1
+group = "KUBERNETES"
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-001"
+title = "Version the Kubernetes preflight (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "Kubernetes preflight is evaluated", system = "Billet", action = "report the Kubernetes target and v1 artifact profile versions" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-002"
+title = "Build the workload file without an image (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "the standalone workload file is built", system = "Billet", action = "write the configuration as JSON without realizing the application" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-003"
+title = "Preserve Kubernetes preflight capability requirements (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "a definition requires a capability", system = "Billet", action = "echo it separately from the native mapping list" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-004"
+title = "Package the exact Kubernetes file (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "the Kubernetes bundle is built", system = "Billet", action = "include the exact standalone workload file as kubernetes.json" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-005"
+title = "Package the canonical manifest (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "the Kubernetes bundle is built", system = "Billet", action = "include the exact canonical IR as manifest.json" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-006"
+title = "Annotate Kubernetes resources with Billet provenance (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "the Deployment is rendered", system = "Billet", action = "annotate it and its Pod template with the Billet identity and canonical manifest digest" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-007"
+title = "Package the existing Docker archive (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "the Kubernetes bundle is built", system = "Billet", action = "include the exact existing Docker archive as image.tar" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-008"
+title = "Constrain Kubernetes node architecture (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "an OCI image system is selected", system = "Billet", action = "select nodes matching its Linux architecture" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-009"
+title = "Block rendering for an ineligible OCI user (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "the OCI preflight rejects the process user", system = "Billet", action = "report the process.user error and block the Kubernetes artifact selectors" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-010"
+title = "Keep the Kubernetes identity stable (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "the manifest of one identity changes", system = "Billet", action = "retain the Deployment name and selector using the profile DNS naming rules" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-011"
+title = "Render the Kubernetes CPU request (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered", system = "Billet", action = "encode the CPU request in millicores" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-012"
+title = "Render the Kubernetes CPU limit (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered", system = "Billet", action = "encode the CPU limit in millicores" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-013"
+title = "Render the Kubernetes memory request (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered", system = "Billet", action = "encode the memory request in bytes" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-014"
+title = "Render the Kubernetes memory limit (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered", system = "Billet", action = "encode the memory limit in bytes" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-015"
+title = "Render the minimum replica count (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered", system = "Billet", action = "set its replica count to the minimum including zero" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-016"
+title = "Diagnose a Kubernetes replica range (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "maximum replicas exceed the minimum", system = "Billet", action = "report that the Deployment uses the minimum replica count" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-017"
+title = "Diagnose a Kubernetes scaling metric (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a target metric is declared", system = "Billet", action = "report the missing autoscaler mapping for resources.targetMetric" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-018"
+title = "Diagnose Kubernetes placement constraints (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "placement constraints are declared", system = "Billet", action = "report the missing scheduler mapping for resources.placement" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-019"
+title = "Render Kubernetes rollout surge (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a non-singleton Deployment is rendered", system = "Billet", action = "set the RollingUpdate surge count to the declared value" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-020"
+title = "Render Kubernetes rollout unavailability (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a rolling Deployment is rendered", system = "Billet", action = "set the unavailable count to the declared value" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-021"
+title = "Render the Kubernetes rollout ready hold (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered", system = "Billet", action = "set minReadySeconds to the declared ready hold" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-022"
+title = "Render the Kubernetes rollout deadline (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered", system = "Billet", action = "set progressDeadlineSeconds to the declared deadline" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-023"
+title = "Reject an invalid Kubernetes deadline (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "the rollout deadline is no greater than the ready hold", system = "Billet", action = "report the deadline field and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-024"
+title = "Reject a Kubernetes integer overflow (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a rendered signed 32-bit field exceeds its maximum", system = "Billet", action = "report the field and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-025"
+title = "Reject Kubernetes replica and surge overflow (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "the desired replicas plus surge exceed the signed 32-bit maximum", system = "Billet", action = "report the surge field and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-026"
+title = "Recreate a singleton Deployment (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "strict singleton is declared", system = "Billet", action = "use Recreate with an advisory on replacement guarantees" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-027"
+title = "Report Kubernetes restart semantics (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered with restart disabled", system = "Billet", action = "report the mismatch with the required Always restart policy" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-028"
+title = "Diagnose Kubernetes automatic rollback (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "automatic rollback is enabled", system = "Billet", action = "report that rollback remains an external policy" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-029"
+title = "Diagnose Kubernetes initialization limits (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "initialization steps are declared", system = "Billet", action = "report the Pod lifecycle and timeout limitations of init containers" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-030"
+title = "Diagnose a custom stop signal (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a non-default stop signal is declared", system = "Billet", action = "report the dependency on OCI stop signal support in the container runtime" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-031"
+title = "Render a Kubernetes gRPC startup probe (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a gRPC startup probe is declared", system = "Billet", action = "set its numeric gRPC port from the declared port" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-032"
+title = "Render a literal Kubernetes exec probe (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "an exec readiness probe is declared", system = "Billet", action = "encode its executable and argv with Kubernetes dollar escaping" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-033"
+title = "Render a Kubernetes HTTP liveness probe (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "an HTTP liveness probe is declared", system = "Billet", action = "set its numeric port and declared path" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-034"
+title = "Render the Kubernetes probe period (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a probe is declared", system = "Billet", action = "set its periodSeconds to the declared interval" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-035"
+title = "Render initialization as ordered init containers (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "initialization steps are declared", system = "Billet", action = "render each command in order with the application image, resources and declared mounts and secret references" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-036"
+title = "Render a required environment secret reference (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "a required environment secret is declared", system = "Billet", action = "set the target variable from a required Secret key reference" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-037"
+title = "Render an optional environment secret reference (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "an optional environment secret is declared", system = "Billet", action = "set the target variable from an optional Secret key reference" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-038"
+title = "Reject malformed Kubernetes secret references (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "an external secret reference has invalid shape", system = "Billet", action = "report its field without echoing the rejected reference and block rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-039"
+title = "Reject optional Kubernetes file delivery (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "a file secret is optional", system = "Billet", action = "report that exact-path optional delivery is unsupported and block rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-040"
+title = "Project a required secret as a single file (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "a required file secret is declared", system = "Billet", action = "mount only the declared Secret key at the exact target without emitting a Secret object" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-041"
+title = "Render memory-backed ephemeral storage (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "an ephemeral memory claim is declared", system = "Billet", action = "render memory-backed emptyDir with the declared size" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-042"
+title = "Render disk-backed ephemeral storage (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "an ephemeral disk claim is declared", system = "Billet", action = "render disk-backed emptyDir with the declared size" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-043"
+title = "Render the PVC provisioner class (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "persistent disk is declared", system = "Billet", action = "request a PVC in the declared storage class" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-044"
+title = "Render read-only persistent storage (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "persistent disk declares readOnlyMany access", system = "Billet", action = "request a ReadOnlyMany PVC and mount it read-only" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-045"
+title = "Reject an invalid Kubernetes storage class (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "persistent disk has a class invalid for a PVC", system = "Billet", action = "report the driverClass field and block rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-046"
+title = "Render Kubernetes service discovery (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "ports are declared", system = "Billet", action = "provide a ClusterIP Service targeting the matching Pod ports over TCP" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-047"
+title = "Publish only public ports (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "public ports are declared", system = "Billet", action = "include only those ports on a distinct LoadBalancer Service" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-048"
+title = "Render directional Kubernetes ingress (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "declared connections reach local ports", system = "Billet", action = "allow traffic to private ports only from matched same-namespace source Pods and allow public ports from any source" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-049"
+title = "Isolate Kubernetes egress (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "public egress is disabled", system = "Billet", action = "allow only directional egress to same-namespace destination Pods on the matching named ports" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-050"
+title = "Diagnose Kubernetes egress DNS (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "public egress is disabled", system = "Billet", action = "report that DNS reachability needs a cluster allow policy" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-051"
+title = "Diagnose opaque Kubernetes egress restrictions (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "opaque restrictions are declared", system = "Billet", action = "report that they have no native mapping" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-052"
+title = "Diagnose an unresolved local link (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "an incoming link names an invalid local destination port", system = "Billet", action = "warn and omit its ingress rule" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-053"
+title = "Allow Kubernetes artifact rendering with warnings (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "a native mapping has advisory diagnostics and no errors", system = "Billet", action = "report the mapping and render a Kubernetes v1 List" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-054"
+title = "Diagnose the emptyDir storage class (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "ephemeral storage is declared", system = "Billet", action = "report that emptyDir has no provisioner class or access topology" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-055"
+title = "Validate the Kubernetes bundle at the API server (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#qualification"
+ears = { type = "event", trigger = "K3s validates the generated resource List", system = "Billet", action = "supply resources that pass strict server-side validation" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-056"
+title = "Run the bundled primary image through Kubernetes (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "K3s starts the Deployment with the bundled image", system = "Billet", action = "run the image primary process with its declared argv, ordinary environment, working directory and identity" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-057"
+title = "Run ordered Kubernetes init containers (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "K3s starts the Pod with declared initialization", system = "Billet", action = "perform the two ordered steps against the shared volume before the primary process starts" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-058"
+title = "Use a native Kubernetes TCP startup probe (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "K3s starts a Pod with a TCP startup probe", system = "Billet", action = "reach startup success through the declared TCP port" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-059"
+title = "Run the literal Kubernetes readiness command (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "K3s evaluates the exec readiness probe", system = "Billet", action = "pass literal probe argv and observe readiness success" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-060"
+title = "Serve the workload through ClusterIP (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "K3s publishes the ready workload endpoints", system = "Billet", action = "deliver HTTP through the generated Service to its mapped Pod port" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-061"
+title = "Resolve Kubernetes secrets at runtime (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "the cluster provides the bound Secret key", system = "Billet", action = "deliver its value through the declared environment and read-only file mounts and leave the absent optional environment key unset" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-062"
+title = "Mount bounded memory storage in Kubernetes (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "K3s starts the Pod with memory storage", system = "Billet", action = "mount the tmpfs at the requested path with the requested size" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-063"
+title = "Render the Kubernetes shutdown grace period (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "K3s admits the workload Pod", system = "Billet", action = "set its termination grace period to the declared duration" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-064"
+title = "Diagnose disk emptyDir accounting (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "ephemeral disk storage is declared", system = "Billet", action = "report the dependency on kubelet storage accounting for size enforcement" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-065"
+title = "Render the Kubernetes probe timeout (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a probe is declared", system = "Billet", action = "set its timeoutSeconds to the declared timeout" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-066"
+title = "Render the Kubernetes probe failure threshold (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a probe is declared", system = "Billet", action = "set its failureThreshold to the declared count" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-067"
+title = "Render the PVC storage request (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "persistent disk is declared", system = "Billet", action = "request the declared storage size in bytes" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-068"
+title = "Reference a stable persistent claim (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "a definition with persistent disk changes within one identity", system = "Billet", action = "retain its generated claim name and reference that claim from the Pod volume" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-069"
+title = "Preserve unrestricted egress (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "public egress is enabled for a service without ports or incoming links", system = "Billet", action = "omit a network policy for that service" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-070"
+title = "Use the exact OCI image tag (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered", system = "Billet", action = "reference the OCI image tag with IfNotPresent and inherit its primary process settings" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-071"
+title = "Set the declared Kubernetes user and group (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Deployment is rendered", system = "Billet", action = "set the Pod security context to the numeric OCI UID and GID" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-072"
+title = "Reject the reserved Kubernetes deadline (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "the declared progress deadline equals the native value that disables tracking", system = "Billet", action = "report the deadline field and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-073"
+title = "Keep application and init container names distinct (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "a Billet identity matches an init container name", system = "Billet", action = "use a distinct application container name within the Pod" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-074"
+title = "Allow the declared ingress peer in K3s (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "a Pod matching the declared private ingress source connects in K3s", system = "Billet", action = "provide a native rule that permits the traffic on the named private port" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-075"
+title = "Isolate the private port from other K3s Pods (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "a Pod without the private ingress source label connects in K3s", system = "Billet", action = "provide native rules that deny its private port traffic and allow its public port traffic" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-076"
+title = "Validate the Kubernetes UID and GID range (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "an OCI numeric UID or GID exceeds the Kubernetes API maximum", system = "Billet", action = "report process.user and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-077"
+title = "Validate the Kubernetes annotation size (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "the identity and manifest digest exceed the native annotation budget", system = "Billet", action = "report the identity field and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-078"
+title = "Preserve a declared API Service environment override (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#workload-and-lifecycle"
+ears = { type = "event", trigger = "an application or init container declares an ordinary value on a kubelet API Service variable", system = "Billet", action = "deliver the declared literal value to the container" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-079"
+title = "Reject ambiguous optional environment Secret targets (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "an optional environment Secret targets an API Service variable", system = "Billet", action = "report the target and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-080"
+title = "Reserve the API Service name (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "a Billet identity is kubernetes", system = "Billet", action = "use the stable hash-based name for its rendered resources and selector" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-081"
+title = "Deliver a file under the default token mount (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "a declared Secret file overlaps the automatic ServiceAccount mount", system = "Billet", action = "disable the automatic token mount and deliver the file at its declared path" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-082"
+title = "Reserve Deployment controller annotation space (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#public-artifacts"
+ears = { type = "event", trigger = "Billet provenance requires more than 252 KiB of annotation data", system = "Billet", action = "report the identity and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-083"
+title = "Stamp the selected namespace (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#namespace-and-dependencies"
+ears = { type = "event", trigger = "kubernetes.namespace is explicitly set", system = "Billet", action = "include the namespace on each namespaced resource" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-084"
+title = "Create an opted-in namespace (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#namespace-and-dependencies"
+ears = { type = "event", trigger = "namespace creation is enabled for an explicit namespace", system = "Billet", action = "prepend the Namespace resource so the List applies into a fresh namespace" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-085"
+title = "Require a name for namespace creation (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#namespace-and-dependencies"
+ears = { type = "event", trigger = "namespace creation is enabled without a namespace name", system = "Billet", action = "report the namespace field and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-086"
+title = "Validate the namespace name (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#namespace-and-dependencies"
+ears = { type = "event", trigger = "the specified namespace is not a Kubernetes DNS label", system = "Billet", action = "report the namespace field and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-087"
+title = "Protect built-in Kubernetes namespaces (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#namespace-and-dependencies"
+ears = { type = "event", trigger = "namespace creation targets default or a kube-prefixed namespace", system = "Billet", action = "report the namespace field and block Kubernetes rendering" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-088"
+title = "Leave namespace selection to the client by default (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#namespace-and-dependencies"
+ears = { type = "event", trigger = "namespace settings are omitted", system = "Billet", action = "omit the Namespace resource and namespace metadata" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-089"
+title = "Keep namespace settings out of portable artifacts (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#namespace-and-dependencies"
+ears = { type = "event", trigger = "only the Kubernetes namespace settings change", system = "Billet", action = "preserve the canonical IR digest and OCI image tag" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-090"
+title = "Deliver a required Secret on an API Service variable (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "a required environment Secret targets a kubelet API Service variable", system = "Billet", action = "deliver the referenced value with precedence over kubelet's default" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-091"
+title = "Qualify both sides of a private service link (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "the source and destination Billets declare the same private link in one K3s namespace", system = "Billet", action = "allow the egress-isolated source to reach the declared port through the destination Service" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-092"
+title = "Qualify the port scope of private egress (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#services-and-policy"
+ears = { type = "event", trigger = "the egress-isolated Billet connects to an undeclared port on the permitted destination", system = "Billet", action = "deny the connection through the generated egress policy" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-093"
+title = "Version bundle preflight (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "Kubernetes bundle preflight is evaluated", system = "Billet", action = "report the kubernetes-artifact-bundle-v1 profile" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-094"
+title = "Include member preflight (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "Kubernetes bundle preflight is evaluated", system = "Billet", action = "include the report from each member" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-095"
+title = "Union native capability mappings (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "a renderable member supports Job completion", system = "Billet", action = "include job-completion among the bundle's native mappings" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-096"
+title = "Gate an ineligible member (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "a Job member declares a replica range", system = "Billet", action = "reject configuration with a member-scoped replica diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-097"
+title = "Reject conflicting namespaces (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "members select different explicit namespaces", system = "Billet", action = "reject the bundle with a namespace diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-098"
+title = "Reject overlapping resource identities (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "members emit the same namespaced resource identity", system = "Billet", action = "reject the bundle with a collision diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-099"
+title = "Share an explicit namespace (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "one member selects a namespace and another omits it", system = "Billet", action = "render both members' namespaced resources in the selected namespace" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-100"
+title = "Use one-shot Pod restart policy (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#one-shot-workloads"
+ears = { type = "event", trigger = "a Billet selects a Job", system = "Billet", action = "set its Pod restart policy to Never" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-101"
+title = "Map enabled unexpected-exit retries (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#one-shot-workloads"
+ears = { type = "event", trigger = "a Job allows unexpected-exit retries", system = "Billet", action = "use the declared maximum as the Job backoff limit" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-102"
+title = "Disable Job retries (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#one-shot-workloads"
+ears = { type = "event", trigger = "a Job disables restart", system = "Billet", action = "set the Job backoff limit to zero" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-103"
+title = "Name each changed Job revision (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#one-shot-workloads"
+ears = { type = "event", trigger = "the Job's application arguments change", system = "Billet", action = "render a different Job resource name" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-104"
+title = "Build the combined List independently of images (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "the standalone bundle file is built", system = "Billet", action = "write the member resources in a v1 List without realizing application packages" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-105"
+title = "Include an opted-in namespace once (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "multiple members request creation of the same namespace", system = "Billet", action = "place a single Namespace before namespaced items" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-106"
+title = "Bundle the exact List (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "the Kubernetes project bundle is built", system = "Billet", action = "include the exact standalone kubernetes.json" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-107"
+title = "Include each member image (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "the Kubernetes project bundle is built", system = "Billet", action = "include each member's exact Docker archive under images" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-108"
+title = "Include each canonical manifest (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#bundle-outputs"
+ears = { type = "event", trigger = "the Kubernetes project bundle is built", system = "Billet", action = "include each member's canonical manifest under manifests" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-109"
+title = "Run the report through the catalog Service (BI004, BI011)"
+manual = false
+design = "design/kubernetes-bundle.md#catalog-and-report"
+ears = { type = "event", trigger = "the catalog-report Kubernetes bundle is applied to K3s", system = "Billet", action = "complete the report Job after it reads the inventory through the catalog Service" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-110"
+title = "Grant the image group persistent volume ownership (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "persistent disk is declared", system = "Billet", action = "set the Pod fsGroup to the numeric GID with the OnRootMismatch change policy" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-111"
+title = "Omit volume group ownership without persistent storage (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#secret-references-and-storage"
+ears = { type = "event", trigger = "no persistent disk is declared", system = "Billet", action = "leave the Pod fsGroup unset" }

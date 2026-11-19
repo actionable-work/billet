@@ -96,6 +96,21 @@ maxRequirements = 6
 path = "image-name.test.nix"
 reason = "This file checks image-name defaults, validation, and resolved OCI and Compose references."
 
+[checks.specifications.testExceptions.kubernetes_artifacts]
+maxRequirements = 74
+path = "kubernetes.test.nix"
+reason = "Separate derivations check preflight, workload, mounts, networking and standalone packaging. Each declared requirement has a keyed assertion or a file comparison."
+
+[checks.specifications.testExceptions.kubernetes_bundle]
+maxRequirements = 17
+path = "kubernetes-bundle.test.nix"
+reason = "Pure assertions check the namespace and Job settings. The K3s guest validates the packaged example."
+
+[checks.specifications.testExceptions.kubernetes_vm]
+maxRequirements = 20
+path = "kubernetes-vm.test.nix"
+reason = "The K3s VM has separate bundle comparisons, strict API validation, and live workload assertions. The Kubernetes design identifies the witnesses."
+
 [checks.specifications.testExceptions.oci_fixtures]
 maxRequirements = 34
 path = "oci.test.nix"

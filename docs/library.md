@@ -80,6 +80,7 @@ Each runtime's artifacts are described in its guide.
 | ----------------------------------------------------------------------- | -------------------------------------------- |
 | `ociImage`, `ociLayout`, `dockerImage`                                  | [Docker](runtimes/docker.md)                 |
 | `dockerCompose` (`capabilityReport`, `configuration`, `file`, `bundle`) | [Docker Compose](runtimes/docker-compose.md) |
+| `kubernetes` (`capabilityReport`, `configuration`, `file`, `bundle`)    | [Kubernetes](runtimes/kubernetes.md)         |
 
 ## `mkBilletBundle`
 
@@ -103,11 +104,12 @@ Every member must use the same system as `pkgs`.
 
 ### Attributes
 
-| Attribute         | Description                                                                                              |
-| ----------------- | -------------------------------------------------------------------------------------------------------- |
-| `billets`         | The member Billets.                                                                                      |
-| `validationCheck` | Validates every member and the bundle structure, then writes each member's manifest digest.              |
-| `dockerCompose`   | One Compose project with a service per member. See [Docker Compose](runtimes/docker-compose.md#bundles). |
+| Attribute         | Description                                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `billets`         | The member Billets.                                                                                                             |
+| `validationCheck` | Validates every member and the bundle structure, then writes each member's manifest digest.                                     |
+| `dockerCompose`   | One Compose project with a service per member. See [Docker Compose](runtimes/docker-compose.md#bundles).                        |
+| `kubernetes`      | One Kubernetes List with each member's native resources, image, and manifest. See [Kubernetes](runtimes/kubernetes.md#bundles). |
 
 `validationCheck` rejects an empty bundle and identifies members with mismatched
 keys or systems.

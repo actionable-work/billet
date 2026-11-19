@@ -142,6 +142,11 @@ Bloomery's `billets` callback to expose both services and their Compose bundle.
 It passes the Rust workspace's exported `catalog` package as the primary process
 package. The report fetches inventory from the Rust catalog in Compose.
 
+## Kubernetes artifact
+
+The [Kubernetes profile](kubernetes.md) defines resource rendering, packaging,
+preflight, and qualification for one Billet.
+
 ## Artifact preflight
 
 The versioned capability report measures artifact eligibility. It echoes the

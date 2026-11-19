@@ -29,6 +29,10 @@ and the logical secret name. If a service named `hello` uses the example
 The `external` field stays in the manifest. See the
 [Compose secret naming and delivery rules](runtimes/docker-compose.md#provide-secrets-at-startup).
 
+Kubernetes uses `external` as a same-namespace Secret name and key, for example
+`database/password`. See
+[Kubernetes secret delivery](runtimes/kubernetes.md#provide-secrets).
+
 For a direct `docker run`, supply the file or environment value yourself.
 [Run the Docker container](runtimes/docker.md#run-the-container)
 

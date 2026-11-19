@@ -1,37 +1,19 @@
-{lib}: {
+{
   pkgs,
   billets,
+  members,
+  system,
+  structureDiagnostics,
 }: let
-  system = pkgs.stdenv.hostPlatform.system;
-  members = lib.mapAttrs (_: billet: billet.ir) billets;
+  inherit (pkgs) lib;
   reports = lib.mapAttrs (_: billet: billet.dockerCompose.capabilityReport) billets;
   project = import ./compose-project.nix {inherit lib;} members;
-  diagnostic = code: field: reason: {
-    inherit code field reason;
-    capability = "compose-packaging";
-  };
-  emptyDiagnostics = lib.optional (billets == {}) (diagnostic "EmptyBilletBundle" "billets" "provide at least one Billet");
-  memberDiagnostics = name: billet:
-    lib.optional (name != billet.ir.identity.name)
-    (diagnostic "BundleMemberNameMismatch" "services.${name}.identity.name" "the member key must match the canonical identity name")
-    ++ lib.optional (billet.ir.system != system)
-    (diagnostic "BundleMemberSystemMismatch" "services.${name}.system" "the member must match the selected package-set system");
-  structureDiagnostics = emptyDiagnostics ++ lib.concatLists (lib.mapAttrsToList memberDiagnostics billets);
   memberReports = lib.concatLists (lib.mapAttrsToList (name: report:
     map (item: item // {field = "services.${name}.${item.field}";}) report.diagnostics)
   reports);
-  diagnostics = structureDiagnostics ++ memberReports ++ project.diagnostics;
+  diagnostics = map (item: item // {capability = "compose-packaging";}) structureDiagnostics ++ memberReports ++ project.diagnostics;
   sorted = values: lib.sort builtins.lessThan (lib.unique values);
   formatDiagnostics = lib.concatMapStringsSep "; " (item: "${item.field}: ${item.reason}");
-  validationCheck =
-    if structureDiagnostics != []
-    then throw ("billet: invalid bundle: " + formatDiagnostics structureDiagnostics)
-    else
-      builtins.deepSeq members (
-        pkgs.writeText "billet-bundle-validation" (
-          builtins.unsafeDiscardStringContext (builtins.toJSON (lib.mapAttrs (_: billet: billet.manifestDigest) billets)) + "\n"
-        )
-      );
   canRender = structureDiagnostics == [] && lib.all (report: report.canRender) (builtins.attrValues reports);
   capabilityReport = {
     schemaVersion = 1;
@@ -78,7 +60,4 @@
         '')
         billets)}
     '';
-in {
-  inherit billets validationCheck;
-  dockerCompose = {inherit capabilityReport configuration file bundle;};
-}
+in {inherit capabilityReport configuration file bundle;}

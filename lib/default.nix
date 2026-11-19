@@ -2,7 +2,7 @@
   lib,
   nix2container ? null,
 }: {
-  mkBilletBundle = import ./compose-bundle.nix {inherit lib;};
+  mkBilletBundle = import ./bundle.nix {inherit lib;};
 
   mkBillet = {
     pkgs,
@@ -128,5 +128,9 @@
       ociLayout = oci.layout;
       dockerImage = oci.archive;
       dockerCompose = import ./compose.nix {inherit pkgs billet oci imageEligibility;};
+      kubernetes = import ./kubernetes.nix {
+        inherit pkgs billet oci imageEligibility;
+        settings = c.kubernetes;
+      };
     };
 }

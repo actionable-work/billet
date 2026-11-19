@@ -64,6 +64,11 @@
     docker = record {
       maxLayers = int 124;
     };
+    kubernetes = record {
+      namespace = nullable str;
+      createNamespace = bool false;
+      workload = enum ["deployment" "job"] "deployment";
+    };
     systems = (list str) // {default = [system];};
     process = record (command.fields
       // {
