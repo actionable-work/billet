@@ -3,6 +3,21 @@ use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
+/// Require an invalid fixture to fail with a field diagnostic that omits its value.
+pub fn diagnose(name: &str, field: &str) -> Result {
+    let prefix = nix_expression();
+    let result = evaluate(&format!("{prefix}(f.evaluate f.invalid.{name}).ir"))?;
+    let error = String::from_utf8(result.stderr)?;
+    check(
+        !result.status.success() && error.contains(&format!("billet: {field}:")),
+        &error,
+    )?;
+    check(
+        !error.contains("DO-NOT-ECHO-SECRET"),
+        "rejected value leaked to diagnostic",
+    )
+}
+
 pub fn ir() -> Result {
     let prefix = nix_expression();
     let cases = [
@@ -15,16 +30,7 @@ pub fn ir() -> Result {
         ("schemaVersion", "schemaVersion"),
     ];
     for (name, field) in cases {
-        let result = evaluate(&format!("{prefix}(f.evaluate f.invalid.{name}).ir"))?;
-        let error = String::from_utf8(result.stderr)?;
-        check(
-            !result.status.success() && error.contains(&format!("billet: {field}:")),
-            &error,
-        )?;
-        check(
-            !error.contains("DO-NOT-ECHO-SECRET"),
-            "rejected value leaked to diagnostic",
-        )?;
+        diagnose(name, field)?;
     }
     let payload = std::fs::read(env("manifest"))?;
     for _ in 0..2 {

@@ -7,16 +7,29 @@
       url = "github:nlewo/nix2container";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
+    self,
     nixpkgs,
     nix2container,
+    treefmt-nix,
     ...
-  }: {
+  }: let
+    eachSystem = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
+    treefmt = eachSystem (system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix);
+  in {
     lib = import ./lib {
       lib = nixpkgs.lib;
       inherit nix2container;
     };
+    formatter = eachSystem (system: treefmt.${system}.config.build.wrapper);
+    checks = eachSystem (system: {
+      formatting = treefmt.${system}.config.build.check self;
+    });
   };
 }

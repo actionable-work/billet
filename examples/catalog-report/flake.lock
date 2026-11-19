@@ -3,7 +3,10 @@
     "billet": {
       "inputs": {
         "nix2container": "nix2container",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": "treefmt-nix"
       },
       "locked": {
         "path": "../..",
@@ -18,10 +21,8 @@
     "bloomery": {
       "inputs": {
         "flake-parts": "flake-parts",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": "treefmt-nix"
+        "nixpkgs": "nixpkgs",
+        "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
         "lastModified": 1795037517,
@@ -100,12 +101,33 @@
         "billet": "billet",
         "bloomery": "bloomery",
         "nixpkgs": [
-          "billet",
+          "bloomery",
           "nixpkgs"
         ]
       }
     },
     "treefmt-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "billet",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791885023,
+        "narHash": "sha256-C3alQ2MEt0zVrUSho5NUDo3jmhbff72++bfwoqT9Omo=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "0d6d739a833ba9a9c93034862e4a7b061a062a1c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_2": {
       "inputs": {
         "nixpkgs": [
           "bloomery",

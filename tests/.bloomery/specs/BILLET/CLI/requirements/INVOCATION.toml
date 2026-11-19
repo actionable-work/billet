@@ -2,7 +2,7 @@ group = "INVOCATION"
 
 [[requirements]]
 id = "BILLET-CLI-INVOCATION-001"
-title = "Argument-safe Nix tooling"
+title = "Argument-safe Nix tooling (BI002)"
 manual = false
 design = "design/contract.md"
 

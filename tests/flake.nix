@@ -2,13 +2,14 @@
   description = "Billet artifact qualification";
 
   inputs = {
-    billet.url = "path:..";
-    bloomery = {
-      url = "github:actionable-work/bloomery";
+    billet = {
+      url = "path:..";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.follows = "billet/nixpkgs";
+    bloomery.url = "github:actionable-work/bloomery";
+    nixpkgs.follows = "bloomery/nixpkgs";
     nix2container.follows = "billet/nix2container";
+    treefmt-nix.follows = "billet/treefmt-nix";
   };
 
   outputs = {
@@ -17,6 +18,7 @@
     bloomery,
     nixpkgs,
     nix2container,
+    treefmt-nix,
     ...
   }: let
     billetLib = billet.lib;
@@ -42,9 +44,13 @@
             cli = packages.billet;
           })
           // (import ./oci.test.nix {inherit pkgs billetLib harness;})
+          // (import ./image-name.test.nix {inherit pkgs billetLib harness;})
           // (import ./service-validation.test.nix {inherit pkgs billetLib;})
           // (import ./bundle-validation.test.nix {inherit pkgs billetLib;})
-          // (import ./public-format.test.nix {inherit pkgs;})
+          // (import ./public-format.test.nix {
+            inherit pkgs treefmt-nix;
+            formatting = billet.checks.${system}.formatting;
+          })
           // (import ./ci-app.test.nix {
             inherit pkgs;
             app = self.apps.${system}.ci;
@@ -53,6 +59,7 @@
             inherit pkgs;
             qualificationChecks = self.checks.${system};
             smoke = self.apps.${system}.oci-smoke;
+            publicFormatter = billet.formatter;
           })
           // (import ./examples.test.nix {
             inherit pkgs catalogBillets catalogPackage;

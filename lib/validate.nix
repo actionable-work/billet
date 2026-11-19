@@ -12,6 +12,22 @@
   nonnegative = path: value: require path (value >= 0) "must be nonnegative";
   named = value: builtins.match "[a-zA-Z0-9][a-zA-Z0-9_.-]*" value != null;
   envName = value: builtins.match "[a-zA-Z_][a-zA-Z0-9_]*" value != null;
+  # OCI distribution repository names: lowercase path components, optionally
+  # after a registry host (one containing "." or ":", or "localhost").
+  repositoryPath = value: builtins.all (part: builtins.match "[a-z0-9]+(([._]|__|-+)[a-z0-9]+)*" part != null) (lib.splitString "/" value);
+  registryHost = value: builtins.match "[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?([.][a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*(:[0-9]+)?" value != null;
+  imageRepository = value: let
+    parts = lib.splitString "/" value;
+    first = builtins.head parts;
+    hosted = builtins.length parts > 1 && (lib.hasInfix "." first || lib.hasInfix ":" first || first == "localhost");
+  in
+    builtins.stringLength value
+    <= 255
+    && (
+      if hosted
+      then registryHost first && repositoryPath (lib.concatStringsSep "/" (builtins.tail parts))
+      else repositoryPath value
+    );
   cleanParts = value: builtins.all (x: x != ".." && x != "." && x != "") (lib.splitString "/" value);
   absolute = value: value == "/" || (lib.hasPrefix "/" value && cleanParts (lib.removePrefix "/" value));
   overlap = a: b: a == b || lib.hasPrefix "${a}/" b || lib.hasPrefix "${b}/" a;
@@ -66,6 +82,7 @@ in
     (require "schemaVersion" (c.schemaVersion == 1) "unsupported schema version; explicit migration required")
     (require "identity.name" (named c.identity.name) "must be an identifier")
     (nonempty "identity.version" c.identity.version)
+    (require "identity.imageName" (imageRepository c.identity.imageName) "must be a lowercase image repository name; set it explicitly when identity.name is not one")
     (require "systems" (builtins.elem system c.systems) "selected system is not declared")
     (map (s: nonempty "systems" s) c.systems)
     (command "process" c.process)

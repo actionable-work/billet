@@ -60,6 +60,7 @@
     identity = record {
       name = str;
       version = str;
+      imageName = nullable str;
     };
     systems = (list str) // {default = [system];};
     process = record (command.fields

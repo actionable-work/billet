@@ -14,8 +14,22 @@
       modules = [schema.module] ++ modules;
       specialArgs = {inherit pkgs;};
     };
-    c = evaluated.config;
-    checked = builtins.deepSeq (schema.checkUnknown c) (import ./validate.nix {inherit lib system;} c);
+    raw = evaluated.config;
+    # The image repository defaults to the application name; IR records the
+    # effective value.
+    c =
+      raw
+      // {
+        identity =
+          raw.identity
+          // {
+            imageName =
+              if raw.identity.imageName == null
+              then lib.toLower raw.identity.name
+              else raw.identity.imageName;
+          };
+      };
+    checked = builtins.deepSeq (schema.checkUnknown raw) (import ./validate.nix {inherit lib system;} c);
     sorted = xs: lib.sort builtins.lessThan (lib.unique xs);
     command = p: {
       package = toString p.package;

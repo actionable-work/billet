@@ -2,12 +2,12 @@
   description = "Compose artifacts for a Bloomery Rust catalog and its report client";
 
   inputs = {
-    billet.url = "path:../..";
-    bloomery = {
-      url = "github:actionable-work/bloomery";
+    billet = {
+      url = "path:../..";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.follows = "billet/nixpkgs";
+    bloomery.url = "github:actionable-work/bloomery";
+    nixpkgs.follows = "bloomery/nixpkgs";
   };
 
   outputs = {

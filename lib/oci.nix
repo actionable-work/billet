@@ -35,7 +35,7 @@ else let
     metadata = {created_by = "billet-runtime-v1";};
   };
   image = backend.buildImage {
-    name = "billet";
+    name = billet.ir.identity.imageName;
     tag = builtins.hashString "sha256" "${billet.manifestDigest}:1:${backendRevision}";
     arch = eligibility.architecture;
     created = "1970-01-01T00:00:00Z";

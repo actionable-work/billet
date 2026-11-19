@@ -168,3 +168,10 @@ title = "Run the Rust catalog from its exported image (BI004, BI011)"
 manual = false
 design = "design/targets.md#example-subflakes"
 ears = { type = "ubiquitous", system = "Billet", action = "use the Rust workspace binary as the catalog image entrypoint" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-025"
+title = "Reference the named image from Compose (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-artifact"
+ears = { type = "ubiquitous", system = "Billet", action = "set each Compose service image to its identity.imageName with the content-derived tag" }

@@ -69,6 +69,8 @@
     schemaVersion = base // {schemaVersion = 0;};
     unknown = base // {applications = ["another"];};
     wrongType = lib.recursiveUpdate base {resources.cpuLimit = "DO-NOT-ECHO-SECRET";};
+    imageName = lib.recursiveUpdate base {identity.imageName = "DO-NOT-ECHO-SECRET";};
+    imageNameDefault = lib.recursiveUpdate base {identity.name = "a..b";};
     inlineSecret = lib.recursiveUpdate full {secrets.database.value = "DO-NOT-ECHO-SECRET";};
     secretType = lib.recursiveUpdate full {secrets.database.external = {value = "DO-NOT-ECHO-SECRET";};};
     secretContext = lib.recursiveUpdate full {secrets.database.external = "${data}";};

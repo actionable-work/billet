@@ -45,3 +45,17 @@ title = "Retain process argument arrays (BI001, BI010)"
 manual = false
 design = "design/contract.md#encoding-and-identity"
 ears = { type = "ubiquitous", system = "Billet", action = "preserve argument order, empty arguments, spaces and metacharacters in canonical process argv" }
+
+[[requirements]]
+id = "BILLET-IR-NORMALIZATION-007"
+title = "Default the image name to the application name (BI001, BI010)"
+manual = false
+design = "design/contract.md#module-fields"
+ears = { type = "event", trigger = "identity.imageName is omitted", system = "Billet", action = "record identity.name in lowercase as identity.imageName in the IR" }
+
+[[requirements]]
+id = "BILLET-IR-NORMALIZATION-008"
+title = "Record an explicit image name (BI001, BI010)"
+manual = false
+design = "design/contract.md#module-fields"
+ears = { type = "event", trigger = "identity.imageName is a valid repository name, including one with a registry host and port", system = "Billet", action = "record it unchanged in the IR" }

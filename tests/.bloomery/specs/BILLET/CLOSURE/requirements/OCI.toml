@@ -91,3 +91,10 @@ title = "Preserve OCI stop signal (BI003, BI006)"
 manual = false
 design = "design/oci.md#contents-and-execution-parameters"
 ears = { type = "ubiquitous", system = "Billet", action = "preserve the declared stop signal in OCI StopSignal" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-014"
+title = "Name the image from the IR (BI003, BI006)"
+manual = false
+design = "design/oci.md#determinism-and-provenance"
+ears = { type = "ubiquitous", system = "Billet", action = "reference the OCI image and Docker archive as identity.imageName with the content-derived tag" }

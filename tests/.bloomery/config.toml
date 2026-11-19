@@ -91,6 +91,11 @@ maxRequirements = 13
 path = "compose.test.nix"
 reason = "The Docker VM verifies independent manifest, image, Compose, and service interaction requirements with one isolated boot."
 
+[checks.specifications.testExceptions.image_name]
+maxRequirements = 6
+path = "image-name.test.nix"
+reason = "This file exports a separate check per image-name requirement: default, explicit, invalid, invalid default, OCI reference, and Compose reference."
+
 [checks.specifications.testExceptions.oci_fixtures]
 maxRequirements = 25
 path = "oci.test.nix"

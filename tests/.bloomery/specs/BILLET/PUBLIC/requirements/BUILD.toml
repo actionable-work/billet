@@ -37,7 +37,7 @@ id = "BILLET-PUBLIC-BUILD-005"
 title = "Keep public library flake inputs independent of qualification (BI009)"
 manual = false
 design = "design/contract.md#public-library"
-ears = { type = "event", trigger = "the public library flake is consumed", system = "Billet", action = "expose the library through pinned nixpkgs and nix2container inputs" }
+ears = { type = "event", trigger = "the public library flake is consumed", system = "Billet", action = "expose the library through pinned nixpkgs, nix2container, and treefmt-nix inputs" }
 
 [[requirements]]
 id = "BILLET-PUBLIC-BUILD-006"
@@ -48,10 +48,10 @@ ears = { type = "event", trigger = "the catalog example flake is evaluated", sys
 
 [[requirements]]
 id = "BILLET-PUBLIC-BUILD-007"
-title = "Expose only the library from the public root (BI009)"
+title = "Expose only the library and formatting from the public root (BI009)"
 manual = false
 design = "design/contract.md#public-library"
-ears = { type = "event", trigger = "the public root flake is consumed", system = "Billet", action = "export the Billet library as the only flake output" }
+ears = { type = "event", trigger = "the public root flake is consumed", system = "Billet", action = "export the Billet library, the repository formatter, and the formatting check as its only flake outputs" }
 
 [[requirements]]
 id = "BILLET-PUBLIC-BUILD-008"
@@ -66,3 +66,24 @@ title = "Reject CI outside a checkout (BI009)"
 manual = false
 design = "design/contract.md#ci-app"
 ears = { type = "unwanted_behavior", trigger = "the test flake ci app runs outside a Billet checkout", system = "Billet", action = "exit with an error without running CI" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-010"
+title = "Export a repository formatter (BI009)"
+manual = false
+design = "design/contract.md#formatting"
+ears = { type = "event", trigger = "the public root flake is consumed", system = "Billet", action = "export a treefmt-nix formatter for each system the root lists" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-011"
+title = "Reject unformatted tracked files (BI009)"
+manual = false
+design = "design/contract.md#formatting"
+ears = { type = "unwanted_behavior", trigger = "a tracked repository file differs from the formatter output", system = "Billet", action = "fail the formatting check" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-BUILD-012"
+title = "Accept formatted tracked files (BI009)"
+manual = false
+design = "design/contract.md#formatting"
+ears = { type = "event", trigger = "every tracked repository file matches the formatter output", system = "Billet", action = "pass the formatting check" }
