@@ -12,6 +12,7 @@
 in {
   "billet:example-outputs" = assert helloApp.program == hello.ir.process.executable;
   assert catalog.ir.process.package == toString catalogPackage;
+  assert catalog.ir.oci.imageName == "billet-example/catalog";
     pkgs.runCommand "billet-example-outputs" {
       passthru.bloomery = ["BILLET-IR-TARGETS-022" "BILLET-IR-TARGETS-023"];
     } ''

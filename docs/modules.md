@@ -14,11 +14,20 @@ declarations.
 
 ## `identity`
 
-| Field       | Default          | Description                                                                                                                                             |
-| ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`      | required         | The application name.                                                                                                                                   |
-| `version`   | required         | The application version.                                                                                                                                |
-| `imageName` | lowercase `name` | Image repository, optionally with a registry such as `registry.example.com/team/hello`. Set it when the lowercase name is invalid as a repository name. |
+| Field     | Default  | Description              |
+| --------- | -------- | ------------------------ |
+| `name`    | required | The application name.    |
+| `version` | required | The application version. |
+
+## `oci`
+
+| Field       | Default                   | Description                                                                                                               |
+| ----------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `imageName` | lowercase `identity.name` | Fully qualified image name, for example: `registry.example.com/myteam/hello`. Set it when you need a specific image name. |
+| `maxLayers` | `124`                     | Maximum runtime layers, an integer from 1 through 124. The final metadata layer is additional.                            |
+
+See [Docker image contents](runtimes/docker.md#image-contents) for how the
+budget affects layer grouping and image tags.
 
 ## `process`
 

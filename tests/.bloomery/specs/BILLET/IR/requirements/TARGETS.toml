@@ -174,7 +174,7 @@ id = "BILLET-IR-TARGETS-025"
 title = "Reference the named image from Compose (BI004, BI011)"
 manual = false
 design = "design/targets.md#compose-artifact"
-ears = { type = "ubiquitous", system = "Billet", action = "set each Compose service image to its identity.imageName with the content-derived tag" }
+ears = { type = "ubiquitous", system = "Billet", action = "set each Compose service image to its effective oci.imageName with the content-derived tag" }
 
 [[requirements]]
 id = "BILLET-IR-TARGETS-026"

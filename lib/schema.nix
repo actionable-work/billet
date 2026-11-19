@@ -55,12 +55,14 @@
     timeoutSeconds = int 1;
     failureThreshold = int 3;
   });
-  root = record {
+  fields = {
     schemaVersion = int 1;
     identity = record {
       name = str;
       version = str;
-      imageName = nullable str;
+    };
+    docker = record {
+      maxLayers = int 124;
     };
     systems = (list str) // {default = [system];};
     process = record (command.fields
@@ -149,6 +151,15 @@
     });
     requiredCapabilities = list str;
   };
+  root = config:
+    record (fields
+      // {
+        oci = record {
+          imageName = nullable str;
+          # Allow one additional layer for image metadata within Docker's budget.
+          maxLayers = int config.docker.maxLayers;
+        };
+      });
   # Every type accepts input at the module engine's check boundary. Its merge
   # validates instead, so lib.evalModules cannot print a rejected secret value.
   toType = shape:
@@ -206,9 +217,9 @@
     then unknown loc shape.item value
     else true;
 in {
-  module = {
+  module = {config, ...}: {
     freeformType = types.attrsOf types.raw;
-    options = options root.fields;
+    options = options (root config).fields;
   };
-  checkUnknown = unknown [] root;
+  checkUnknown = config: unknown [] (root config) config;
 }

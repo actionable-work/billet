@@ -16,8 +16,8 @@ archive build operates without a Docker daemon.
 ## Compose artifact
 
 Render one application service keyed by the IR identity name. Reference the
-exact exported image, `identity.imageName` with its content-derived tag, and
-require a locally loaded image with pull policy `never`. Compose inherits the
+exact exported image, `oci.imageName` with its content-derived tag, and require
+a locally loaded image with pull policy `never`. Compose inherits the
 entrypoint, argv, ordinary environment, user, and working directory from the
 image. Native Compose directives project the applicable policy fields. A
 top-level `x-billet` extension gives the configured runtime the canonical

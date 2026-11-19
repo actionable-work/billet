@@ -44,7 +44,7 @@ messages never echo the rejected value.
 
 | Attribute         | Type       | Description                                                                    |
 | ----------------- | ---------- | ------------------------------------------------------------------------------ |
-| `ir`              | Nix value  | The normalized definition, with every default made explicit.                   |
+| `ir`              | Nix value  | The normalized application definition, with every IR default made explicit.    |
 | `canonicalJSON`   | string     | The IR as canonical JSON: sorted keys, no whitespace.                          |
 | `manifestDigest`  | string     | `sha256:<hex>` of `canonicalJSON`. It identifies the definition.               |
 | `manifest`        | derivation | A file containing `canonicalJSON`.                                             |

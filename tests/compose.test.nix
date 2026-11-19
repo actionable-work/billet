@@ -280,7 +280,8 @@
 in {
   "billet:compose-artifact" = pkgs.testers.runNixOSTest {
     name = "billet-compose-artifact";
-    globalTimeout = 180;
+    # Loading the layered archives can dominate the run on slower builders.
+    globalTimeout = 360;
     qemu.forceAccel = true;
     passthru.bloomery = [
       "BILLET-IR-TARGETS-006"

@@ -3,6 +3,7 @@
   billet,
   eligibility,
   nix2container,
+  maxRuntimeLayers,
 }:
 if !eligibility.supported
 then throw ("billet: unsupported OCI image: " + pkgs.lib.concatMapStringsSep "; " (d: "${d.field}: ${d.reason}") eligibility.diagnostics)
@@ -32,11 +33,12 @@ else let
     '';
   runtimeLayer = backend.buildLayer {
     deps = billet.runtimeRoots;
+    maxLayers = maxRuntimeLayers;
     metadata = {created_by = "billet-runtime-v1";};
   };
   image = backend.buildImage {
-    name = billet.ir.identity.imageName;
-    tag = builtins.hashString "sha256" "${billet.manifestDigest}:1:${backendRevision}";
+    name = billet.ir.oci.imageName;
+    tag = builtins.hashString "sha256" "${billet.manifestDigest}:1:${backendRevision}:${toString maxRuntimeLayers}";
     arch = eligibility.architecture;
     created = "1970-01-01T00:00:00Z";
     layers = [runtimeLayer];

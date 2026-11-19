@@ -26,10 +26,10 @@ docker load --input hello.tar
 `docker load` prints the image reference:
 
 ```text
-Loaded image: hello:7ded9d1e081f6d5cc96148be2a46ec445362661ef42bbaa96b2ee9091c747ad0
+Loaded image: hello:9b8ab9c47b5bfea93f0ed9744f36504e71cbe7e2d987f23e4379332912d08b44
 ```
 
-The image is named `identity.imageName`, which defaults to `identity.name` in
+The image is named `oci.imageName`, which defaults to `identity.name` in
 lowercase. The tag is derived from the definition, so a different definition
 always produces a different tag. To get the reference without building, evaluate
 it:
@@ -48,7 +48,7 @@ nix run .#billets.x86_64-linux.hello.ociImage.copyToDockerDaemon
 ## Run the container
 
 ```sh
-docker run --rm hello:7ded9d1e081f6d5cc96148be2a46ec445362661ef42bbaa96b2ee9091c747ad0
+docker run --rm hello:9b8ab9c47b5bfea93f0ed9744f36504e71cbe7e2d987f23e4379332912d08b44
 ```
 
 The image is configured from the definition:
@@ -82,9 +82,25 @@ supported restart and exec healthcheck settings directly from the Billet.
 
 ## Image contents
 
-A runtime layer contains the service's closure, the same store paths listed by
-`closureDescriptor`. Shells and other tools are present when the declared
-runtime closure includes them. The image also contains:
+The runtime layers contain the service's closure, the same store paths listed by
+`closureDescriptor`. nix2container streams one layer per realized store path,
+including transitive dependencies, so a registry can reuse layers for unchanged
+paths. For closures that exceed the layer budget, the last runtime layer groups
+the remaining paths. Shells and other tools are present only when the declared
+runtime closure includes them.
+
+Set `oci.maxLayers` in your application module to choose a runtime layer budget
+from `1` to `124`. It defaults to `124`. For example, keep at most 32 runtime
+layers plus the metadata layer:
+
+```nix
+oci.maxLayers = 32;
+```
+
+The budget contributes to the image tag. The canonical application manifest has
+its own digest based on application intent.
+
+The final layer contains:
 
 - `/etc/billet/manifest.json`: the canonical manifest.
 - `/etc/billet/closure.json`: the closure descriptor.
@@ -109,14 +125,10 @@ images.
 
 ## Push to a registry
 
-Set `identity.imageName` to include your registry:
+Set `oci.imageName` to include your registry:
 
 ```nix
-identity = {
-  name = "hello";
-  version = "0.1.0";
-  imageName = "registry.example.com/team/hello";
-};
+oci.imageName = "registry.example.com/team/hello";
 ```
 
 Then push the image under its own reference:
@@ -180,8 +192,8 @@ hello-oci/
 
 Image attributes fail at evaluation when a Billet can't be packaged:
 
-| Error                                                           | Fix                                                     |
-| --------------------------------------------------------------- | ------------------------------------------------------- |
-| `UnsupportedImageSystem`                                        | Build with an `x86_64-linux` or `aarch64-linux` `pkgs`. |
-| `UnsupportedImageUser`                                          | Set `process.user` to numeric `uid:gid`.                |
-| `identity.imageName: must be a lowercase image repository name` | Set `identity.imageName` to a valid repository name.    |
+| Error                                                      | Fix                                                     |
+| ---------------------------------------------------------- | ------------------------------------------------------- |
+| `UnsupportedImageSystem`                                   | Build with an `x86_64-linux` or `aarch64-linux` `pkgs`. |
+| `UnsupportedImageUser`                                     | Set `process.user` to numeric `uid:gid`.                |
+| `oci.imageName: must be a lowercase image repository name` | Set `oci.imageName` to a valid repository name.         |

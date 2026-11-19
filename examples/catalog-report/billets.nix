@@ -22,6 +22,7 @@
     }) {
     catalog = {
       identity.version = catalogPackage.version;
+      oci.imageName = "billet-example/catalog";
       process = {
         package = catalogPackage;
         executable = "bin/catalog";

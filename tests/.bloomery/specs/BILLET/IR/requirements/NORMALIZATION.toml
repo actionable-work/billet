@@ -50,12 +50,12 @@ ears = { type = "ubiquitous", system = "Billet", action = "preserve argument ord
 id = "BILLET-IR-NORMALIZATION-007"
 title = "Default the image name to the application name (BI001, BI010)"
 manual = false
-design = "design/contract.md#module-fields"
-ears = { type = "event", trigger = "identity.imageName is omitted", system = "Billet", action = "record identity.name in lowercase as identity.imageName in the IR" }
+design = "design/contract.md#oci-packaging-options"
+ears = { type = "event", trigger = "oci.imageName is omitted", system = "Billet", action = "record identity.name in lowercase as oci.imageName in the v1 IR" }
 
 [[requirements]]
 id = "BILLET-IR-NORMALIZATION-008"
 title = "Record an explicit image name (BI001, BI010)"
 manual = false
-design = "design/contract.md#module-fields"
-ears = { type = "event", trigger = "identity.imageName is a valid repository name, including one with a registry host and port", system = "Billet", action = "record it unchanged in the IR" }
+design = "design/contract.md#oci-packaging-options"
+ears = { type = "event", trigger = "oci.imageName is a valid repository name, including one with a registry host and port", system = "Billet", action = "record the repository unchanged as oci.imageName in the v1 IR" }

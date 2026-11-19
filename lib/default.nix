@@ -20,13 +20,13 @@
     c =
       raw
       // {
-        identity =
-          raw.identity
+        oci =
+          raw.oci
           // {
             imageName =
-              if raw.identity.imageName == null
+              if raw.oci.imageName == null
               then lib.toLower raw.identity.name
-              else raw.identity.imageName;
+              else raw.oci.imageName;
           };
       };
     checked = builtins.deepSeq (schema.checkUnknown raw) (import ./validate.nix {inherit lib system;} c);
@@ -66,6 +66,7 @@
       normalizationVersion = 1;
       inherit system;
       inherit (c) identity shutdown rollout secrets storage;
+      oci = {inherit (c.oci) imageName;};
       systems = sorted c.systems;
       process = command c.process // {inherit (c.process) environment workingDirectory user;};
       initialization = c.initialization // {steps = map (s: command s // {inherit (s) id timeoutSeconds;}) c.initialization.steps;};
@@ -118,6 +119,7 @@
     oci = import ./oci.nix {
       inherit pkgs billet nix2container;
       eligibility = imageEligibility;
+      maxRuntimeLayers = c.oci.maxLayers;
     };
   in
     billet

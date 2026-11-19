@@ -94,12 +94,12 @@ reason = "The Docker VM uses separate assertions for artifact integrity, Compose
 [checks.specifications.testExceptions.image_name]
 maxRequirements = 6
 path = "image-name.test.nix"
-reason = "This file exports a separate check per image-name requirement: default, explicit, invalid, invalid default, OCI reference, and Compose reference."
+reason = "This file checks image-name defaults, validation, and resolved OCI and Compose references."
 
 [checks.specifications.testExceptions.oci_fixtures]
-maxRequirements = 25
+maxRequirements = 34
 path = "oci.test.nix"
-reason = "This file exports separate preflight and OCI artifact checks with distinct assertions."
+reason = "This file exports separate preflight, OCI export, layer budget validation, and layer grouping checks. The OCI design identifies the layer assertions."
 
 [checks.unusedDependencies]
 enable = true

@@ -97,4 +97,60 @@ id = "BILLET-CLOSURE-OCI-014"
 title = "Name the image from the IR (BI003, BI006)"
 manual = false
 design = "design/oci.md#determinism-and-provenance"
-ears = { type = "ubiquitous", system = "Billet", action = "reference the OCI image and Docker archive as identity.imageName with the content-derived tag" }
+ears = { type = "ubiquitous", system = "Billet", action = "reference the OCI image and Docker archive by the effective oci.imageName with the content-derived tag" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-015"
+title = "Isolate runtime store outputs in OCI layers (BI003, BI006)"
+manual = false
+design = "design/oci.md#runtime-layers"
+ears = { type = "event", trigger = "the runtime closure fits within the effective layer budget", system = "Billet", action = "emit exactly one OCI runtime layer for each realized store path" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-016"
+title = "Group runtime outputs beyond the layer budget (BI003, BI006)"
+manual = false
+design = "design/oci.md#runtime-layers"
+ears = { type = "event", trigger = "the runtime closure exceeds the effective layer budget", system = "Billet", action = "emit single-path runtime layers up to the penultimate budget slot and group every remaining runtime path in the last slot" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-017"
+title = "Isolate Billet metadata in the final OCI layer (BI003, BI006)"
+manual = false
+design = "design/oci.md#runtime-layers"
+ears = { type = "ubiquitous", system = "Billet", action = "place the manifest and closure descriptor in a final layer without runtime store paths" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-018"
+title = "Default to 124 runtime layers (BI003, BI006)"
+manual = false
+design = "design/oci.md#runtime-layers"
+ears = { type = "event", trigger = "neither layer budget option is set", system = "Billet", action = "use a runtime layer budget of 124" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-019"
+title = "Bind the effective layer budget to the image tag (BI003, BI006, BI010)"
+manual = false
+design = "design/oci.md#determinism-and-provenance"
+ears = { type = "ubiquitous", system = "Billet", action = "derive the image tag from the effective oci.maxLayers value" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-020"
+title = "Preserve application manifest identity across layer budgets (BI003, BI006, BI010)"
+manual = false
+design = "design/oci.md#determinism-and-provenance"
+ears = { type = "event", trigger = "only the Docker layer budget changes", system = "Billet", action = "emit identical canonical application manifest bytes" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-021"
+title = "Preserve the legacy layer budget declaration (BI003, BI006)"
+manual = false
+design = "design/oci.md#runtime-layers"
+ears = { type = "event", trigger = "only the legacy docker.maxLayers option sets a budget", system = "Billet", action = "produce the same image as an equivalent oci.maxLayers declaration" }
+
+[[requirements]]
+id = "BILLET-CLOSURE-OCI-022"
+title = "Use the explicit OCI layer budget (BI003, BI006)"
+manual = false
+design = "design/oci.md#runtime-layers"
+ears = { type = "event", trigger = "both layer budget options are set to different values", system = "Billet", action = "use the oci.maxLayers budget to package the image" }

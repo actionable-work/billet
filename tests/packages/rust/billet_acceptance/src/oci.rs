@@ -28,7 +28,11 @@ fn blob(directory: &Path, reference: &Value, reached: &mut BTreeSet<String>) -> 
     Ok(data)
 }
 
-fn layer(data: Vec<u8>, media: &str, nodes: &mut BTreeMap<String, Node>) -> Result<String> {
+fn layer(
+    data: Vec<u8>,
+    media: &str,
+    nodes: &mut BTreeMap<String, Node>,
+) -> Result<(String, BTreeSet<String>)> {
     let mut bytes = Vec::new();
     if media.ends_with("+gzip") {
         GzDecoder::new(data.as_slice()).read_to_end(&mut bytes)?;
@@ -90,7 +94,7 @@ fn layer(data: Vec<u8>, media: &str, nodes: &mut BTreeMap<String, Node>) -> Resu
         }
         nodes.insert(name, node);
     }
-    Ok(diff_id)
+    Ok((diff_id, names))
 }
 
 fn tree(path: &Path, nodes: &BTreeMap<String, Node>, expected: &mut BTreeSet<String>) -> Result {
@@ -155,13 +159,17 @@ pub fn verify() -> Result {
         serde_json::from_slice(&blob(directory, &manifest["config"], &mut reached)?)?;
     let mut nodes = BTreeMap::new();
     let mut diff_ids = Vec::new();
+    let mut layer_entries = Vec::new();
     for layer_ref in array(&manifest["layers"]) {
-        diff_ids.push(layer(
+        let (diff_id, entries) = layer(
             blob(directory, layer_ref, &mut reached)?,
             text(&layer_ref["mediaType"]),
             &mut nodes,
-        )?);
+        )?;
+        diff_ids.push(diff_id);
+        layer_entries.push(entries);
     }
+    verify_layer_split(&layer_entries, &descriptor)?;
     check(
         config["rootfs"] == serde_json::json!({"type":"layers","diff_ids":diff_ids}),
         "OCI DiffIDs differ",
@@ -201,6 +209,41 @@ pub fn verify() -> Result {
         array(&descriptor["paths"]).len()
     );
     Ok(())
+}
+
+fn verify_layer_split(layers: &[BTreeSet<String>], descriptor: &Value) -> Result {
+    let (metadata, runtime) = layers.split_last().ok_or("missing metadata layer")?;
+    check(
+        metadata.contains("etc/billet/manifest.json")
+            && metadata.contains("etc/billet/closure.json")
+            && !metadata.iter().any(|entry| entry.starts_with("nix/store/")),
+        "final layer must contain Billet metadata without runtime paths",
+    )?;
+    let expected: BTreeSet<_> = array(&descriptor["paths"])
+        .iter()
+        .map(|path| text(&path["path"]).trim_start_matches('/'))
+        .collect();
+    let mut seen = BTreeSet::new();
+    for entries in runtime {
+        let mut paths = entries.iter().filter(|entry| {
+            entry
+                .strip_prefix("nix/store/")
+                .is_some_and(|name| !name.contains('/'))
+        });
+        let path = paths.next().ok_or("runtime layer has no store path")?;
+        check(
+            paths.next().is_none(),
+            "runtime layer has multiple store paths",
+        )?;
+        check(
+            seen.insert(path.as_str()),
+            "store path appears in multiple layers",
+        )?;
+    }
+    check(
+        seen == expected,
+        "runtime layers differ from the closure descriptor",
+    )
 }
 
 fn verify_config(config: &Value, ir: &Value) -> Result {

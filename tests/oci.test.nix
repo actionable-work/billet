@@ -6,6 +6,15 @@
   inherit (pkgs) lib;
   fixtures = import ./fixtures.nix {inherit pkgs billetLib;};
   sample = fixtures.sample;
+  withLayerBudget = maxLayers: fixtures.evaluate (fixtures.full // {oci = {inherit maxLayers;};});
+  oneRuntimeLayer = withLayerBudget 1;
+  twoRuntimeLayers = withLayerBudget 2;
+  legacyLayerBudget = fixtures.evaluate (fixtures.full // {docker.maxLayers = 1;});
+  overriddenLayerBudget = fixtures.evaluate (fixtures.full
+    // {
+      docker.maxLayers = 1;
+      oci.maxLayers = 2;
+    });
   targets = import ../lib/targets.nix {inherit lib;};
   trapped = fixtures.evaluate (lib.recursiveUpdate fixtures.base {
     identity.name = "trapped";
@@ -53,6 +62,34 @@
     };
   };
   supported = pkgs.stdenv.hostPlatform.isLinux;
+  overflowOutputs = lib.genList (index: "data${toString index}") 125;
+  overflowData = pkgs.runCommand "billet-runtime-outputs" {outputs = ["out"] ++ overflowOutputs;} ''
+    for output in $outputs; do
+      printf '%s\n' "$output" > "''${!output}"
+    done
+  '';
+  overflow = fixtures.evaluate (lib.recursiveUpdate fixtures.base {
+    process = {
+      package = pkgs.writeShellScriptBin "overflow" ''
+        ${lib.concatMapStringsSep "\n" (output: "# ${overflowData.${output}}") overflowOutputs}
+        exit 0
+      '';
+      executable = "bin/overflow";
+    };
+  });
+  checkLayerLimit = ''
+    check_layer_limit() {
+      jq -e --slurpfile closure "$descriptor/descriptor.json" --argjson budget "$1" '
+        ($closure[0].paths | map(.path) | sort) as $expected
+        | (.layers[0:$budget] | map(.paths | map(.path))) as $runtime
+        | ($expected | length) > $budget
+          and (.layers | length) == ($budget + 1)
+          and all($runtime[0:($budget - 1)][]; length == 1)
+          and ($runtime[-1] | length) > 1
+          and ($runtime | add | sort) == $expected
+      ' "$2"
+    }
+  '';
   acceptance = assert reports.trap.canRender == supported;
   assert reports.full.requiredCapabilities == sample.ir.requiredCapabilities;
   assert !(builtins.tryEval badUser.ociImage).success;
@@ -90,11 +127,25 @@ in
         ${harness}/bin/billet-acceptance preflight
         touch "$out"
       '';
+
+    "billet:oci-layer-budget-validation" =
+      pkgs.runCommand "billet-oci-layer-budget-validation" {
+        passthru.bloomery = ["BILLET-IR-VALIDATION-028"];
+        nativeBuildInputs = [pkgs.nix];
+        source = ../.;
+        nixpkgsSource = pkgs.path;
+        system = pkgs.stdenv.hostPlatform.system;
+      } ''
+        for fixture in ociLayersType ociLayersBelowMinimum ociLayersAboveMaximum; do
+          ${harness}/bin/billet-acceptance diagnose "$fixture" oci.maxLayers
+        done
+        touch "$out"
+      '';
   }
   // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
     "billet:oci-acceptance" =
       pkgs.runCommand "billet-oci-acceptance" {
-        passthru.bloomery = ["BILLET-CLOSURE-OCI-001" "BILLET-CLOSURE-OCI-002" "BILLET-IR-SECRETS-001" "BILLET-IR-SECRETS-004" "BILLET-CLOSURE-OCI-003" "BILLET-CLOSURE-OCI-004" "BILLET-CLOSURE-OCI-005" "BILLET-CLOSURE-OCI-006" "BILLET-CLOSURE-OCI-007" "BILLET-CLOSURE-OCI-008" "BILLET-CLOSURE-OCI-009" "BILLET-CLOSURE-OCI-010" "BILLET-CLOSURE-OCI-011" "BILLET-CLOSURE-OCI-012" "BILLET-CLOSURE-OCI-013"];
+        passthru.bloomery = ["BILLET-CLOSURE-OCI-001" "BILLET-CLOSURE-OCI-002" "BILLET-IR-SECRETS-001" "BILLET-IR-SECRETS-004" "BILLET-CLOSURE-OCI-003" "BILLET-CLOSURE-OCI-004" "BILLET-CLOSURE-OCI-005" "BILLET-CLOSURE-OCI-006" "BILLET-CLOSURE-OCI-007" "BILLET-CLOSURE-OCI-008" "BILLET-CLOSURE-OCI-009" "BILLET-CLOSURE-OCI-010" "BILLET-CLOSURE-OCI-011" "BILLET-CLOSURE-OCI-012" "BILLET-CLOSURE-OCI-013" "BILLET-CLOSURE-OCI-015" "BILLET-CLOSURE-OCI-017"];
         nativeBuildInputs = [];
         image = sample.ociLayout;
         nativeImage = sample.ociImage;
@@ -103,6 +154,39 @@ in
         system = pkgs.stdenv.hostPlatform.system;
       } ''
         ${harness}/bin/billet-acceptance oci
+        touch "$out"
+      '';
+
+    "billet:oci-layer-limit" =
+      pkgs.runCommand "billet-oci-layer-limit" {
+        passthru.bloomery = ["BILLET-CLOSURE-OCI-016" "BILLET-CLOSURE-OCI-018"];
+        nativeBuildInputs = [pkgs.jq];
+        image = overflow.ociImage;
+        descriptor = overflow.closureDescriptor;
+      } ''
+        ${checkLayerLimit}
+        check_layer_limit 124 "$image"
+        touch "$out"
+      '';
+
+    "billet:oci-custom-layer-budget" = assert (withLayerBudget 124).ociImage.imageRefUnsafe == sample.ociImage.imageRefUnsafe;
+    assert oneRuntimeLayer.ociImage.imageRefUnsafe != twoRuntimeLayers.ociImage.imageRefUnsafe;
+    assert twoRuntimeLayers.ociImage.imageRefUnsafe != sample.ociImage.imageRefUnsafe;
+    assert oneRuntimeLayer.canonicalJSON == sample.canonicalJSON;
+    assert twoRuntimeLayers.canonicalJSON == sample.canonicalJSON;
+    assert legacyLayerBudget.ociImage.drvPath == oneRuntimeLayer.ociImage.drvPath;
+    assert legacyLayerBudget.ociImage.imageRefUnsafe == oneRuntimeLayer.ociImage.imageRefUnsafe;
+    assert overriddenLayerBudget.ociImage.drvPath == twoRuntimeLayers.ociImage.drvPath;
+      pkgs.runCommand "billet-oci-custom-layer-budget" {
+        passthru.bloomery = ["BILLET-CLOSURE-OCI-016" "BILLET-CLOSURE-OCI-019" "BILLET-CLOSURE-OCI-020" "BILLET-CLOSURE-OCI-021" "BILLET-CLOSURE-OCI-022"];
+        nativeBuildInputs = [pkgs.jq];
+        single = oneRuntimeLayer.ociImage;
+        pair = twoRuntimeLayers.ociImage;
+        descriptor = sample.closureDescriptor;
+      } ''
+        ${checkLayerLimit}
+        check_layer_limit 1 "$single"
+        check_layer_limit 2 "$pair"
         touch "$out"
       '';
   }

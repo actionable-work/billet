@@ -37,7 +37,7 @@ system.
 | Field                  | Contract and defaults                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `schemaVersion`        | Integer 1.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `identity`             | Required `name`, `version` nonempty strings. `imageName` names the image repository: lowercase path components separated by `/` (`[a-z0-9]+` joined by `.`, `_`, `__` or `-`), optionally after a registry host such as `registry.example.com:5000`, at most 255 characters. It defaults to `identity.name` in lowercase; IR records the effective value.                                                                                                                            |
+| `identity`             | Required `name`, `version` nonempty strings.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `systems`              | Nonempty list of allowed system strings, default selected `pkgs` system; selected system must be included. Standalone interface is generic.                                                                                                                                                                                                                                                                                                                                          |
 | `process`              | Exactly one record: required derivation `package`, package-relative `executable` (no absolute path or `..`/`.` segments), `argv=[]`, non-secret `environment={}`, absolute normalized `workingDirectory="/"`, `user="65534:65534"`. IR records package output store path and absolute executable.                                                                                                                                                                                    |
 | `initialization`       | `steps=[]`, each with unique `id`, process package/executable/argv and positive `timeoutSeconds`; `budgetSeconds=0` for empty steps, otherwise required positive, at least sum of step timeouts and no greater than `startupAllowanceSeconds=30`. Each launch must rerun all steps; no runtime work occurs at evaluation/build.                                                                                                                                                      |
@@ -54,6 +54,25 @@ system.
 No application-list, supervisor or guest-module escape hatch exists. Workers may
 be children of the primary and share its lifecycle/resources. An application
 wrapper cannot turn independent applications into one supported Billet.
+
+## OCI packaging options
+
+`oci.imageName` names the image repository. It accepts lowercase path components
+separated by `/` (`[a-z0-9]+` joined by `.`, `_`, `__` or `-`), optionally after
+a registry host such as `registry.example.com:5000`, with a maximum length of
+255 characters. A missing image name defaults to the lowercase `identity.name`.
+The v1 IR records the effective repository as `oci.imageName`. The `identity`
+record contains the application name and version.
+
+`oci.maxLayers` accepts an integer from 1 through 124. The resolved setting is
+passed to the [OCI adapter](../../CLOSURE/design/oci.md#runtime-layers) as a
+packaging option outside the canonical application IR. Validation identifies
+invalid values by their OCI option paths.
+
+The former `docker.maxLayers` module option supplies the default for
+`oci.maxLayers`. The layer-budget check compares image derivations and
+references across both spellings and verifies precedence for an explicit
+`oci.maxLayers` value.
 
 ## Validation and runtime boundary
 

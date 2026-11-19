@@ -20,12 +20,11 @@ runtime secrets.
 ## Contents and execution parameters
 
 Use nix2container.buildLayer with explicit runtimeRoots, retaining the complete
-transitive closure, including init/probe/config-only dependencies. Use
-copyToRoot only for metadata and structural directories. The final filesystem
-contains the descriptor's exact store paths, structural directories, declared
-working directory and canonical manifest/descriptor under /etc/billet. No host
-store mounts, build-tool paths, base registry image, anonymous volumes or
-network fetches.
+transitive closure, including init/probe/config-only dependencies. The final
+filesystem contains the descriptor's exact store paths, structural directories,
+declared working directory and canonical manifest/descriptor under /etc/billet.
+No host store mounts, build-tool paths, base registry image, anonymous volumes
+or network fetches.
 
 Pass OCI config arrays directly to buildImage: absolute primary executable in
 Entrypoint, ordered argv in Cmd, sorted non-secret NAME=value Env, and declared
@@ -39,16 +38,38 @@ An image's primary command does not implement init/probes, durable restart,
 full-tree shutdown, rollout, runtime secrets, network, resource or storage
 policy. Image smoke does not establish those target capabilities.
 
+## Runtime layers
+
+Use nix2container's reproducible layer builder to stream the tar for each layer
+from realized Nix store paths during export. Use the definition's
+`oci.maxLayers` as the runtime layer budget, defaulting to 124. A closure within
+the budget gets one layer per path, including outputs reached transitively. For
+larger closures, nix2container puts the remaining paths together in the last
+runtime layer. The final image layer contains the Billet metadata and any
+structural directories from `copyToRoot`. The maximum budget keeps the complete
+image within 125 layers for Docker compatibility.
+
+The OCI acceptance check counts runtime layers in the exported manifest and
+checks the store path at the root of each layer tar. It also checks that the
+final tar contains both metadata files and no runtime paths. The layer-limit
+check compares the overflow fixture's native nix2container groups with its
+closure descriptor and checks the total layer count for the default budget. The
+custom-budget check does the same for budgets of 1 and 2 and compares the
+references and canonical bytes for identical applications with different
+budgets.
+
 ## Determinism and provenance
 
 Pin nix2container and make its nixpkgs input follow the project's public pin.
-Name the image `identity.imageName` from the IR and use a content-derived tag,
-so a changed definition always produces a new reference. Use a fixed creation
-epoch. Backend layer encoding and permissions are tested against the declared
-Nix store trees. Do not patch or reimplement its serialization. Export with the
-supported copy API; verify OCI blob digests/sizes and uncompressed layer DiffIDs
-independently. Copying twice must reproduce all layout/blob bytes, including
-compressed layers if used.
+The image repository comes from `oci.imageName` in the v1 IR. The
+content-derived tag includes the effective runtime layer budget so a change gets
+a new reference. The canonical application manifest retains its identity when
+only the layer budget changes. Use a fixed creation epoch. Backend layer
+encoding and permissions are tested against the declared Nix store trees. Do not
+patch or reimplement its serialization. Export with the supported copy API;
+verify OCI blob digests/sizes and uncompressed layer DiffIDs independently.
+Copying twice must reproduce all layout/blob bytes, including compressed layers
+if used.
 
 The exported layout includes image-digest and provenance.json v1 binding Billet
 manifest digest, system, adapter version, nix2container revision, image manifest

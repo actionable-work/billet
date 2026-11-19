@@ -183,12 +183,19 @@ ears = { type = "ubiquitous", system = "Billet", action = "reject declared minim
 id = "BILLET-IR-VALIDATION-026"
 title = "Reject an invalid image name (BI002)"
 manual = false
-design = "design/contract.md#module-fields"
-ears = { type = "unwanted_behavior", trigger = "identity.imageName has uppercase path characters, an empty or tagged component, or more than 255 characters", system = "Billet", action = "fail evaluation with an identity.imageName diagnostic that does not echo the value" }
+design = "design/contract.md#oci-packaging-options"
+ears = { type = "unwanted_behavior", trigger = "oci.imageName has uppercase path characters, an empty or tagged component, or more than 255 characters", system = "Billet", action = "fail evaluation with an oci.imageName diagnostic that does not echo the value" }
 
 [[requirements]]
 id = "BILLET-IR-VALIDATION-027"
 title = "Reject an application name that cannot default the image name (BI002)"
 manual = false
-design = "design/contract.md#module-fields"
-ears = { type = "unwanted_behavior", trigger = "identity.imageName is omitted and lowercase identity.name is not a repository name", system = "Billet", action = "fail evaluation with an identity.imageName diagnostic" }
+design = "design/contract.md#oci-packaging-options"
+ears = { type = "unwanted_behavior", trigger = "oci.imageName is omitted and lowercase identity.name is not a repository name", system = "Billet", action = "fail evaluation with an oci.imageName diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-028"
+title = "Reject an invalid OCI layer budget (BI001, BI003, BI006)"
+manual = false
+design = "design/contract.md#oci-packaging-options"
+ears = { type = "event", trigger = "oci.maxLayers is not an integer from 1 through 124", system = "Billet", action = "fail definition validation with an oci.maxLayers diagnostic" }
