@@ -25,17 +25,14 @@ means rewriting it. Billet separates _what a service is_ from _where it runs_:
 - **One definition.** Each Billet describes one application. Its identity,
   process, resources, secret references, and lifecycle policy are declared once.
 - **A canonical, portable IR.** Definitions normalize into a versioned,
-  validated intermediate representation. Every target renders from that IR, so
-  the same service means the same thing everywhere.
-- **Slim, reproducible closures.** Images contain only the service's transitive
+  validated intermediate representation. Each target renders supported runtime
+  native settings from that IR.
+- **Slim, reproducible images.** Images contain only the service's transitive
   Nix runtime closure, which reduces image size and attack surface.
 - **Secret-free by design.** Billet records only references to secrets. The
   runtime resolves and delivers the values.
 - **Artifacts, not a runtime.** Billet produces standard artifacts that follow
   each runtime's conventions. You don't need a custom runtime to use Billets.
-- **No lock-in.** Because the definition is independent of the runtime, moving a
-  service onto or off a platform means building a different artifact, not
-  rewriting the service.
 
 ## Billet and Hammerworks
 
@@ -107,10 +104,10 @@ detail.
 
 ## Examples
 
-| Example                                   | Shows                                                                       |
-| ----------------------------------------- | --------------------------------------------------------------------------- |
-| [hello](examples/hello)                   | A single nixpkgs package as a Billet.                                       |
-| [catalog-report](examples/catalog-report) | Two Rust services built with Bloomery and run together as a Compose bundle. |
+| Example                                   | Shows                                                                                |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| [hello](examples/hello)                   | A single nixpkgs package as a Billet.                                                |
+| [catalog-report](examples/catalog-report) | A Rust catalog built with Bloomery and a curl-based reporting service in one bundle. |
 
 ## Documentation
 

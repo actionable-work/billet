@@ -30,10 +30,9 @@ acceptance evidence. Licensing is MIT OR Apache-2.0.
 
 Container construction uses the public flake-locked nix2container backend; its
 nixpkgs follows the project's pin. Repository-owned tooling and acceptance
-harnesses use Rust. The upstream NixOS test driver supplies its own Python
-runtime to orchestrate the isolated Docker qualification VM; the acceptance
-logic remains in the Rust harnesses. Public artifact operations use `nix eval`
-and `nix build`.
+harnesses use Rust. The upstream NixOS test driver runs the isolated Docker
+qualification VM and its Compose consumer assertions through its Python test
+interface. Public artifact operations use `nix eval` and `nix build`.
 
 ## Formatting
 

@@ -87,9 +87,9 @@ path = "acceptance.test.nix"
 reason = "This file exports separate CLI, executable, IR, and closure checks with distinct assertions."
 
 [checks.specifications.testExceptions.compose_vm]
-maxRequirements = 13
+maxRequirements = 73
 path = "compose.test.nix"
-reason = "The Docker VM verifies independent manifest, image, Compose, and service interaction requirements with one isolated boot."
+reason = "The Docker VM uses separate assertions for artifact integrity, Compose parsing and diagnostics, and live Docker behavior. The TARGETS design identifies the witnesses."
 
 [checks.specifications.testExceptions.image_name]
 maxRequirements = 6

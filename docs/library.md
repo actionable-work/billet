@@ -109,5 +109,5 @@ Every member must use the same system as `pkgs`.
 | `validationCheck` | Validates every member and the bundle structure, then writes each member's manifest digest.              |
 | `dockerCompose`   | One Compose project with a service per member. See [Docker Compose](runtimes/docker-compose.md#bundles). |
 
-`validationCheck` fails, naming the offending member, when the bundle is empty,
-a key doesn't match its member's name, or members use different systems.
+`validationCheck` rejects an empty bundle and identifies members with mismatched
+keys or systems.

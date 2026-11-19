@@ -7,16 +7,18 @@ contribute to the same application.
 Unknown fields and wrong types fail with the field path. CPU values are in
 millicores, sizes in bytes, and durations in seconds.
 
-The [IR contract](../tests/.bloomery/specs/BILLET/IR/design/contract.md) defines
-every validation rule.
+These fields describe application intent. See the
+[IR contract](../tests/.bloomery/specs/BILLET/IR/design/contract.md) for
+validation and the [runtime guides](runtimes.md) for how each target applies the
+declarations.
 
 ## `identity`
 
-| Field       | Default          | Description                                                                                                                        |
-| ----------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `name`      | required         | The application name.                                                                                                              |
-| `version`   | required         | The application version.                                                                                                           |
-| `imageName` | lowercase `name` | Image repository, optionally with a registry: `registry.example.com/team/hello`. Set it when `name` isn't a valid repository name. |
+| Field       | Default          | Description                                                                                                                                             |
+| ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`      | required         | The application name.                                                                                                                                   |
+| `version`   | required         | The application version.                                                                                                                                |
+| `imageName` | lowercase `name` | Image repository, optionally with a registry such as `registry.example.com/team/hello`. Set it when the lowercase name is invalid as a repository name. |
 
 ## `process`
 
@@ -47,7 +49,7 @@ The single primary process. Additional workers run as its children.
 
 ## `initialization`
 
-Steps that run before the primary process on every start.
+Steps the definition requests before the primary process on every start.
 
 | Field                     | Default | Description                                                                   |
 | ------------------------- | ------- | ----------------------------------------------------------------------------- |
@@ -104,7 +106,7 @@ Steps that run before the primary process on every start.
 
 | Field                | Default | Description                                                                                                |
 | -------------------- | ------- | ---------------------------------------------------------------------------------------------------------- |
-| `ports.<name>`       | `{}`    | `port` (required), `protocol` (`tcp`, `http`, `grpc`), and `exposure` (`private`, `public`).               |
+| `ports`              | `{}`    | Named ports. Each entry sets `port`, with `protocol` defaulting to `"tcp"` and `exposure` to `"private"`.  |
 | `privateConnections` | `[]`    | Requested connections, each with `sourceService`, `destinationService`, `destinationPort`, and `protocol`. |
 | `publicEgress`       | `true`  | Allow outbound internet access.                                                                            |
 | `egressRestrictions` | `[]`    | Egress restrictions.                                                                                       |
@@ -120,7 +122,7 @@ A named map of secret references. See [Secrets](secrets.md).
 | `mountPoint`  | required          | Absolute mount path.                                  |
 | `lifecycle`   | `"ephemeral"`     | `ephemeral` or `persistent`.                          |
 | `medium`      | `"disk"`          | `disk` or `memory`. Memory storage must be ephemeral. |
-| `sizeBytes`   | required          | Size limit.                                           |
+| `sizeBytes`   | required          | Requested size limit.                                 |
 | `accessMode`  | `"readWriteOnce"` | `readWriteOnce`, `readOnlyMany`, or `readWriteMany`.  |
 | `driverClass` | required          | Storage class requested from the runtime.             |
 

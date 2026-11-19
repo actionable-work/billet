@@ -1,8 +1,9 @@
 # Runtimes
 
-Every runtime target renders from the same canonical definition, so a service
-means the same thing wherever it runs. Moving a service between runtimes means
-building a different artifact, not rewriting the service.
+Each target renders from the same canonical definition. The artifact supplies
+the native settings available to its consumer and preserves the full declaration
+in the manifest. Moving a service between runtimes means building a different
+artifact, not rewriting the service.
 
 | Runtime                                | Artifacts                                       | Status      | Guide                                        |
 | -------------------------------------- | ----------------------------------------------- | ----------- | -------------------------------------------- |
@@ -18,10 +19,10 @@ Billet builds artifacts. The runtime that consumes them runs the service and
 owns execution, health checks, restarts, rollout, admission, network and
 resource enforcement, and secret delivery.
 
-Each artifact carries the canonical manifest, or a reference to it, alongside
-the runtime's native configuration. A runtime that reads the manifest can honor
-every declaration, even ones its native format can't express. Each guide lists
-which declarations the native format applies.
+Built images embed the manifest. Compose bundles also ship it alongside the
+native Compose configuration and identify it in `x-billet`. Consumers can read
+the manifest for additional policy. The runtime guides describe which
+declarations each target supports.
 
 ## Contracts
 

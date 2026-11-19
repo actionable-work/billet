@@ -41,6 +41,7 @@
     ir,
     manifestDigest,
     image,
+    mapping,
   }: {
     schemaVersion = 1;
     target = "dockerCompose";
@@ -51,8 +52,11 @@
     system = ir.system;
     inherit manifestDigest image;
     requiredCapabilities = ir.requiredCapabilities;
-    supportedCapabilities = [];
+    supportedCapabilities =
+      if image.supported
+      then mapping.supportedCapabilities
+      else [];
     canRender = image.supported;
-    inherit (image) diagnostics;
+    diagnostics = image.diagnostics ++ mapping.diagnostics;
   };
 }

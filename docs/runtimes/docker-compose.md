@@ -1,11 +1,12 @@
 # Docker Compose
 
-Billet builds a self-contained Compose bundle: the images, a `compose.yaml` that
-references them, and the canonical manifests. Compose runs it without pulling or
-building anything.
+Billet bundles the images, their canonical manifests, and a `compose.yaml` with
+native service settings. Load the images locally before starting the project.
+Supply any declared secret values separately at startup.
 
 This guide assumes you have a Billet at `.#billets.x86_64-linux.hello`, as in
-[Getting started](../getting-started.md). Compose images have the same
+[Getting started](../getting-started.md). To run the project, use Docker Engine
+with the Docker Compose CLI. Compose images have the same build and user
 requirements as [Docker images](docker.md#requirements).
 
 ## Check the Billet can be rendered
@@ -14,9 +15,18 @@ requirements as [Docker images](docker.md#requirements).
 nix eval --json .#billets.x86_64-linux.hello.dockerCompose.capabilityReport
 ```
 
-The report evaluates without building any packages. When `canRender` is `false`,
-each entry in `diagnostics` names the field that blocks rendering and why. The
-report also echoes the Billet's `requiredCapabilities`.
+The report evaluates without building any packages. `canRender` indicates
+whether Billet can produce the artifacts. When it is `false`, check
+`diagnostics` for packaging or bundle errors. Diagnostics with
+`severity = "warning"` describe mapping limitations and allow rendering. For
+example, the hello report warns about CPU reservations and still has
+`canRender = true`.
+
+`requiredCapabilities` comes from the IR. `supportedCapabilities` names native
+mappings used by the rendered project. A name can cover a partial mapping. For
+example, `resources` covers CPU and memory limits and memory reservation in
+standalone Compose. For a bundle, the report also includes per-service reports
+and service-scoped diagnostics.
 
 ## Build the bundle
 
@@ -31,13 +41,26 @@ result/
 └── manifest.json
 ```
 
-`compose.yaml` contains one service named after `identity.name`:
+`compose.yaml` contains one service named after `identity.name`. The image tag
+and manifest digest are abbreviated here.
 
 ```yaml
 services:
   hello:
     image: hello:7ded9d1e…
     pull_policy: never
+    restart: on-failure:5
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "1.000"
+          memory: "67108864"
+        reservations:
+          cpus: "0.100"
+          memory: "16777216"
 x-billet:
   manifest: ./manifest.json
   manifestDigest: sha256:e21c…
@@ -65,43 +88,72 @@ docker compose -f result/compose.yaml down
 
 `pull_policy: never` makes Compose use the image you loaded, and fail rather
 than fetch a different one if it is missing. The image supplies the entrypoint,
-arguments, environment, user, working directory, and stop signal; see
+arguments, ordinary environment, user, and working directory. See
 [Docker](docker.md#run-the-container).
 
 ## What Compose receives
 
-The generated service sets only the image. The rest of the definition stays in
-`manifest.json`, and the `x-billet` extension points to it with its digest. A
-runtime that reads the manifest can honor it; plain Compose ignores it.
+The `x-billet` extension identifies the canonical manifest and its digest. The
+manifest retains the full declaration.
 
-| Declared in the Billet | In plain Compose                                            |
-| ---------------------- | ----------------------------------------------------------- |
-| Process configuration  | Applied, through the image                                  |
-| `network.ports`        | Reachable on the project network, not published to the host |
-| `resources`            | Not applied                                                 |
-| `probes`               | Not applied                                                 |
-| `restart`, `rollout`   | Not applied                                                 |
-| `secrets`, `storage`   | Not applied                                                 |
+| Declared in the Billet                                      | In standalone Docker Compose                                                                                                                                                                                      |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resources.cpuLimit`, `resources.memoryLimit`               | `deploy.resources.limits` in decimal CPU cores and bytes.                                                                                                                                                         |
+| `resources.cpuRequest`, `resources.memoryRequest`           | `deploy.resources.reservations` in the same units. Docker Compose applies the memory reservation. CPU reservation is a Swarm feature.                                                                             |
+| `resources.replicas`                                        | A fixed replica count at `min`, including zero. A range produces an advisory.                                                                                                                                     |
+| `shutdown.stopSignal`, `shutdown.stopGracePeriodSeconds`    | `stop_signal` and `stop_grace_period`.                                                                                                                                                                            |
+| `restart.enabled`, `restart.maxRetries`, `restart.triggers` | `on-failure:N` for enabled, positive-retry `unexpected-exit` policies. Exit code zero ends the container. Disabled restart, zero retries, and policies without `unexpected-exit` use `"no"`.                      |
+| Exec readiness or liveness probe                            | One `CMD` healthcheck, preferring exec readiness. Its interval, timeout and failure threshold become the Compose healthcheck settings. Liveness reports health for operators.                                     |
+| Startup probe and `initialization.startupAllowanceSeconds`  | For a rendered healthcheck, `start_period` uses the startup probe's interval times its failure threshold, or the initialization allowance if no startup probe is declared. Startup commands stay in the manifest. |
+| TCP, HTTP and gRPC probes                                   | A capability diagnostic identifies each probe that needs an in-image client.                                                                                                                                      |
+| `initialization.steps`                                      | Steps stay in the manifest with a diagnostic. Compose has no equivalent that runs inside the same container on every start.                                                                                       |
+| Public and private ports                                    | `ports` publishes public TCP transport ports with host ports assigned by Docker. `expose` records private ports. HTTP and gRPC use TCP.                                                                           |
+| `network.publicEgress`                                      | A service with egress disabled joins only the internal project network. Its public ports are recorded in `expose` with an advisory because Docker cannot publish ports from an internal-only network.             |
+| File secrets                                                | Environment-sourced Compose secrets delivered at the declared absolute path, readable by the image user.                                                                                                          |
+| Environment secrets                                         | Compose interpolates host variables into the declared container environment keys. Required variables must be set and nonempty. Optional variables default to empty.                                               |
+| Ephemeral memory storage                                    | A tmpfs mount sized in bytes.                                                                                                                                                                                     |
+| Ephemeral disk storage                                      | An anonymous local volume.                                                                                                                                                                                        |
+| Persistent disk storage                                     | A named local volume scoped to the project and service. `docker compose down` retains it.                                                                                                                         |
 
-To publish ports or set limits for local use, add an override file instead of
-editing the generated one:
+Billet caps a healthcheck start period that exceeds Compose's duration range and
+reports an advisory.
 
-```yaml
-# compose.override.yaml
-services:
-  hello:
-    ports:
-      - "8080:8080"
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 64M
-```
+Docker Compose uses the declared storage target and honors `readOnlyMany` as a
+read-only mount. Volume access topology and driver class stay in the manifest.
+Disk claims generate a diagnostic for the missing size limit. To remove a
+project along with its declared named volumes and attached anonymous volumes,
+use `docker compose down --volumes`.
+
+Rollout, placement, strict singleton, target-metric scaling, the replica maximum
+as a scaling bound, restart backoff and jitter, the restart ready-reset window,
+startup- and liveness-triggered restarts, directional private connection policy,
+and egress restrictions stay in the manifest.
+
+Look up the host port assigned to a published container port after startup. For
+a service with multiple replicas, pass `--index` to select a replica. Services
+on the same network can connect to listening container ports by service name.
 
 ```sh
-docker compose -f result/compose.yaml -f compose.override.yaml up --no-build
+docker compose -f result/compose.yaml port my-service 8080
 ```
+
+## Provide secrets at startup
+
+Set host environment variables when running Compose. The variable name is
+`BILLET_SECRET_<service>__<logical-secret>`, using the Billet's `identity.name`
+and the key in its `secrets` map. Encode each name with case preserved, using
+`_H` for hyphen, `_D` for dot, and `_U` for underscore. For example, a secret
+named `db.password` on `my-service` uses
+`BILLET_SECRET_my_Hservice__db_Dpassword`. The `external` reference stays in the
+canonical manifest.
+
+For file delivery, Compose requires the host variable to be set, even for an
+optional file secret. A nonempty value creates the file with owner-only read
+permission for the image user. An empty value leaves the file absent, even if
+the declaration marks it required. For environment delivery, Compose fails
+configuration when a required variable is missing or empty and uses an empty
+string for an unset optional variable. Supply these values only to Compose at
+runtime.
 
 ## Bundles
 
@@ -137,9 +189,22 @@ for image in result/images/*.tar; do docker load --input "$image"; done
 docker compose -f result/compose.yaml up --no-build
 ```
 
-Members share the project's default network and reach each other by service
-name. In the [catalog-report example](../../examples/catalog-report), `report`
-fetches `http://catalog:8080/items.json`.
+Members reach each other by service name. When every member allows egress,
+members share the default network. When any member disables egress, members
+share an internal network and members that allow egress also join a non-internal
+network.
+
+Compose collects `privateConnections` links from all members. A link between
+distinct members makes its source wait for an exec readiness healthcheck on its
+destination, provided the destination declares the named port and has a positive
+replica count. Cyclic readiness dependencies are omitted with a diagnostic.
+Compose uses these dependencies for startup ordering. Directional network policy
+stays in the manifest. Secret and persistent volume keys are scoped by the
+encoded member and logical name so members can reuse logical names.
+
+In the [catalog-report example](../../examples/catalog-report), `report` fetches
+`http://catalog:8080/items.json` over the shared network. The catalog's port
+uses the default private exposure.
 
 ## Outputs
 

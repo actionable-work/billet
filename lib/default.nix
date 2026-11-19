@@ -115,10 +115,6 @@
       inherit ir manifestDigest;
       pkgsSystem = system;
     };
-    capabilityReport = targets.compose {
-      inherit ir manifestDigest;
-      image = imageEligibility;
-    };
     oci = import ./oci.nix {
       inherit pkgs billet nix2container;
       eligibility = imageEligibility;
@@ -129,6 +125,6 @@
       ociImage = oci.image;
       ociLayout = oci.layout;
       dockerImage = oci.archive;
-      dockerCompose = import ./compose.nix {inherit pkgs billet oci capabilityReport;};
+      dockerCompose = import ./compose.nix {inherit pkgs billet oci imageEligibility;};
     };
 }

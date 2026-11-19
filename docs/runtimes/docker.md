@@ -76,15 +76,15 @@ docker run --rm \
   hello:<tag>
 ```
 
-Docker's own restart policy and health checks are also separate from the
-definition's `restart` and `probes`. To have them honored without repeating
-them, use a runtime that reads the manifest.
+The image leaves restart policy and health checks to the caller. Use the
+[Docker Compose bundle](docker-compose.md#what-compose-receives) to apply the
+supported restart and exec healthcheck settings directly from the Billet.
 
 ## Image contents
 
-The image has a single layer containing the service's runtime closure, the same
-store paths listed by `closureDescriptor`. It has no shell, package manager, or
-base distribution. It also contains:
+A runtime layer contains the service's closure, the same store paths listed by
+`closureDescriptor`. Shells and other tools are present when the declared
+runtime closure includes them. The image also contains:
 
 - `/etc/billet/manifest.json`: the canonical manifest.
 - `/etc/billet/closure.json`: the closure descriptor.

@@ -111,8 +111,8 @@ exists. Every image Billet builds contains exactly this closure.
 The same Billet now builds artifacts for each runtime:
 
 - [Docker](runtimes/docker.md): build and run the OCI image.
-- [Docker Compose](runtimes/docker-compose.md): run one or more services as a
-  Compose project.
+- [Docker Compose](runtimes/docker-compose.md): build and run one or more OCI
+  images in a compose environment.
 
 See [Runtimes](runtimes.md) for every runtime and its status.
 

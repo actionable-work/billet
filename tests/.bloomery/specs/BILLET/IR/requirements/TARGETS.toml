@@ -76,7 +76,7 @@ id = "BILLET-IR-TARGETS-011"
 title = "Emit artifact-only Compose service fields (BI004, BI011)"
 manual = false
 design = "design/targets.md#compose-artifact"
-ears = { type = "ubiquitous", system = "Billet", action = "preserve the image execution settings by omitting additional execution and lifecycle overrides" }
+ears = { type = "ubiquitous", system = "Billet", action = "inherit the image entrypoint, arguments, ordinary environment, user and working directory in the native Compose service" }
 
 [[requirements]]
 id = "BILLET-IR-TARGETS-012"
@@ -175,3 +175,423 @@ title = "Reference the named image from Compose (BI004, BI011)"
 manual = false
 design = "design/targets.md#compose-artifact"
 ears = { type = "ubiquitous", system = "Billet", action = "set each Compose service image to its identity.imageName with the content-derived tag" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-026"
+title = "Render the CPU limit (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "a Billet declares a CPU limit", system = "Billet", action = "encode its millicores as decimal cores in deploy.resources.limits.cpus" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-027"
+title = "Render the memory limit (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "a Billet declares a memory limit", system = "Billet", action = "encode its byte count in deploy.resources.limits.memory" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-028"
+title = "Render the CPU reservation (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "a Billet declares a CPU request", system = "Billet", action = "encode its millicores as decimal cores in deploy.resources.reservations.cpus" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-029"
+title = "Render the memory reservation (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "a Billet declares a memory request", system = "Billet", action = "encode its byte count in deploy.resources.reservations.memory" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-030"
+title = "Render fixed replicas (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "the replica minimum equals the maximum", system = "Billet", action = "set deploy.replicas to the fixed count, including zero" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-031"
+title = "Select the minimum replica count (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "the replica maximum exceeds the minimum", system = "Billet", action = "set deploy.replicas to the minimum" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-032"
+title = "Report unsupported replica scaling (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "the replica maximum exceeds the minimum", system = "Billet", action = "emit an advisory at resources.replicas.max" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-033"
+title = "Render the shutdown signal (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "the Billet renders for Compose", system = "Billet", action = "set the container stop signal from shutdown.stopSignal" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-034"
+title = "Render the shutdown grace period (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "the Billet renders for Compose", system = "Billet", action = "set the stop timeout from shutdown.stopGracePeriodSeconds" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-035"
+title = "Set bounded restart retries (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "unexpected-exit restart is enabled with positive retries", system = "Billet", action = "apply on-failure with exactly the declared maximum retry count" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-036"
+title = "Honor zero restart retries (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "the maximum restart retries is zero", system = "Billet", action = "disable container restart" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-037"
+title = "Honor disabled restart (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "restart is disabled", system = "Billet", action = "render the Compose no-restart policy" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-038"
+title = "End cleanly exited containers (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an on-failure container exits with code zero", system = "Billet", action = "allow it to terminate without a restart" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-039"
+title = "Honor the unexpected-exit trigger (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "the restart triggers omit unexpected-exit", system = "Billet", action = "render the Compose no-restart policy" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-040"
+title = "Prefer exec readiness and preserve argv (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "exec readiness and exec liveness are both declared", system = "Billet", action = "use the readiness executable and exact argv in the container CMD healthcheck" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-041"
+title = "Fall back to exec liveness (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "readiness has no executable healthcheck and liveness is exec", system = "Billet", action = "use the liveness command in the service healthcheck" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-042"
+title = "Render the healthcheck interval (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an exec healthcheck renders", system = "Billet", action = "set the Docker healthcheck interval from the selected probe" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-043"
+title = "Render the healthcheck timeout (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an exec healthcheck renders", system = "Billet", action = "set the Docker healthcheck timeout from the selected probe" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-044"
+title = "Render the healthcheck failure threshold (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an exec healthcheck renders", system = "Billet", action = "set Docker healthcheck retries to the selected failure threshold" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-045"
+title = "Derive the health grace from startup (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an exec healthcheck and a startup probe are declared", system = "Billet", action = "set start_period from the startup interval times its failure threshold" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-046"
+title = "Fall back to the initialization allowance (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an exec healthcheck renders without a startup probe", system = "Billet", action = "set start_period from initialization.startupAllowanceSeconds" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-047"
+title = "Diagnose TCP probes (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "a TCP probe is declared", system = "Billet", action = "report a field-scoped unsupported network probe advisory" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-048"
+title = "Diagnose HTTP probes (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an HTTP probe is declared", system = "Billet", action = "report a field-scoped unsupported network probe advisory" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-049"
+title = "Diagnose gRPC probes (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "a gRPC probe is declared", system = "Billet", action = "report a field-scoped unsupported network probe advisory" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-050"
+title = "Gate startup on member readiness (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-bundles"
+ears = { type = "event", trigger = "an internal bundle link names a destination port on a running service with exec readiness", system = "Billet", action = "make the source wait for the destination through service_healthy" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-051"
+title = "Omit external startup dependencies (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-bundles"
+ears = { type = "event", trigger = "a private link names a destination outside the bundle", system = "Billet", action = "omit the outside destination from Compose startup ordering" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-052"
+title = "Publish public TCP transport ports (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-networking"
+ears = { type = "event", trigger = "a service that allows public egress declares a public port", system = "Billet", action = "publish the container port on a Docker-assigned host port" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-053"
+title = "Expose private ports (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-networking"
+ears = { type = "event", trigger = "a service declares a private port", system = "Billet", action = "emit the container port in expose without a host binding" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-054"
+title = "Isolate the network for services that disallow egress (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-networking"
+ears = { type = "event", trigger = "a service disables public egress", system = "Billet", action = "attach it exclusively to the internal project network" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-055"
+title = "Provide an external route in a mixed bundle (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-networking"
+ears = { type = "event", trigger = "a member allows egress alongside an isolated member", system = "Billet", action = "attach it to both the internal and egress project networks and give it an external route" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-056"
+title = "Diagnose port publishing on internal-only services (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-networking"
+ears = { type = "event", trigger = "an internal-only service declares a public port", system = "Billet", action = "emit an advisory at that port exposure and preserve its container port in expose" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-057"
+title = "Reference a host variable for file delivery (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-secrets"
+ears = { type = "event", trigger = "a file secret is declared", system = "Billet", action = "write a top-level Compose secret with its encoded host environment source" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-058"
+title = "Deliver file secrets at the declared path (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-secrets"
+ears = { type = "event", trigger = "Compose receives a nonempty file secret host variable", system = "Billet", action = "deliver those bytes at the declared absolute path readable by the application user" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-059"
+title = "Require environment secrets at startup (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-secrets"
+ears = { type = "event", trigger = "a required environment secret is declared", system = "Billet", action = "use required nonempty host interpolation for its container environment target" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-060"
+title = "Default optional environment secrets to empty (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-secrets"
+ears = { type = "event", trigger = "the host variable for an optional environment target is unset", system = "Billet", action = "set the container environment target to the empty string" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-061"
+title = "Scope file secrets to bundle members (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-secrets"
+ears = { type = "event", trigger = "two members use the same logical file secret name", system = "Billet", action = "render distinct names and let each member receive its own host value" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-062"
+title = "Allow empty optional file delivery (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-secrets"
+ears = { type = "event", trigger = "an optional file secret host variable is set to an empty string", system = "Billet", action = "allow Compose to start with no file delivered at that target" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-063"
+title = "Mount memory-backed scratch space (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-storage"
+ears = { type = "event", trigger = "a Billet declares ephemeral memory storage", system = "Billet", action = "mount tmpfs at the declared path" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-064"
+title = "Size tmpfs mounts (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-storage"
+ears = { type = "event", trigger = "a Billet declares ephemeral memory storage", system = "Billet", action = "pass its sizeBytes to the tmpfs mount in bytes" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-065"
+title = "Mount local disk scratch space (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-storage"
+ears = { type = "event", trigger = "a Billet declares ephemeral disk storage", system = "Billet", action = "mount an anonymous volume at the declared path" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-066"
+title = "Retain persistent disk volumes (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-storage"
+ears = { type = "event", trigger = "a Billet declares persistent storage", system = "Billet", action = "mount a named project volume at the declared path and retain it through ordinary Compose down" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-067"
+title = "Scope persistent volumes to bundle members (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-storage"
+ears = { type = "event", trigger = "two members use the same local claim name", system = "Billet", action = "mount a distinct named volume for each member" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-068"
+title = "Diagnose missing disk quotas (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-storage"
+ears = { type = "event", trigger = "a Billet declares disk-backed storage", system = "Billet", action = "report a sizeBytes advisory for each disk claim" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-069"
+title = "Make read-only claims read-only (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-storage"
+ears = { type = "event", trigger = "a Billet declares readOnlyMany storage", system = "Billet", action = "mount the claim read-only in the container" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-070"
+title = "Diagnose initialization steps (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "initialization steps are declared", system = "Billet", action = "report that Compose cannot apply same-container initialization on every start" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-071"
+title = "Preserve initialization intent (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "initialization steps are declared", system = "Billet", action = "carry them in the manifest and render only the declared applications as Compose services" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-072"
+title = "Report native service capabilities (BI004, BI011)"
+manual = false
+design = "design/targets.md#artifact-preflight"
+ears = { type = "event", trigger = "a Billet renders native Compose directives", system = "Billet", action = "list the supported mappings for those directives" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-073"
+title = "Report native bundle capabilities (BI004, BI011)"
+manual = false
+design = "design/targets.md#artifact-preflight"
+ears = { type = "event", trigger = "a Compose bundle renders", system = "Billet", action = "list the union of the members' native mappings and applicable project mappings" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-074"
+title = "Keep advisory-only inputs renderable (BI004, BI011)"
+manual = false
+design = "design/targets.md#artifact-preflight"
+ears = { type = "event", trigger = "a Compose declaration has a native mapping limitation", system = "Billet", action = "report it as a warning while leaving canRender true" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-075"
+title = "Retain directional private connection policy (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-networking"
+ears = { type = "event", trigger = "a Billet declares private connections", system = "Billet", action = "preserve every directional link in its canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-076"
+title = "Retain egress restrictions (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-networking"
+ears = { type = "event", trigger = "a Billet declares egress restrictions", system = "Billet", action = "preserve them in its canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-077"
+title = "Retain rollout policy (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "a Billet declares rollout policy", system = "Billet", action = "preserve it in the canonical manifest without applying Compose updates or rollback directives" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-078"
+title = "Retain placement policy (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "a Billet declares placement", system = "Billet", action = "preserve it in the manifest without applying Compose placement" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-079"
+title = "Retain strict singleton policy (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "a Billet declares strict singleton", system = "Billet", action = "preserve the singleton declaration in the manifest" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-080"
+title = "Retain the scale target metric (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "a Billet declares a target metric", system = "Billet", action = "preserve it in the manifest" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-081"
+title = "Retain customized restart policy metadata (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "a Billet describes restart delays, jitter and ready-reset timing", system = "Billet", action = "preserve those settings in the manifest while applying Compose's native bounded retry policy" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-082"
+title = "Omit cyclic readiness dependencies (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-bundles"
+ears = { type = "event", trigger = "candidate readiness dependencies form a cycle", system = "Billet", action = "exclude cyclic edges and emit advisories for the affected sources" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-083"
+title = "Report standalone CPU reservation limits (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-resources-and-replicas"
+ears = { type = "event", trigger = "a Billet declares a CPU request", system = "Billet", action = "advise that standalone Docker Compose does not apply CPU reservations" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-084"
+title = "Diagnose unset optional file sources (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-secrets"
+ears = { type = "event", trigger = "a Billet declares an optional file secret", system = "Billet", action = "advise that Compose needs the host variable set even when the file is omitted" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-085"
+title = "Isolate standalone services that disallow egress (BI004, BI011)"
+manual = false
+design = "design/targets.md#compose-networking"
+ears = { type = "event", trigger = "a standalone Billet disables public egress", system = "Billet", action = "render a single internal network and attach the service to it" }

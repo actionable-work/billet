@@ -197,7 +197,8 @@ pub fn preflight() -> Result {
                 && report["rendererVersion"] == 1
                 && report["mode"] == "artifact-only"
                 && report["canRender"] == (supported && name != "invalidUser")
-                && array(&report["supportedCapabilities"]).is_empty(),
+                && array(&report["supportedCapabilities"]).is_empty()
+                    == (!supported || name == "invalidUser"),
             "Compose artifact eligibility report differs",
         )?;
     }
