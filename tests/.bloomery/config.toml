@@ -92,9 +92,14 @@ path = "compose.test.nix"
 reason = "The Docker VM uses separate assertions for artifact integrity, Compose parsing and diagnostics, and live Docker behavior. The TARGETS design identifies the witnesses."
 
 [checks.specifications.testExceptions.documentation]
-maxRequirements = 33
+maxRequirements = 37
 path = "docs.test.nix"
 reason = "Each documented block has its own record. Sandbox checks and the Docker and K3s VMs run the blocks in separate scenarios, and the coverage and stand-in checks assert each rule separately."
+
+[checks.specifications.testExceptions.guestbook_example]
+maxRequirements = 21
+path = "guestbook.test.nix"
+reason = "Pure checks assert validation, overlay priorities, the conflict diagnostic and the layer budget separately. The Docker and K3s VMs keep each requirement in its own subtest. The examples design identifies the witnesses."
 
 [checks.specifications.testExceptions.image_name]
 maxRequirements = 6

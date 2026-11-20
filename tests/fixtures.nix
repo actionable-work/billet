@@ -74,6 +74,14 @@
     ociLayersType = base // {oci.maxLayers = "DO-NOT-ECHO-SECRET";};
     ociLayersBelowMinimum = base // {oci.maxLayers = 0;};
     ociLayersAboveMaximum = base // {oci.maxLayers = 125;};
+    # Two plain overlays of the guestbook base define one field differently.
+    overlayConflict = {
+      imports = [
+        ../examples/guestbook/modules/guestbook.nix
+        {process.environment.GUESTBOOK_LOG_LEVEL = "DO-NOT-ECHO-SECRET-FIRST";}
+      ];
+      process.environment.GUESTBOOK_LOG_LEVEL = "DO-NOT-ECHO-SECRET-SECOND";
+    };
     inlineSecret = lib.recursiveUpdate full {secrets.database.value = "DO-NOT-ECHO-SECRET";};
     secretType = lib.recursiveUpdate full {secrets.database.external = {value = "DO-NOT-ECHO-SECRET";};};
     secretContext = lib.recursiveUpdate full {secrets.database.external = "${data}";};

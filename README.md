@@ -110,10 +110,11 @@ detail.
 
 ## Examples
 
-| Example                                   | Shows                                                                                |
-| ----------------------------------------- | ------------------------------------------------------------------------------------ |
-| [hello](examples/hello)                   | A single nixpkgs package as a Billet.                                                |
-| [catalog-report](examples/catalog-report) | A Rust catalog built with Bloomery and a curl-based reporting service in one bundle. |
+| Example                                   | Shows                                                                                                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [hello](examples/hello)                   | A single nixpkgs package as a Billet.                                                                                                                  |
+| [catalog-report](examples/catalog-report) | A Rust catalog built with Bloomery and a curl-based reporting service in one bundle.                                                                   |
+| [guestbook](examples/guestbook)           | A Python web app and its PostgreSQL database with storage, secrets, migrations, probes, and dev and prod overlays. See the [guide](docs/guestbook.md). |
 
 ## Documentation
 
@@ -126,6 +127,7 @@ detail.
   - [Docker Compose](docs/runtimes/docker-compose.md)
 - [Bloomery integration](docs/bloomery.md)
 - [Secrets](docs/secrets.md)
+- [Guestbook example](docs/guestbook.md): a stateful bundle with a database
 
 ## Development
 

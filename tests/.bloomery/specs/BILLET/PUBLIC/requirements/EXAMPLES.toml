@@ -1,0 +1,149 @@
+schema_version = 1
+group = "EXAMPLES"
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-001"
+title = "Publish guestbook validation checks (BI009)"
+manual = false
+design = "design/examples.md#layered-modules"
+ears = { type = "event", trigger = "the guestbook example flake is evaluated", system = "Billet", action = "publish the dev and prod bundles, each with guestbook and postgres members, and a flake validation check for every bundle and member" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-002"
+title = "Replace mkDefault base values with plain overlay values (BI001)"
+manual = false
+design = "design/examples.md#layered-modules"
+ears = { type = "event", trigger = "an environment overlay plainly defines a field that the shared base module defines with lib.mkDefault", system = "Billet", action = "normalize the overlay value for that field and keep the base default for fields the overlay leaves unset" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-003"
+title = "Replace plain base values with mkForce overlay values (BI001)"
+manual = false
+design = "design/examples.md#layered-modules"
+ears = { type = "event", trigger = "an environment overlay defines a field with lib.mkForce that the shared base module defines plainly", system = "Billet", action = "normalize the forced value without a conflict while other plain base values pass through unchanged" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-004"
+title = "Diagnose conflicting plain overlay definitions (BI002)"
+manual = false
+design = "design/examples.md#layered-modules"
+ears = { type = "unwanted_behavior", trigger = "two modules plainly define the same scalar field with different values", system = "Billet", action = "fail evaluation with billet: <field path>: conflicting definitions and omit both values from the message" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-005"
+title = "Group the guestbook closure into its layer budget (BI003, BI006)"
+manual = false
+design = "design/examples.md#members"
+ears = { type = "event", trigger = "the guestbook image is built from a runtime closure with more store paths than its oci.maxLayers budget", system = "Billet", action = "emit at most the budgeted runtime layers plus the metadata layer" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-006"
+title = "Render the guestbook Compose project (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "Docker Compose parses the dev guestbook bundle", system = "Billet", action = "declare the PostgreSQL exec healthcheck, the service_healthy startup dependency, the published HTTP port, the internal-only database network, the persistent database volume and both secret deliveries, and warn that the HTTP probes and initialization step have no Compose mapping" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-007"
+title = "Gate guestbook readiness on the manifest migration step (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "the guestbook runs in Compose and the fixture runs the migration step recorded in its manifest", system = "Billet", action = "report unavailable on the HTTP readiness path before the step and ready with schema version 1 after it" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-008"
+title = "Rerun the guestbook migration step idempotently (BI004, BI011)"
+manual = false
+design = "design/examples.md#members"
+ears = { type = "event", trigger = "the migration step runs against an already migrated database", system = "Billet", action = "exit successfully and report the recorded schema version without applying it again" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-009"
+title = "Deliver guestbook secrets through Compose (BI003, BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "the Compose fixture provides runtime secret values through the derived BILLET_SECRET variables", system = "Billet", action = "deliver the database password to the declared guestbook environment variable and PostgreSQL file path, and the session key to the declared guestbook file path, shown by a verifiable entry HMAC" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-010"
+title = "Retain guestbook entries across Compose restarts (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "the guestbook or PostgreSQL container restarts or the project is taken down without removing volumes", system = "Billet", action = "serve the previously stored entries after the guestbook becomes ready again" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-011"
+title = "Stop guestbook services on their declared signals (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "Docker Compose stops the dev guestbook project", system = "Billet", action = "stop the guestbook with SIGTERM and a 15 second timeout and PostgreSQL with SIGINT and a 60 second timeout, both exiting with status zero" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-012"
+title = "Apply the guestbook restart tuning in Compose (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "Docker runs the dev guestbook container", system = "Billet", action = "apply an on-failure restart policy with three retries" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-013"
+title = "Render guestbook HTTP probes for Kubernetes (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "the prod guestbook bundle is rendered for Kubernetes", system = "Billet", action = "render httpGet readiness on /readyz and liveness on /healthz for the guestbook container and an exec pg_isready readiness probe for PostgreSQL" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-014"
+title = "Render guestbook rollout and termination tuning for Kubernetes (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "the prod guestbook bundle is rendered for Kubernetes", system = "Billet", action = "render two guestbook replicas with surge one, zero unavailable, 10 second minimum readiness, a 180 second progress deadline and 30 second termination grace, and a Recreate PostgreSQL Deployment with 60 second termination grace" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-015"
+title = "Render the guestbook database claim for Kubernetes (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "the prod guestbook bundle is rendered for Kubernetes", system = "Billet", action = "render one ReadWriteOnce PersistentVolumeClaim with the local-path storage class for the PostgreSQL data" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-016"
+title = "Run the guestbook migration in Kubernetes init containers (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "K3s starts the two prod guestbook replicas", system = "Billet", action = "run the migration init container in each pod, apply the migration in exactly one of them, and make both replicas ready with schema version 1" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-017"
+title = "Deliver guestbook secrets through a Kubernetes Secret (BI003, BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "the K3s fixture creates the guestbook Secret from runtime values", system = "Billet", action = "deliver the database password through a secretKeyRef environment variable and the session key at the declared file path, shown by an authenticated write and a verifiable entry HMAC" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-018"
+title = "Retain guestbook entries across Kubernetes pod replacement (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "the PostgreSQL pod is deleted or the guestbook rollout restarts in K3s", system = "Billet", action = "serve the previously stored entries from the persistent claim after the rollout completes" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-019"
+title = "Admit only the guestbook to the database in Kubernetes (BI004, BI011)"
+manual = false
+design = "design/examples.md#qualification"
+ears = { type = "event", trigger = "the prod guestbook bundle is rendered for Kubernetes and applied in K3s", system = "Billet", action = "render a PostgreSQL NetworkPolicy that admits only guestbook pods on the database port and denies database egress, while the guestbook still reaches the database" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-020"
+title = "Reject malformed and oversized guestbook bodies (BI004, BI011)"
+manual = false
+design = "design/examples.md#members"
+ears = { type = "unwanted_behavior", trigger = "a guestbook POST has an incomplete entry, a negative or non-numeric Content-Length, or a body over 64 KiB", system = "Billet", action = "answer 400, 411 or 413 without reading an unbounded body" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-EXAMPLES-021"
+title = "Leave the database volume root ownership unchanged (BI004, BI011)"
+manual = false
+design = "design/examples.md#members"
+ears = { type = "event", trigger = "the PostgreSQL Billet starts on a persistent volume", system = "Billet", action = "keep the volume root owned as the runtime created it and keep the server data in a 65534-owned subdirectory, so a later fsGroup pass does not loosen the data directory permissions" }

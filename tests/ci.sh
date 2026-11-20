@@ -6,6 +6,7 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 nix flake check .
 nix flake check ./examples/hello
 nix flake check ./examples/catalog-report
+nix flake check ./examples/guestbook
 nix flake check ./tests
 
 (

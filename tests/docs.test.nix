@@ -7,6 +7,7 @@
   doctest,
   hello,
   catalog,
+  guestbook,
 }: let
   inherit (pkgs) lib;
   docs = import ./docs.nix {inherit pkgs doctest;};
@@ -38,6 +39,10 @@
     kubernetes-bundle = "BILLET-PUBLIC-DOCS-028";
     microvm-build = "BILLET-PUBLIC-DOCS-029";
     microvm-bundle = "BILLET-PUBLIC-DOCS-030";
+    guestbook-secrets = "BILLET-PUBLIC-DOCS-038";
+    guestbook-up = "BILLET-PUBLIC-DOCS-039";
+    guestbook-migrate = "BILLET-PUBLIC-DOCS-040";
+    guestbook-request = "BILLET-PUBLIC-DOCS-041";
   };
 
   # Guide projects, bound to the checkout under test.
@@ -155,6 +160,23 @@
       steps = [(doc "compose-bundle")];
       until = inventory;
     })
+    (mkScenario {
+      name = "guestbook";
+      flakes."examples/guestbook" = guestbook;
+      steps = [
+        (doc "guestbook-secrets")
+        (doc "guestbook-up")
+        (harness "the guestbook answers but is not ready before the migration" ''
+          url="http://127.0.0.1:$(docker compose -f result/compose.yaml port guestbook 8080 | head -n 1 | cut -d: -f2)"
+          for _ in $(seq 60); do curl -fsS "$url/healthz" >/dev/null && break; sleep 1; done
+          test "$(curl -sS -o /dev/null -w '%{http_code}' "$url/readyz")" = 503
+        '')
+        (doc "guestbook-migrate")
+        (doc "guestbook-request")
+        (harness "the entry was stored" ''curl -fsS "http://127.0.0.1:$port/entries" | grep -F '"author": "ada"' '')
+        (harness "remove the project and its volume" "docker compose -f result/compose.yaml down --volumes")
+      ];
+    })
   ];
 
   kubernetes = [
@@ -191,7 +213,7 @@
     })
   ];
 
-  dockerQualification.passthru.bloomery = ["BILLET-PUBLIC-DOCS-007" "BILLET-PUBLIC-DOCS-013" "BILLET-PUBLIC-DOCS-014" "BILLET-PUBLIC-DOCS-015" "BILLET-PUBLIC-DOCS-016" "BILLET-PUBLIC-DOCS-017" "BILLET-PUBLIC-DOCS-018" "BILLET-PUBLIC-DOCS-019" "BILLET-PUBLIC-DOCS-020" "BILLET-PUBLIC-DOCS-021" "BILLET-PUBLIC-DOCS-022" "BILLET-PUBLIC-DOCS-023" "BILLET-PUBLIC-DOCS-024"];
+  dockerQualification.passthru.bloomery = ["BILLET-PUBLIC-DOCS-007" "BILLET-PUBLIC-DOCS-013" "BILLET-PUBLIC-DOCS-014" "BILLET-PUBLIC-DOCS-015" "BILLET-PUBLIC-DOCS-016" "BILLET-PUBLIC-DOCS-017" "BILLET-PUBLIC-DOCS-018" "BILLET-PUBLIC-DOCS-019" "BILLET-PUBLIC-DOCS-020" "BILLET-PUBLIC-DOCS-021" "BILLET-PUBLIC-DOCS-022" "BILLET-PUBLIC-DOCS-023" "BILLET-PUBLIC-DOCS-024" "BILLET-PUBLIC-DOCS-038" "BILLET-PUBLIC-DOCS-039" "BILLET-PUBLIC-DOCS-040" "BILLET-PUBLIC-DOCS-041"];
   kubernetesQualification.passthru.bloomery = ["BILLET-PUBLIC-DOCS-025" "BILLET-PUBLIC-DOCS-026" "BILLET-PUBLIC-DOCS-027" "BILLET-PUBLIC-DOCS-028"];
   # Each check's literal records must match the blocks it executes.
   traced = qualification: blocks: let
@@ -284,7 +306,7 @@ in
           diskSize = 8192;
           docker.enable = true;
         };
-        environment.systemPackages = [pkgs.jq];
+        environment.systemPackages = [pkgs.jq pkgs.curl];
       };
       testScript = ''
         machine.wait_for_unit("docker.service")

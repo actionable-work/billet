@@ -161,3 +161,37 @@ A named map of secret references. See [Secrets](secrets.md).
 | `schemaVersion`        | `1`            | IR schema version.                                                                 |
 | `systems`              | `[ <system> ]` | Systems the application supports. Must include the `pkgs` system.                  |
 | `requiredCapabilities` | `[]`           | Extra runtime capabilities to require, added to those derived from the definition. |
+
+## Layering modules
+
+List a shared base module first and an environment overlay after it. The module
+system resolves each field by priority, so overlays never need
+`recursiveUpdate`:
+
+```nix
+# base.nix
+{ lib, ... }: {
+  resources.cpuLimit = lib.mkDefault 500; # an overlay may replace this
+  shutdown.stopGracePeriodSeconds = 15;   # fixed unless forced
+}
+```
+
+```nix
+# prod.nix
+{ lib, ... }: {
+  resources.cpuLimit = 1000;                         # replaces the mkDefault
+  shutdown.stopGracePeriodSeconds = lib.mkForce 30;  # replaces a plain value
+}
+```
+
+```nix
+billet.lib.mkBillet { inherit pkgs; modules = [ ./base.nix ./prod.nix ]; }
+```
+
+Two plain definitions of the same field with different values fail with
+`billet: <field>: conflicting definitions`, for example
+`billet: resources.cpuLimit: conflicting definitions`. The message omits the
+values. Lists such as `process.argv` concatenate instead of conflicting.
+
+The [guestbook example](../examples/guestbook) uses a shared base with `dev` and
+`prod` overlays.

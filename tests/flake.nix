@@ -24,6 +24,7 @@
     billetLib = billet.lib;
     hello = (import ../examples/hello/flake.nix).outputs {inherit billet nixpkgs;};
     catalog = (import ../examples/catalog-report/flake.nix).outputs {inherit billet bloomery nixpkgs;};
+    guestbook = (import ../examples/guestbook/flake.nix).outputs {inherit billet nixpkgs;};
   in
     bloomery.mkFlake {
       inherit nixpkgs;
@@ -67,6 +68,11 @@
             helloApp = hello.apps.${system}.default;
             catalogChecks = catalog.checks.${system};
           })
+          // (import ./guestbook.test.nix {
+            inherit pkgs billetLib harness;
+            guestbook = guestbook.billets.${system};
+            guestbookChecks = guestbook.checks.${system};
+          })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes.test.nix {
             inherit pkgs billetLib;
           })
@@ -95,6 +101,7 @@
             doctest = packages.billet-doctest;
             hello = hello;
             catalog = catalog;
+            guestbook = guestbook;
           }));
         apps = eachSystem (system: let
           pkgs = nixpkgs.legacyPackages.${system};

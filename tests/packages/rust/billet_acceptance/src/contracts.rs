@@ -3,13 +3,19 @@ use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-/// Require an invalid fixture to fail with a field diagnostic that omits its value.
-pub fn diagnose(name: &str, field: &str) -> Result {
+/// Require an invalid fixture to fail with a field diagnostic that omits every
+/// value containing the `DO-NOT-ECHO-SECRET` sentinel and, when given, states
+/// the expected reason.
+pub fn diagnose(name: &str, field: &str, reason: Option<&str>) -> Result {
     let prefix = nix_expression();
     let result = evaluate(&format!("{prefix}(f.evaluate f.invalid.{name}).ir"))?;
     let error = String::from_utf8(result.stderr)?;
+    let expected = match reason {
+        Some(reason) => format!("billet: {field}: {reason}"),
+        None => format!("billet: {field}:"),
+    };
     check(
-        !result.status.success() && error.contains(&format!("billet: {field}:")),
+        !result.status.success() && error.contains(&expected),
         &error,
     )?;
     check(
@@ -30,7 +36,7 @@ pub fn ir() -> Result {
         ("schemaVersion", "schemaVersion"),
     ];
     for (name, field) in cases {
-        diagnose(name, field)?;
+        diagnose(name, field, None)?;
     }
     let payload = std::fs::read(env("manifest"))?;
     for _ in 0..2 {

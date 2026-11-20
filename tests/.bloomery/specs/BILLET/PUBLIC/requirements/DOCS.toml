@@ -259,3 +259,31 @@ title = "Check a reader's Bloomery workspace (BI009)"
 manual = true
 design = "design/documentation.md#exclusions"
 ears = { type = "event", trigger = "a reader runs the Bloomery guide bloomery check command in their workspace", system = "Billet", action = "validate every definition; this is a manual record, and tests/ci.sh runs the command in the catalog-report workspace" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-038"
+title = "Export the guestbook Compose secret variables (BI003, BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the guestbook guide secrets block runs in a shell", system = "Billet", action = "export the three BILLET_SECRET variables with one shared database password and a session key generated in that shell" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-039"
+title = "Start the guestbook development bundle (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the guestbook guide start block runs from the repository root after the secrets block", system = "Billet", action = "build the dev Compose bundle, load both images and start the project with the guestbook answering but not yet ready" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-040"
+title = "Run the guestbook migration under Compose (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the guestbook guide migration block runs against the started project", system = "Billet", action = "run the manifest initialization step in a one-off guestbook container and apply the schema" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-041"
+title = "Read and write guestbook entries (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the guestbook guide request block runs after the migration", system = "Billet", action = "report ready, store the posted entry and list it" }

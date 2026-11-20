@@ -140,7 +140,9 @@ directory. The hello subflake consumes Billet directly and exports an app that
 uses its Billet's selected executable. The catalog-report subflake uses
 Bloomery's `billets` callback to expose both services and their Compose bundle.
 It passes the Rust workspace's exported `catalog` package as the primary process
-package. The report fetches inventory from the Rust catalog in Compose.
+package. The report fetches inventory from the Rust catalog in Compose. The
+guestbook subflake is the stateful example; see
+[the examples design](../../PUBLIC/design/examples.md).
 
 ## Kubernetes artifact
 
