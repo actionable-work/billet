@@ -199,3 +199,24 @@ title = "Reject an invalid OCI layer budget (BI001, BI003, BI006)"
 manual = false
 design = "design/contract.md#oci-packaging-options"
 ears = { type = "event", trigger = "oci.maxLayers is not an integer from 1 through 124", system = "Billet", action = "fail definition validation with an oci.maxLayers diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-029"
+title = "Report each rejected fixture's field and reason (BI002)"
+manual = false
+design = "design/contract.md#rejection-diagnostics"
+ears = { type = "event", trigger = "an invalid acceptance fixture is evaluated in a separate evaluator", system = "Billet", action = "fail with the billet diagnostic for the fixture's expected field path and reason" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-030"
+title = "Require an expected diagnostic for every invalid fixture (BI002)"
+manual = false
+design = "design/contract.md#rejection-diagnostics"
+ears = { type = "unwanted_behavior", trigger = "an invalid acceptance fixture has no expected field path and reason, or an expectation has no fixture", system = "Billet", action = "fail rejection qualification before evaluating the fixtures" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-031"
+title = "Omit the canary from every rejection diagnostic (BI002)"
+manual = false
+design = "design/contract.md#rejection-diagnostics"
+ears = { type = "event", trigger = "any invalid acceptance fixture is rejected", system = "Billet", action = "emit error output that does not contain the DO-NOT-ECHO-SECRET canary" }

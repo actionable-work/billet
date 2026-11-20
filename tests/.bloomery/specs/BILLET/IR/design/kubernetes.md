@@ -135,6 +135,14 @@ consumers. The K3s test also renders both sides of a private link and verifies
 actual traffic from an egress-isolated Billet to the destination. Tests bind
 individual requirements to their assertions.
 
+The K3s test also renders two versions of one Billet that differ in
+`identity.version`, argv and image tag. It applies the first List, then the
+second over it with strict server-side validation. Billet qualifies only the
+artifacts and their acceptance by the consumer. The API server accepts the
+update, the updated Deployment carries the declared rolling strategy, ready hold
+and progress deadline, and the rollout completes with only second-version Pods
+ready. Kubernetes owns how and when the rollout proceeds.
+
 The numbers below refer to `BILLET-IR-KUBERNETES` records. The pure checks in
 `tests/kubernetes.test.nix` evaluate a separately keyed assertion for each
 binding. The VM checks in `tests/kubernetes-vm.test.nix` use the native API
@@ -159,3 +167,4 @@ server and kubelet.
 | 078, 081, 084, 090                                                        | The live process checks a literal API Service environment override and a required Secret on another injected name. The VM checks delivery under the default token path and applies the List into a namespace created by the List itself.            |
 | 079–080, 082–083, 085–089                                                 | Pure evaluation checks optional environment rejection, API Service naming, the exact annotation budget, namespace validation and render modes, and unchanged canonical and image metadata.                                                          |
 | 091–092                                                                   | A separately rendered, egress-isolated Billet reaches its declared private port through the destination Service and cannot reach that same destination on an undeclared port.                                                                       |
+| 112–114                                                                   | The second List applies over the first. The updated Deployment has the declared strategy, ready hold and progress deadline, and its ready Pods run the second image with the second version annotation and argv.                                    |

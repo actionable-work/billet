@@ -277,6 +277,30 @@
         right = peer "right" "left";
       };
     }).dockerCompose;
+  upgradeApp = pkgs.writeShellScriptBin "compose-upgrade" ''
+    trap 'exit 0' INT
+    echo "BILLET_UPGRADE $1"
+    while true; do ${pkgs.coreutils}/bin/sleep 1; done
+  '';
+  # Two versions of one Billet that differ in version, argv and image tag.
+  upgrade = version: argument:
+    make (lib.recursiveUpdate hello {
+      identity = {
+        name = "upgrade";
+        inherit version;
+      };
+      process = {
+        package = upgradeApp;
+        executable = "bin/compose-upgrade";
+        argv = [argument];
+      };
+      shutdown = {
+        stopSignal = "SIGINT";
+        stopGracePeriodSeconds = 5;
+      };
+    });
+  upgradeV1 = upgrade "1.0.0" "v1";
+  upgradeV2 = upgrade "2.0.0" "v2";
 in {
   "billet:compose-artifact" = pkgs.testers.runNixOSTest {
     name = "billet-compose-artifact";
@@ -357,6 +381,8 @@ in {
       "BILLET-IR-TARGETS-083"
       "BILLET-IR-TARGETS-084"
       "BILLET-IR-TARGETS-085"
+      "BILLET-IR-TARGETS-092"
+      "BILLET-IR-TARGETS-093"
     ];
     nodes.machine = {
       virtualisation = {
@@ -369,6 +395,7 @@ in {
     testScript = ''
       import hashlib
       import json
+      import time
 
       machine.start()
       machine.wait_for_unit("docker.service")
@@ -612,6 +639,36 @@ in {
           machine.succeed(f"{command} down")
           machine.succeed("${docker} volume inspect billet-native_db_Happ__state billet-native_worker__state")
           machine.succeed(f"{command} down --volumes")
+          assert machine.succeed("${docker} ps -aq").strip() == ""
+
+      with subtest("Compose accepts a second Billet version"):
+          first_command = "${cli} --project-name billet-upgrade -f ${upgradeV1.dockerCompose.file}"
+          second_command = "${cli} --project-name billet-upgrade -f ${upgradeV2.dockerCompose.file}"
+          machine.succeed("${docker} image load --input ${upgradeV1.dockerImage}")
+          machine.succeed("${docker} image load --input ${upgradeV2.dockerImage}")
+          machine.succeed(f"{first_command} up --no-build --detach")
+          first, = containers(first_command, "upgrade")
+          machine.wait_until_succeeds(f"${docker} logs {first} | grep -qx 'BILLET_UPGRADE v1'", timeout=30)
+          time.sleep(2)
+          assert machine.succeed(f"${docker} logs {first} 2>&1") == "BILLET_UPGRADE v1\n"
+          assert inspect(first)["Config"]["Image"] == "${upgradeV1.ociImage.imageRefUnsafe}"
+
+          parsed = json.loads(machine.succeed(f"{second_command} config --format json"))["services"]["upgrade"]
+          assert parsed["image"] == "${upgradeV2.ociImage.imageRefUnsafe}"
+          assert (parsed["stop_signal"], parsed["stop_grace_period"]) == ("SIGINT", "5s")
+          machine.succeed(f"{second_command} up --no-build --detach")
+          second, = containers(second_command, "upgrade")
+          assert second != first
+          machine.fail(f"${docker} inspect {first}")
+          info = inspect(second)
+          assert info["State"]["Running"]
+          assert info["Config"]["Image"] == "${upgradeV2.ociImage.imageRefUnsafe}"
+          assert info["Config"]["Cmd"] == ["v2"]
+          assert (info["Config"]["StopSignal"], info["Config"]["StopTimeout"]) == ("SIGINT", 5)
+          machine.wait_until_succeeds(f"${docker} logs {second} | grep -qx 'BILLET_UPGRADE v2'", timeout=30)
+          time.sleep(2)
+          assert machine.succeed(f"${docker} logs {second} 2>&1") == "BILLET_UPGRADE v2\n"
+          machine.succeed(f"{second_command} down --volumes")
           assert machine.succeed("${docker} ps -aq").strip() == ""
     '';
   };

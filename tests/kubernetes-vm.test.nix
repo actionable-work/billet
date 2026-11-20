@@ -177,6 +177,43 @@
       }
     ];
   };
+  upgradeApp = pkgs.writeShellScriptBin "upgrade-app" ''
+    echo "BILLET_UPGRADE $1"
+    exec ${core}/sleep infinity
+  '';
+  # Two versions of one Billet that differ in version, argv and image tag.
+  upgrade = version: argument:
+    billetLib.mkBillet {
+      inherit pkgs;
+      modules = [
+        ../examples/hello/application.nix
+        {
+          identity = {
+            name = lib.mkForce "kube-upgrade";
+            version = lib.mkForce version;
+          };
+          oci.imageName = "docker.io/library/kube-upgrade";
+          process = {
+            package = lib.mkForce upgradeApp;
+            executable = lib.mkForce "bin/upgrade-app";
+            argv = lib.mkForce [argument];
+          };
+          kubernetes = {
+            namespace = "billet-upgrade";
+            createNamespace = true;
+          };
+          rollout = {
+            maxSurge = 1;
+            maxUnavailable = 0;
+            minReadySeconds = 2;
+            progressDeadlineSeconds = 120;
+          };
+          shutdown.stopGracePeriodSeconds = 3;
+        }
+      ];
+    };
+  upgradeV1 = upgrade "1.0.0" "v1";
+  upgradeV2 = upgrade "2.0.0" "v2";
   inherit (fixture.kubernetes) bundle;
 in {
   "billet:kubernetes-k3s" = pkgs.testers.runNixOSTest {
@@ -202,6 +239,9 @@ in {
       "BILLET-IR-KUBERNETES-090"
       "BILLET-IR-KUBERNETES-091"
       "BILLET-IR-KUBERNETES-092"
+      "BILLET-IR-KUBERNETES-112"
+      "BILLET-IR-KUBERNETES-113"
+      "BILLET-IR-KUBERNETES-114"
     ];
     nodes.machine = {config, ...}: {
       virtualisation = {
@@ -278,6 +318,46 @@ in {
       assert machine.wait_until_succeeds(f"{kubectl} exec denied -- {request(8080)}", timeout=60) == "ready\n"
       wait_for_denial("denied", 9090)
       wait_for_denial("deployment/kube-peer", 8080)
+
+      with subtest("the consumer accepts a second Billet version"):
+          import time
+
+          upgrade = "k3s kubectl -n billet-upgrade"
+          machine.succeed("k3s ctr images import ${upgradeV1.dockerImage}")
+          machine.succeed("k3s ctr images import ${upgradeV2.dockerImage}")
+          machine.succeed("k3s kubectl apply --server-side --validate=strict -f ${upgradeV1.kubernetes.file}")
+          machine.succeed(f"{upgrade} rollout status deployment/kube-upgrade --timeout=90s")
+          first = json.loads(machine.succeed(f"{upgrade} get deployment kube-upgrade -o json"))
+          machine.succeed("k3s kubectl apply --server-side --validate=strict -f ${upgradeV2.kubernetes.file}")
+          machine.succeed(f"{upgrade} rollout status deployment/kube-upgrade --timeout=120s")
+
+          deployment = json.loads(machine.succeed(f"{upgrade} get deployment kube-upgrade -o json"))
+          spec = deployment["spec"]
+          assert deployment["metadata"]["generation"] > first["metadata"]["generation"]
+          assert spec["strategy"] == {"type": "RollingUpdate", "rollingUpdate": {"maxSurge": 1, "maxUnavailable": 0}}, spec["strategy"]
+          assert (spec["minReadySeconds"], spec["progressDeadlineSeconds"]) == (2, 120)
+          annotations = spec["template"]["metadata"]["annotations"]
+          assert annotations["billet.actionable.work/identity-version"] == "2.0.0"
+          assert first["spec"]["template"]["metadata"]["annotations"]["billet.actionable.work/identity-version"] == "1.0.0"
+
+          def second_version_pods():
+              pods = json.loads(machine.succeed(f"{upgrade} get pods -o json"))["items"]
+              statuses = [status for pod in pods for status in pod["status"].get("containerStatuses", [])]
+              ready = len(pods) == 1 and len(statuses) == 1 and all(
+                  status["ready"] and status["image"] == "${upgradeV2.ociImage.imageRefUnsafe}" for status in statuses
+              )
+              return pods if ready else None
+
+          deadline = time.monotonic() + 60
+          while (pods := second_version_pods()) is None:
+              assert time.monotonic() < deadline, machine.succeed(f"{upgrade} get pods -o wide")
+              time.sleep(1)
+          assert "${upgradeV1.ociImage.imageRefUnsafe}" != "${upgradeV2.ociImage.imageRefUnsafe}"
+          for pod in pods:
+              assert pod["metadata"]["annotations"]["billet.actionable.work/identity-version"] == "2.0.0"
+              # The container inherits the second image's argv; its output reports it.
+              assert {"command", "args"}.isdisjoint(pod["spec"]["containers"][0])
+              assert machine.succeed(f"{upgrade} logs {pod['metadata']['name']}") == "BILLET_UPGRADE v2\n"
     '';
   };
 }

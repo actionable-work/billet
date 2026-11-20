@@ -59,3 +59,10 @@ title = "Record an explicit image name (BI001, BI010)"
 manual = false
 design = "design/contract.md#oci-packaging-options"
 ears = { type = "event", trigger = "oci.imageName is a valid repository name, including one with a registry host and port", system = "Billet", action = "record the repository unchanged as oci.imageName in the v1 IR" }
+
+[[requirements]]
+id = "BILLET-IR-NORMALIZATION-009"
+title = "Keep the full fixture's canonical IR stable (BI001, BI010)"
+manual = false
+design = "design/contract.md#golden-canonical-ir"
+ears = { type = "event", trigger = "the full acceptance fixture is evaluated", system = "Billet", action = "produce canonical bytes equal to tests/golden/full-v1.json after replacing store hashes and the system with placeholders" }

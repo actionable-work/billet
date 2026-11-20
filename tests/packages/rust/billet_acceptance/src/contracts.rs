@@ -65,6 +65,13 @@ pub fn ir() -> Result {
     )?;
     let value: Value = serde_json::from_slice(&payload)?;
     check(
+        symbolic_store(std::str::from_utf8(&payload)?)?
+            .replace(text(&value["system"]), "@SYSTEM@")
+            .as_bytes()
+            == std::fs::read(Path::new(&env("source")).join("tests/golden/full-v1.json"))?,
+        "full v1 golden changed without migration",
+    )?;
+    check(
         !payload.ends_with(b"\n")
             && value["normalizationVersion"] == 1
             && value["schemaVersion"] == 1,
@@ -103,6 +110,26 @@ pub fn ir() -> Result {
         "Canonical IR, independent evaluations, seven value-free diagnostics and secret artifacts verified"
     );
     Ok(())
+}
+
+/// Replace the store directory and hash of each store path with `@STORE@`.
+fn symbolic_store(payload: &str) -> Result<String> {
+    let store = format!(
+        "{}/",
+        std::env::var("NIX_STORE").unwrap_or("/nix/store".into())
+    );
+    let mut parts = payload.split(store.as_str());
+    let mut symbolic = parts.next().unwrap_or_default().to_owned();
+    for part in parts {
+        let name = part.get(32..).filter(|name| name.starts_with('-'));
+        check(
+            name.is_some() && part[..32].bytes().all(|b| b.is_ascii_alphanumeric()),
+            "store path without a hash in canonical IR",
+        )?;
+        symbolic.push_str("@STORE@");
+        symbolic.push_str(name.unwrap_or_default());
+    }
+    Ok(symbolic)
 }
 
 pub fn closure() -> Result {

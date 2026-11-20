@@ -46,32 +46,64 @@
       stopGracePeriodSeconds = 7;
     };
   });
-  inherit (fixture.microvm) bundle file runner;
-  digest = lib.removePrefix "sha256:" (builtins.unsafeDiscardStringContext fixture.manifestDigest);
-in {
-  "billet:microvm-boot" =
-    pkgs.runCommand "billet-microvm-boot" {
-      passthru.bloomery = [
-        "BILLET-IR-MICROVM-041"
-        "BILLET-IR-MICROVM-042"
-        "BILLET-IR-MICROVM-043"
-        "BILLET-IR-MICROVM-044"
-        "BILLET-IR-MICROVM-045"
-        "BILLET-IR-MICROVM-046"
-        "BILLET-IR-MICROVM-047"
-        "BILLET-IR-MICROVM-048"
-        "BILLET-IR-MICROVM-049"
-        "BILLET-IR-MICROVM-050"
-        "BILLET-IR-MICROVM-051"
-        "BILLET-IR-MICROVM-052"
-        "BILLET-IR-MICROVM-053"
-        "BILLET-IR-MICROVM-054"
-      ];
-    } ''
+  # The full acceptance fixture with a guest assertion script as its process.
+  # Its secrets, storage, port, initialization and probe have no native
+  # microVM mapping; the script checks that the guest provides none of them
+  # while the probe and initialization executables remain in the guest store.
+  initMarker = "/tmp/billet-initialized";
+  fullInit = pkgs.writeShellScriptBin "initialize" ''${core}/touch ${initMarker}'';
+  fullProbe = pkgs.writeShellScriptBin "probe" "echo BILLET_PROBE_RAN";
+  fullApp = pkgs.writeShellScriptBin "microvm-full-app" ''
+    set -eu
+    trap 'printf "BILLET_GUEST_FAILED at line %s\n" "$LINENO"' ERR
+    manifest=/etc/billet/manifest.json
+    probe=$(${pkgs.jq}/bin/jq -r .probes.readiness.command.executable "$manifest")
+    init=$(${pkgs.jq}/bin/jq -r '.initialization.steps[0].executable' "$manifest")
+    test -f "$probe" && test -x "$probe"
+    test "$("$probe")" = BILLET_PROBE_RAN
+    test -f "$init" && test -x "$init"
+    test ! -e ${initMarker}
+    test ! -e /run/secrets/database
+    test -z "''${APP_TOKEN+set}"
+    test "$(${core}/cut -d ' ' -f 2 /proc/mounts | ${pkgs.gnugrep}/bin/grep -cxF /tmp/work || true)" = 0
+    test "$(${core}/ls /sys/class/net)" = lo
+    digest=$(${core}/sha256sum "$manifest")
+    trap 'echo BILLET_GUEST_STOPPED; exit 0' TERM
+    echo "BILLET_GUEST_READY ''${digest%% *}"
+    while true; do ${core}/sleep 1; done
+  '';
+  full = fixtures.evaluate (lib.recursiveUpdate fixtures.full {
+    microvm.acceleration = "tcg";
+    process = {
+      package = fullApp;
+      executable = "bin/microvm-full-app";
+      argv = [];
+    };
+    initialization.steps = [(builtins.head fixtures.full.initialization.steps // {package = fullInit;})];
+    probes.readiness.command.package = fullProbe;
+  });
+  fullReport = full.microvm.capabilityReport;
+  warned = field: builtins.any (d: d.severity == "warning" && d.field == field) fullReport.diagnostics;
+  fullRendering =
+    fullReport.canRender
+    && builtins.all warned ["secrets.database" "secrets.token" "storage.scratch" "network.ports" "initialization.steps" "probes.readiness"];
+
+  # Boot a packaged guest until its service reports the canonical digest, then
+  # shut it down and require the service to report the stop signal.
+  boot = name: billet: qualification: let
+    inherit (billet.microvm) bundle file runner;
+    digest = lib.removePrefix "sha256:" (builtins.unsafeDiscardStringContext billet.manifestDigest);
+  in
+    pkgs.runCommand name qualification ''
       cmp ${file} ${bundle}/microvm.json
-      cmp ${fixture.manifest} ${bundle}/manifest.json
+      cmp ${billet.manifest} ${bundle}/manifest.json
       test "$(readlink ${bundle}/runner)" = ${runner}
       test "$(sha256sum ${bundle}/manifest.json | cut -d ' ' -f 1)" = ${digest}
+      # The packaged QEMU command attaches no network device or host forwarding.
+      grep -q qemu-system "$(readlink -f ${bundle}/runner/bin/microvm-run)"
+      if grep -Eq -- '-netdev|-nic |hostfwd|virtio-net' "$(readlink -f ${bundle}/runner/bin/microvm-run)"; then
+        echo 'runner declares a guest network device'; exit 1
+      fi
 
       timeout -k 5s 180s ${bundle}/runner/bin/microvm-run </dev/null > console.log 2>&1 &
       pid=$!
@@ -98,4 +130,36 @@ in {
       cp console.log "$out/console.log"
       trap - EXIT
     '';
+in {
+  "billet:microvm-boot" = boot "billet-microvm-boot" fixture {
+    passthru.bloomery = [
+      "BILLET-IR-MICROVM-041"
+      "BILLET-IR-MICROVM-042"
+      "BILLET-IR-MICROVM-043"
+      "BILLET-IR-MICROVM-044"
+      "BILLET-IR-MICROVM-045"
+      "BILLET-IR-MICROVM-046"
+      "BILLET-IR-MICROVM-047"
+      "BILLET-IR-MICROVM-048"
+      "BILLET-IR-MICROVM-049"
+      "BILLET-IR-MICROVM-050"
+      "BILLET-IR-MICROVM-051"
+      "BILLET-IR-MICROVM-052"
+      "BILLET-IR-MICROVM-053"
+      "BILLET-IR-MICROVM-054"
+    ];
+  };
+  "billet:microvm-full-boot" = assert fullRendering;
+    boot "billet-microvm-full-boot" full {
+      passthru.bloomery = [
+        "BILLET-IR-MICROVM-080"
+        "BILLET-IR-MICROVM-081"
+        "BILLET-IR-MICROVM-082"
+        "BILLET-IR-MICROVM-083"
+        "BILLET-IR-MICROVM-084"
+        "BILLET-IR-MICROVM-085"
+        "BILLET-IR-MICROVM-086"
+        "BILLET-IR-MICROVM-087"
+      ];
+    };
 }

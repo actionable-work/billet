@@ -48,6 +48,10 @@
           // (import ./image-name.test.nix {inherit pkgs billetLib harness;})
           // (import ./service-validation.test.nix {inherit pkgs billetLib;})
           // (import ./bundle-validation.test.nix {inherit pkgs billetLib;})
+          // (import ./systems.test.nix {
+            inherit pkgs billetLib harness;
+            microvmSource = billet.inputs.microvm.outPath;
+          })
           // (import ./public-format.test.nix {
             inherit pkgs treefmt-nix;
             formatting = billet.checks.${system}.formatting;

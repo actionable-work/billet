@@ -125,7 +125,12 @@
       };
     };
     initBudget = lib.recursiveUpdate full {initialization.budgetSeconds = 1;};
-    duplicateInit = lib.recursiveUpdate full {initialization.steps = full.initialization.steps ++ full.initialization.steps;};
+    duplicateInit = lib.recursiveUpdate full {
+      initialization = {
+        steps = full.initialization.steps ++ full.initialization.steps;
+        budgetSeconds = 4;
+      };
+    };
     retry = lib.recursiveUpdate base {restart.maxRetries = -1;};
     retryDelay = lib.recursiveUpdate base {restart.maxDelaySeconds = 0;};
     multiplier = lib.recursiveUpdate base {restart.multiplier = 1;};

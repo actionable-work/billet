@@ -2,6 +2,7 @@
 mod cli;
 mod common;
 mod contracts;
+mod diagnostics;
 mod oci;
 mod smoke;
 
@@ -13,11 +14,13 @@ fn main() {
             contracts::diagnose(&args[1], &args[2], args.get(3).map(String::as_str))
         }
         Some("closure") => contracts::closure(),
+        Some("rejections") => diagnostics::rejections(),
+        Some("systems") => diagnostics::systems(),
         Some("cli") => cli::verify(),
         Some("preflight") => contracts::preflight(),
         Some("oci") => oci::verify(),
         Some("smoke") if args.len() == 2 => smoke::run(std::path::Path::new(&args[1])),
-        _ => Err("usage: billet-acceptance <ir|diagnose FIXTURE FIELD [REASON]|closure|cli|preflight|oci|smoke OCI_LAYOUT>".into()),
+        _ => Err("usage: billet-acceptance <ir|diagnose FIXTURE FIELD [REASON]|closure|rejections|systems|cli|preflight|oci|smoke OCI_LAYOUT>".into()),
     };
     if let Err(error) = result {
         eprintln!("billet acceptance: {error}");

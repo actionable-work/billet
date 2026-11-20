@@ -164,6 +164,48 @@ systems or users prevent rendering. Field-scoped mapping limitations have
 `severity = "warning"` and allow rendering. Evaluating a supported configuration
 or report does not realize the application package.
 
+## Cross-system evaluation
+
+A Billet definition evaluates on every system it declares, including
+`aarch64-darwin`. The canonical IR, the manifest digest and every target's
+capability report evaluate without building a Linux artifact. The Docker image,
+Compose, Kubernetes and microVM targets are Linux-only. On any other system each
+report refuses rendering with an error diagnostic on the `systems` field. The
+OCI eligibility report and the Compose and Kubernetes reports use
+`UnsupportedImageSystem`. The microVM report uses `UnsupportedMicrovmSystem`.
+
+Selecting an artifact on such a system fails evaluation with a `billet:` message
+that names the target, the `systems` field and the reason:
+
+| Artifacts                                        | Message prefix                                      |
+| ------------------------------------------------ | --------------------------------------------------- |
+| `ociImage`, `ociLayout`, `dockerImage`           | `billet: unsupported OCI image: systems:`           |
+| `dockerCompose` configuration, file and bundle   | `billet: UnsupportedTarget dockerCompose: systems:` |
+| `kubernetes` configuration, file and bundle      | `billet: UnsupportedTarget kubernetes: systems:`    |
+| `microvm` configuration, file, runner and bundle | `billet: microvm: systems:`                         |
+
+These are diagnostics, not evaluator crashes or missing-attribute errors.
+
+A package set for either supported Linux system renders that system's microVM
+guest and runner on any evaluating host, because the guest uses the supplied
+package set.
+
+`tests/systems.test.nix` qualifies both cases on the builder. It evaluates the
+hello example with an `aarch64-darwin` package set, checks the IR and reports in
+Nix, and checks each artifact message in a separate evaluator via the acceptance
+harness. It instantiates the runner derivation of the other supported Linux
+system (`aarch64-linux` on an `x86_64-linux` builder and the reverse) without
+building or booting it. The numbers refer to `BILLET-IR-TARGETS` records, and
+the microVM records to `BILLET-IR-MICROVM`.
+
+| Records         | Witness                                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| TARGETS 086     | The darwin IR records `aarch64-darwin` and its digest matches the canonical bytes.                                                   |
+| TARGETS 087     | Each darwin report has `canRender` or `supported` false and the target's `systems` error code.                                       |
+| TARGETS 088–091 | Each artifact selector in the table fails evaluation with its message prefix.                                                        |
+| MICROVM 088     | The runner derivation of the other supported Linux system instantiates for that system.                                              |
+| MICROVM 089–090 | TCG guests for aarch64-linux and x86_64-linux, both evaluated on every builder, use their machine settings and power button modules. |
+
 ## Qualification
 
 Verify the pure configuration against an unrealizable fixture, including image
@@ -182,6 +224,15 @@ published reachability, and host-supplied file and environment data. Inspect
 container mounts and distinguish pure configuration evidence for unsupported
 features from live Docker behavior.
 
+The same VM renders two versions of one Billet that differ in
+`identity.version`, argv and image tag. It runs `up` with the first version's
+Compose file and then with the second version's file under the same project and
+service names. Billet qualifies only the artifacts and their acceptance by the
+pinned Compose consumer. The consumer replaces the service container with one
+created from the second image, and the second configuration carries the declared
+stop signal and grace period. Replacement order, stop delivery and rollback are
+consumer behavior.
+
 The assertions in `tests/compose.test.nix` bind the following witnesses. Each
 number refers to a `BILLET-IR-TARGETS` record.
 
@@ -199,3 +250,4 @@ number refers to a `BILLET-IR-TARGETS` record.
 | 070–071      | Initialization advisory, canonical step, and startup with only primary services despite a failing initialization executable.                                                                                   |
 | 072–074      | Native capabilities per service and across the bundle, required capability union, and successful rendering with warnings.                                                                                      |
 | 075–081      | Manifest retains directional links, egress restrictions, rollout, placement, singleton, target metric and restart timing. The rendered service contains only their applicable native directives.               |
+| 092–093      | The second `up` replaces the first container with one from the second image whose output reports the second argv. The parsed and inspected second service carry the declared stop signal and grace period.     |

@@ -595,3 +595,59 @@ title = "Isolate standalone services that disallow egress (BI004, BI011)"
 manual = false
 design = "design/targets.md#compose-networking"
 ears = { type = "event", trigger = "a standalone Billet disables public egress", system = "Billet", action = "render a single internal network and attach the service to it" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-086"
+title = "Evaluate canonical IR for a darwin system (BI001, BI010)"
+manual = false
+design = "design/targets.md#cross-system-evaluation"
+ears = { type = "event", trigger = "a Billet is evaluated with an aarch64-darwin package set", system = "Billet", action = "produce canonical IR recording aarch64-darwin and its manifest digest" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-087"
+title = "Refuse Linux-only targets in darwin reports (BI004, BI011)"
+manual = false
+design = "design/targets.md#cross-system-evaluation"
+ears = { type = "event", trigger = "a Billet is evaluated with an aarch64-darwin package set", system = "Billet", action = "report each Linux-only target as not renderable with its systems error diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-088"
+title = "Diagnose darwin OCI image selection (BI004, BI011)"
+manual = false
+design = "design/targets.md#cross-system-evaluation"
+ears = { type = "event", trigger = "an OCI image, layout or Docker archive is selected for an aarch64-darwin Billet", system = "Billet", action = "fail evaluation with an unsupported OCI image systems diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-089"
+title = "Diagnose darwin Compose selection (BI004, BI011)"
+manual = false
+design = "design/targets.md#cross-system-evaluation"
+ears = { type = "event", trigger = "the Compose configuration, file or bundle is selected for an aarch64-darwin Billet", system = "Billet", action = "fail evaluation with an UnsupportedTarget dockerCompose systems diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-090"
+title = "Diagnose darwin Kubernetes selection (BI004, BI011)"
+manual = false
+design = "design/targets.md#cross-system-evaluation"
+ears = { type = "event", trigger = "the Kubernetes configuration, file or bundle is selected for an aarch64-darwin Billet", system = "Billet", action = "fail evaluation with an UnsupportedTarget kubernetes systems diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-091"
+title = "Diagnose darwin microVM selection (BI004, BI011)"
+manual = false
+design = "design/targets.md#cross-system-evaluation"
+ears = { type = "event", trigger = "the microVM configuration, file, runner or bundle is selected for an aarch64-darwin Billet", system = "Billet", action = "fail evaluation with a microvm systems diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-092"
+title = "Accept a new Billet version in Compose (BI004, BI011)"
+manual = false
+design = "design/targets.md#qualification"
+ears = { type = "event", trigger = "the pinned Compose consumer runs up with a second version of a running Billet under the same project", system = "Billet", action = "provide a Compose file from which the consumer replaces the service container with one running the second image and argv" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-093"
+title = "Carry stop settings into the updated Compose service (BI004, BI011)"
+manual = false
+design = "design/targets.md#qualification"
+ears = { type = "event", trigger = "the second version of a Billet is rendered for Compose", system = "Billet", action = "render its declared stop signal and grace period in the configuration accepted by the consumer" }

@@ -82,14 +82,19 @@ enable = true
 enable = true
 
 [checks.specifications.testExceptions.acceptance_fixtures]
-maxRequirements = 56
+maxRequirements = 60
 path = "acceptance.test.nix"
-reason = "This file exports separate CLI, executable, IR, and closure checks with distinct assertions."
+reason = "This file exports separate CLI, executable, IR, rejection diagnostic, and closure checks with distinct assertions. The IR contract design identifies the rejection and golden witnesses."
 
 [checks.specifications.testExceptions.compose_vm]
-maxRequirements = 73
+maxRequirements = 75
 path = "compose.test.nix"
 reason = "The Docker VM uses separate assertions for artifact integrity, Compose parsing and diagnostics, and live Docker behavior. The TARGETS design identifies the witnesses."
+
+[checks.specifications.testExceptions.cross_system]
+maxRequirements = 9
+path = "systems.test.nix"
+reason = "A keyed pure assertion per record checks darwin IR and reports, the runner of the other supported Linux system, and the TCG settings of both Linux systems. The harness checks each darwin selector diagnostic separately. The target design identifies the witnesses."
 
 [checks.specifications.testExceptions.documentation]
 maxRequirements = 37
@@ -117,14 +122,14 @@ path = "kubernetes-bundle.test.nix"
 reason = "Pure assertions check the namespace and Job settings. The K3s guest validates the packaged example."
 
 [checks.specifications.testExceptions.kubernetes_vm]
-maxRequirements = 20
+maxRequirements = 23
 path = "kubernetes-vm.test.nix"
 reason = "The K3s VM has separate bundle comparisons, strict API validation, and live workload assertions. The Kubernetes design identifies the witnesses."
 
 [checks.specifications.testExceptions.microvm_boot]
-maxRequirements = 14
+maxRequirements = 22
 path = "microvm-boot.test.nix"
-reason = "The runner check uses separate artifact comparisons and live guest assertions. The microVM design identifies the witnesses."
+reason = "Two runner checks boot a minimal and a full fixture guest with separate artifact comparisons and live guest assertions. The microVM design identifies the witnesses."
 
 [checks.specifications.testExceptions.microvm_bundle]
 maxRequirements = 20

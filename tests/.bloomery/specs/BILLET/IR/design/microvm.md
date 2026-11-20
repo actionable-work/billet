@@ -45,7 +45,8 @@ the numeric settings at boot.
 ## VM resources and shutdown
 
 Use QEMU with KVM by default. The optional `microvm.acceleration = "tcg"`
-selects software emulation on the same architecture. Use one vCPU per rounded-up
+selects software emulation on the same architecture, with the maximum GIC
+version on aarch64-linux and ACPI on x86_64-linux. Use one vCPU per rounded-up
 core of the declared CPU limit and cap the profile at 64 vCPUs. Round the
 application memory limit up to MiB and add 512 MiB of guest overhead, with a
 maximum application limit of 1 TiB. When that total is exactly 2048 MiB,
@@ -60,7 +61,8 @@ grace period. A zero grace period uses a one-microsecond timeout because systemd
 interprets zero as unlimited. Reject grace periods that overflow systemd's
 microsecond duration when converted from seconds.
 
-Load the guest input drivers needed by the stock runner's virtual power button.
+Load the guest input drivers needed by the stock runner's virtual power button:
+`evdev` on both systems and the ACPI `button` module on x86_64-linux only.
 
 ## Consumer policy
 
@@ -93,3 +95,30 @@ emulation. Each number below refers to a `BILLET-IR-MICROVM` record.
 | 051–052 | The guest reads its own cgroup's CPU quota and memory limit from the kernel.                                               |
 | 053     | The digest of the guest's manifest matches the canonical digest from outside the guest.                                    |
 | 054     | The service receives the declared signal and reports it during shutdown via the packaged MicroVM.nix shutdown command.     |
+
+### Full fixture boot
+
+`tests/microvm-boot.test.nix` also boots a guest rendered from the full
+acceptance fixture with its primary process replaced by a guest assertion
+script. The fixture declares file and environment secret references, memory
+storage, a network port, an initialization step and an exec readiness probe. The
+profile maps none of these natively, so the qualification asserts the documented
+report and the guest state instead of delivery. The runtime owns secret
+resolution and delivery, mounts, port forwarding, initialization and probe
+scheduling. Passing a secret value to Nix to simulate delivery would violate the
+secret boundary, so the test supplies none.
+
+| Records | Witness                                                                                                                                                    |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 080     | The packaged runner boots the full-fixture guest and the service reports the canonical manifest digest.                                                    |
+| 081     | The booted fixture's report has the secret, storage, port, initialization and probe warnings and can render.                                               |
+| 082     | Inside the guest the file secret target does not exist and the environment secret target is unset.                                                         |
+| 083     | Inside the guest nothing is mounted at the storage mount point.                                                                                            |
+| 084     | The guest has only the loopback interface despite the declared port, and the packaged runner's QEMU command attaches no network device or host forwarding. |
+| 085     | The initialization step's marker file is absent when the primary service starts.                                                                           |
+| 086     | The probe executable named by the guest's manifest is an executable file in the guest store and prints its marker when the guest script runs it.           |
+| 087     | The initialization executable named by the guest's manifest is an executable file in the guest store.                                                      |
+
+Records 088–090 cover cross-system evaluation of the runner for the other
+supported Linux system and the TCG settings of both systems, as described in the
+[target contract](targets.md#cross-system-evaluation).

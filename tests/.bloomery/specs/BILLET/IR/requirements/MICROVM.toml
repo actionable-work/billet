@@ -553,3 +553,80 @@ title = "Avoid the exact 2 GiB guest allocation (BI004, BI011)"
 manual = false
 design = "design/microvm.md#vm-resources-and-shutdown"
 ears = { type = "event", trigger = "the application memory limit plus guest overhead is exactly 2048 MiB", system = "Billet", action = "allocate 2049 MiB of guest memory" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-080"
+title = "Boot the full fixture guest (BI004, BI011)"
+manual = false
+design = "design/microvm.md#full-fixture-boot"
+ears = { type = "event", trigger = "the packaged runner of the full acceptance fixture starts", system = "Billet", action = "boot a guest whose service reports the canonical manifest digest" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-081"
+title = "Report the booted fixture's unmapped declarations (BI004, BI011)"
+manual = false
+design = "design/microvm.md#full-fixture-boot"
+ears = { type = "event", trigger = "the full acceptance fixture is rendered for the microVM", system = "Billet", action = "report secret, storage, port, initialization and probe warnings while allowing rendering" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-082"
+title = "Leave guest secret delivery to the consumer (BI004, BI011)"
+manual = false
+design = "design/microvm.md#full-fixture-boot"
+ears = { type = "event", trigger = "the full fixture guest service starts", system = "Billet", action = "provide neither the file secret target nor the environment secret target" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-083"
+title = "Leave guest storage mounting to the consumer (BI004, BI011)"
+manual = false
+design = "design/microvm.md#full-fixture-boot"
+ears = { type = "event", trigger = "the full fixture guest service starts", system = "Billet", action = "mount nothing at the declared storage mount point" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-084"
+title = "Add no guest interface for declared ports (BI004, BI011)"
+manual = false
+design = "design/microvm.md#full-fixture-boot"
+ears = { type = "event", trigger = "a Billet with a declared port is rendered and booted as a microVM", system = "Billet", action = "provide only the loopback interface and a packaged runner whose QEMU command attaches no network device or host forwarding" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-085"
+title = "Leave guest initialization to the consumer (BI004, BI011)"
+manual = false
+design = "design/microvm.md#full-fixture-boot"
+ears = { type = "event", trigger = "the full fixture guest service starts", system = "Billet", action = "start the primary process without running the declared initialization step" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-086"
+title = "Retain the probe command in the guest (BI004, BI011)"
+manual = false
+design = "design/microvm.md#full-fixture-boot"
+ears = { type = "event", trigger = "the full fixture guest service starts", system = "Billet", action = "provide the probe executable named by the guest manifest as a runnable executable file" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-087"
+title = "Retain initialization executables in the guest (BI004, BI011)"
+manual = false
+design = "design/microvm.md#full-fixture-boot"
+ears = { type = "event", trigger = "the full fixture guest service starts", system = "Billet", action = "provide the initialization executable named by the guest manifest as an executable file" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-088"
+title = "Evaluate the other Linux system's guest runner (BI004, BI011)"
+manual = false
+design = "design/targets.md#cross-system-evaluation"
+ears = { type = "event", trigger = "a Billet is evaluated with the package set of the other supported Linux system than the evaluating builder", system = "Billet", action = "instantiate a microVM runner for that system without building it" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-089"
+title = "Select aarch64 software emulation settings (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "an aarch64-linux Billet selects TCG acceleration", system = "Billet", action = "set the max GIC version and load only the evdev module without the x86 power button module" }
+
+[[requirements]]
+id = "BILLET-IR-MICROVM-090"
+title = "Select x86_64 software emulation settings (BI004, BI011)"
+manual = false
+design = "design/microvm.md#vm-resources-and-shutdown"
+ears = { type = "event", trigger = "an x86_64-linux Billet selects TCG acceleration", system = "Billet", action = "enable ACPI and load the evdev and ACPI power button modules" }

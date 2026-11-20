@@ -89,3 +89,38 @@ artifact inputs with field paths before build. Credential resolution,
 application supervision and lifecycle decisions belong to the runtime. The
 [target contract](targets.md) specifies which fields each artifact expresses
 natively and how it reports limitations.
+
+## Qualification
+
+`tests/acceptance.test.nix` qualifies the contract with the acceptance fixtures
+in `tests/fixtures.nix`.
+
+### Rejection diagnostics
+
+Every `fixtures.invalid` entry has exactly one expected diagnostic: the field
+path and reason of the `billet: <field>: <reason>` message the fixture must
+produce. The acceptance harness evaluates each fixture's IR in a separate
+`nix-instantiate` process because `builtins.tryEval` cannot observe the message.
+The harness requires an unsuccessful evaluation whose error output contains the
+expected message. A fixture without an expectation, or an expectation without a
+fixture, fails the check before any fixture is evaluated. No rejection
+diagnostic may contain the `DO-NOT-ECHO-SECRET` canary that several fixtures use
+as the rejected value.
+
+Each invalid fixture changes one declaration so the expected message comes from
+the rule under test. For example, the duplicate initialization fixture raises
+the budget to cover both step timeouts and so reaches the identifier uniqueness
+rule.
+
+### Golden canonical IR
+
+`tests/golden/hello-v1.json` holds the canonical IR of the minimal example and
+`tests/golden/full-v1.json` holds that of the full acceptance fixture. The full
+fixture declares initialization, an exec probe, a network port, file and
+environment secret references, and memory storage. A golden file contains the
+exact canonical bytes with store-dependent values replaced by placeholders. The
+minimal golden replaces its package output path with `@PACKAGE@`. The full
+golden replaces the store directory and 32-character hash of each store path
+with `@STORE@` and keeps the package names. Both replace the selected system
+with `@SYSTEM@`. A changed golden file therefore records an intentional IR
+format change, which needs a migration note once v1 is released.

@@ -777,3 +777,24 @@ title = "Omit volume group ownership without persistent storage (BI004, BI011)"
 manual = false
 design = "design/kubernetes.md#secret-references-and-storage"
 ears = { type = "event", trigger = "no persistent disk is declared", system = "Billet", action = "leave the Pod fsGroup unset" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-112"
+title = "Accept an updated Deployment for a new Billet version (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#qualification"
+ears = { type = "event", trigger = "the List of a second Billet version is applied over the first", system = "Billet", action = "provide a List that the API server accepts with strict server-side validation" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-113"
+title = "Carry the declared rollout settings in the updated Deployment (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#qualification"
+ears = { type = "event", trigger = "the second Billet version is applied", system = "Billet", action = "provide a Deployment whose stored strategy, surge, unavailable count, ready hold and progress deadline equal the declared rollout" }
+
+[[requirements]]
+id = "BILLET-IR-KUBERNETES-114"
+title = "Run only the second version after the consumer rollout (BI004, BI011)"
+manual = false
+design = "design/kubernetes.md#qualification"
+ears = { type = "event", trigger = "the consumer completes the rollout of the second Billet version", system = "Billet", action = "provide artifacts under which every ready Pod runs the second image, argv and version annotation" }
