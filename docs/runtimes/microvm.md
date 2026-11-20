@@ -11,6 +11,8 @@ emulation on the same architecture.
 From the Billet repository, use the hello example to inspect and build the
 artifact. Substitute `aarch64-linux` when building on that platform.
 
+<!-- doctest: microvm-build -->
+
 ```sh
 nix eval --json ./examples/hello#billets.x86_64-linux.hello.microvm.capabilityReport
 nix build ./examples/hello#billets.x86_64-linux.hello.microvm.bundle
@@ -40,6 +42,8 @@ consumer-provided networking.
 
 The catalog-report example uses TCG. Build the complete bundle from the
 repository root.
+
+<!-- doctest: microvm-bundle -->
 
 ```sh
 nix build ./examples/catalog-report#billets.x86_64-linux.catalog-report.microvm.bundle

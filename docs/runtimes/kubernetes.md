@@ -16,6 +16,8 @@ gets a new resource name, so applying a new revision creates a new run.
 From the [hello example](../../examples/hello) directory, evaluate the report
 and build the bundle. Replace the system as needed.
 
+<!-- doctest: kubernetes-build -->
+
 ```sh
 nix eval --json .#billets.x86_64-linux.hello.kubernetes.capabilityReport
 nix build .#billets.x86_64-linux.hello.kubernetes.bundle
@@ -34,6 +36,8 @@ Set `oci.imageName` to your registry repository before building when publishing
 the image. The manifest digest is recorded on the Deployment and Pod template.
 [Container image names and pull policy](https://kubernetes.io/docs/concepts/containers/images/)
 
+<!-- doctest: kubernetes-apply -->
+
 ```sh
 kubectl --namespace my-namespace apply --server-side --dry-run=server --validate=strict -f result/kubernetes.json
 kubectl --namespace my-namespace apply --server-side -f result/kubernetes.json
@@ -44,6 +48,8 @@ kubectl --namespace my-namespace apply --server-side -f result/kubernetes.json
 With the default settings, use an existing namespace. Set the namespace in the
 client context or pass `--namespace` as shown above. To write a namespace
 directly into the resources, set it in the Billet module.
+
+<!-- doctest: kubernetes-namespace-module -->
 
 ```nix
 kubernetes = {
@@ -66,6 +72,8 @@ validate the rest or provision required Secret objects before starting the
 Deployment. After adding the settings to the hello module, rebuild the bundle
 and apply it in stages.
 [Kubernetes namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+
+<!-- doctest: kubernetes-namespace-apply -->
 
 ```sh
 nix build .#billets.x86_64-linux.hello.kubernetes.bundle
@@ -92,6 +100,8 @@ For the catalog-report example on a single-node K3s cluster, build the bundle
 from the repository root, import both images, and apply it into an existing
 namespace. The catalog's NetworkPolicy allows the report to reach port 8080
 through the catalog Service.
+
+<!-- doctest: kubernetes-bundle -->
 
 ```sh
 nix build ./examples/catalog-report#billets.x86_64-linux.catalog-report.kubernetes.bundle

@@ -8,6 +8,8 @@ your workspace can be published as Billets alongside the packages.
 
 Add Billet and Bloomery as sibling inputs:
 
+<!-- doctest: bloomery-flake -->
+
 ```nix
 {
   inputs = {
@@ -33,6 +35,8 @@ Add Billet and Bloomery as sibling inputs:
 The `billets` function receives `{ pkgs, packages }` for each system, where
 `packages` holds the workspace packages that Bloomery builds. It returns a named
 set of Billets and bundles:
+
+<!-- doctest: bloomery-billets -->
 
 ```nix
 # billets.nix
@@ -67,10 +71,19 @@ For each configured system, Bloomery:
   `billet:<name>:validate`.
 
 `nix flake check` and `bloomery check` then validate every definition without
-building images.
+building images:
+
+<!-- doctest: skip runs in a reader's Bloomery workspace; tests/ci.sh runs it in the catalog-report example -->
 
 ```sh
 nix develop --command bloomery check
+```
+
+Build an artifact for an entry, such as the bundle's Compose project:
+
+<!-- doctest: bloomery-build -->
+
+```sh
 nix build .#billets.x86_64-linux.stack.dockerCompose.bundle
 ```
 

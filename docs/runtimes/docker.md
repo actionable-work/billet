@@ -18,6 +18,8 @@ This guide assumes you have a Billet at `.#billets.x86_64-linux.hello`, as in
 
 The quickest path is a Docker archive:
 
+<!-- doctest: docker-load -->
+
 ```sh
 nix build .#billets.x86_64-linux.hello.dockerImage -o hello.tar
 docker load --input hello.tar
@@ -34,6 +36,8 @@ lowercase. The tag is derived from the definition, so a different definition
 always produces a different tag. To get the reference without building, evaluate
 it:
 
+<!-- doctest: docker-reference -->
+
 ```sh
 nix eval --raw .#billets.x86_64-linux.hello.ociImage.imageRefUnsafe
 ```
@@ -41,11 +45,15 @@ nix eval --raw .#billets.x86_64-linux.hello.ociImage.imageRefUnsafe
 Alternatively, copy the image straight into the Docker daemon without an
 intermediate archive:
 
+<!-- doctest: docker-copy -->
+
 ```sh
 nix run .#billets.x86_64-linux.hello.ociImage.copyToDockerDaemon
 ```
 
 ## Run the container
+
+<!-- doctest: docker-run -->
 
 ```sh
 docker run --rm hello:9b8ab9c47b5bfea93f0ed9744f36504e71cbe7e2d987f23e4379332912d08b44
@@ -66,14 +74,18 @@ The image is configured from the definition:
 image.
 
 Docker doesn't read the rest of the definition. Apply resources, ports, and
-secrets with `docker run` options, for example:
+secrets with `docker run` options. For example, with the secret value in
+`./database`:
+
+<!-- doctest: docker-run-options -->
 
 ```sh
+image=$(nix eval --raw .#billets.x86_64-linux.hello.ociImage.imageRefUnsafe)
 docker run --rm \
   --cpus 1 --memory 64m \
   --publish 8080:8080 \
   --mount type=bind,source=./database,target=/run/secrets/database,readonly \
-  hello:<tag>
+  "$image"
 ```
 
 The image leaves restart policy and health checks to the caller. Use the
@@ -115,8 +127,12 @@ These labels identify the image:
 | `org.actionable-work.billet.oci-adapter-version`    | `1`                          |
 | `org.actionable-work.billet.nix2container-revision` | The image builder revision   |
 
+Read a label from the loaded image, with `image` set as above:
+
+<!-- doctest: docker-inspect -->
+
 ```sh
-docker image inspect hello:<tag> \
+docker image inspect "$image" \
   --format '{{index .Config.Labels "org.actionable-work.billet.manifest-digest"}}'
 ```
 
@@ -133,6 +149,8 @@ oci.imageName = "registry.example.com/team/hello";
 
 Then push the image under its own reference:
 
+<!-- doctest: skip publishes to the reader's external registry -->
+
 ```sh
 nix run .#billets.x86_64-linux.hello.ociImage.copyToRegistry
 ```
@@ -140,6 +158,8 @@ nix run .#billets.x86_64-linux.hello.ociImage.copyToRegistry
 `ociImage` is a [nix2container](https://github.com/nlewo/nix2container) image,
 so its other copy helpers work too. To push under a different name or tag, pass
 any [Skopeo](https://github.com/containers/skopeo) destination to `copyTo`:
+
+<!-- doctest: skip publishes to the reader's external registry -->
 
 ```sh
 nix run .#billets.x86_64-linux.hello.ociImage.copyTo -- \
@@ -150,6 +170,8 @@ nix run .#billets.x86_64-linux.hello.ociImage.copyTo -- \
 
 `ociLayout` writes a standard OCI image layout, for tools that read images from
 disk:
+
+<!-- doctest: docker-layout -->
 
 ```sh
 nix build .#billets.x86_64-linux.hello.ociLayout -o hello-oci

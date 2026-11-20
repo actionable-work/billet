@@ -11,6 +11,8 @@ requirements as [Docker images](docker.md#requirements).
 
 ## Check the Billet can be rendered
 
+<!-- doctest: compose-report -->
+
 ```sh
 nix eval --json .#billets.x86_64-linux.hello.dockerCompose.capabilityReport
 ```
@@ -29,6 +31,8 @@ standalone Compose. For a bundle, the report also includes per-service reports
 and service-scoped diagnostics.
 
 ## Build the bundle
+
+<!-- doctest: compose-build -->
 
 ```sh
 nix build .#billets.x86_64-linux.hello.dockerCompose.bundle -o result
@@ -70,6 +74,8 @@ The file is written as JSON, which is valid YAML.
 
 ## Load and run
 
+<!-- doctest: compose-up -->
+
 ```sh
 docker load --input result/image.tar
 docker compose -f result/compose.yaml up --no-build
@@ -81,6 +87,8 @@ hello-1 exited with code 0
 ```
 
 Stop and remove the project with:
+
+<!-- doctest: compose-down -->
 
 ```sh
 docker compose -f result/compose.yaml down
@@ -133,6 +141,8 @@ Look up the host port assigned to a published container port after startup. For
 a service with multiple replicas, pass `--index` to select a replica. Services
 on the same network can connect to listening container ports by service name.
 
+<!-- doctest: skip template for a service that publishes a container port; the examples publish none -->
+
 ```sh
 docker compose -f result/compose.yaml port my-service 8080
 ```
@@ -180,14 +190,20 @@ result/
     └── report.json
 ```
 
-`x-billet.services.<name>` records each member's manifest and digest. Load every
-image, then start the project:
+`x-billet.services.<name>` records each member's manifest and digest. To try the
+[catalog-report example](../../examples/catalog-report), run these commands from
+its directory. Load every image, then start the project:
+
+<!-- doctest: compose-bundle -->
 
 ```sh
 nix build .#billets.x86_64-linux.catalog-report.dockerCompose.bundle -o result
 for image in result/images/*.tar; do docker load --input "$image"; done
 docker compose -f result/compose.yaml up --no-build
 ```
+
+The report prints the catalog inventory and exits, while the catalog keeps
+serving. Press Ctrl-C to stop the project.
 
 Members reach each other by service name. When every member allows egress,
 members share the default network. When any member disables egress, members

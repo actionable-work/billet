@@ -59,6 +59,8 @@ Images build for `x86_64-linux` and `aarch64-linux`. See
 
 Enable the `nix-command` and `flakes` features, then define an application:
 
+<!-- doctest: readme-application -->
+
 ```nix
 # application.nix
 { pkgs, ... }: {
@@ -77,6 +79,8 @@ Enable the `nix-command` and `flakes` features, then define an application:
 
 Export it from your flake:
 
+<!-- doctest: readme-flake -->
+
 ```nix
 {
   inputs.billet.url = "github:actionable-work/billet";
@@ -92,6 +96,8 @@ Export it from your flake:
 ```
 
 Build the Docker Compose bundle and run it:
+
+<!-- doctest: readme-compose -->
 
 ```sh
 nix build .#billets.x86_64-linux.hello.dockerCompose.bundle -o result

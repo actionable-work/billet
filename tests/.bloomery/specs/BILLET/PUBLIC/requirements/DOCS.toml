@@ -1,0 +1,261 @@
+schema_version = 1
+group = "DOCS"
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-001"
+title = "Annotate every documented shell block (BI009)"
+manual = false
+design = "design/documentation.md#annotations"
+ears = { type = "event", trigger = "the documentation has a shell block without a doctest annotation", system = "Billet", action = "fail the coverage check naming its file and line" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-002"
+title = "Require a reason to skip a block (BI009)"
+manual = false
+design = "design/documentation.md#annotations"
+ears = { type = "event", trigger = "a skip annotation has no reason", system = "Billet", action = "fail the coverage check naming its file and line" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-003"
+title = "Place annotations on fences (BI009)"
+manual = false
+design = "design/documentation.md#annotations"
+ears = { type = "event", trigger = "a doctest annotation is not followed by a fenced block", system = "Billet", action = "fail the coverage check naming its file and line" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-004"
+title = "Keep block names unique (BI009)"
+manual = false
+design = "design/documentation.md#annotations"
+ears = { type = "event", trigger = "two documentation blocks share a name", system = "Billet", action = "fail the coverage check naming the duplicate" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-005"
+title = "Use every named block (BI009)"
+manual = false
+design = "design/documentation.md#annotations"
+ears = { type = "event", trigger = "no scenario uses a named documentation block", system = "Billet", action = "fail the coverage check naming the block" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-006"
+title = "Use each named block once (BI009)"
+manual = false
+design = "design/documentation.md#annotations"
+ears = { type = "event", trigger = "several scenarios use one named documentation block", system = "Billet", action = "fail the coverage check naming the block" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-007"
+title = "Run the README Compose quickstart (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the README quickstart block runs against the README project in a Docker VM", system = "Billet", action = "build, load and run the Compose bundle so the service prints its greeting" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-008"
+title = "Check the Getting started flake (BI009)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Getting started flake check block runs against the guide project", system = "Billet", action = "pass the project's flake checks" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-009"
+title = "Print the Getting started canonical JSON (BI009)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Getting started canonical JSON block runs against the guide project", system = "Billet", action = "print the canonical JSON of the guide's Billet" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-010"
+title = "Print the Getting started manifest digest (BI009)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Getting started digest block runs against the guide project", system = "Billet", action = "print the manifest digest of the guide's Billet" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-011"
+title = "Build the Getting started closure descriptor (BI006, BI009)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Getting started closure block runs against the guide project", system = "Billet", action = "build the result-closure link and print its descriptor" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-012"
+title = "Build the Bloomery guide bundle (BI009)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Bloomery guide build block runs against the guide's flake and Billet definitions in the catalog-report workspace", system = "Billet", action = "build the bundle's Compose project link" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-013"
+title = "Load the Docker archive (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Docker guide archive block runs in a Docker VM", system = "Billet", action = "build the hello.tar link and load it into Docker" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-014"
+title = "Print the image reference (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Docker guide reference block runs", system = "Billet", action = "print the image reference without building it" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-015"
+title = "Copy the image to the Docker daemon (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Docker guide copy block runs in a Docker VM", system = "Billet", action = "copy the image into the Docker daemon" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-016"
+title = "Run the documented image tag (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Docker guide run block runs in a Docker VM", system = "Billet", action = "run the image under the tag written in the guide" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-017"
+title = "Run the image with Docker options (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Docker guide options block runs in a Docker VM with the secret file present", system = "Billet", action = "run the image with the documented resource, port and secret mount options" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-018"
+title = "Inspect the manifest digest label (BI001, BI004)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Docker guide inspect block runs in a Docker VM", system = "Billet", action = "print the image label that equals the canonical manifest digest" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-019"
+title = "Build the OCI layout (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Docker guide layout block runs", system = "Billet", action = "build the hello-oci layout link" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-020"
+title = "Print the Compose capability report (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Compose guide report block runs", system = "Billet", action = "print the Compose capability report" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-021"
+title = "Build the Compose bundle (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Compose guide build block runs", system = "Billet", action = "build the Compose bundle result link" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-022"
+title = "Run the Compose project (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Compose guide run block runs in a Docker VM", system = "Billet", action = "load the image and run the project so the service prints its greeting" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-023"
+title = "Remove the Compose project (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Compose guide down block runs in a Docker VM after the project ran", system = "Billet", action = "stop and remove the project containers" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-024"
+title = "Run the Compose catalog-report bundle (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Compose guide bundle block runs from the catalog-report example in a Docker VM", system = "Billet", action = "load both images and run the project until the report prints the inventory" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-025"
+title = "Build the Kubernetes bundle (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Kubernetes guide build block runs from the hello example", system = "Billet", action = "print the capability report and build the bundle result link" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-026"
+title = "Apply the Kubernetes List to an existing namespace (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Kubernetes guide apply block runs in a K3s VM with an existing namespace", system = "Billet", action = "pass the strict server-side dry run and apply the List into that namespace" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-027"
+title = "Apply the opted-in Kubernetes namespace (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Kubernetes guide namespace block runs in a K3s VM with the guide's namespace module", system = "Billet", action = "rebuild the bundle, create the namespace from the List, and apply the rest of the List" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-028"
+title = "Run the Kubernetes catalog-report bundle (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the Kubernetes guide bundle block runs from the repository root in a K3s VM", system = "Billet", action = "import both images and complete the report Job with the inventory in its logs" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-029"
+title = "Build the microVM bundle (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the microVM guide build block runs from the repository root", system = "Billet", action = "print the capability report and build the bundle result link" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-030"
+title = "Boot the microVM catalog-report guests (BI004, BI011)"
+manual = false
+design = "design/documentation.md#scenarios"
+ears = { type = "event", trigger = "the microVM guide bundle block runs from the repository root", system = "Billet", action = "boot both guests until the report console prints the inventory" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-031"
+title = "Reject unsupported Nix invocations (BI009)"
+manual = false
+design = "design/documentation.md#nix-stand-in"
+ears = { type = "event", trigger = "a scenario runs a Nix subcommand, option or reference the stand-in does not support", system = "Billet", action = "fail with an error naming the unsupported form" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-032"
+title = "Resolve references from the working directory (BI009)"
+manual = false
+design = "design/documentation.md#nix-stand-in"
+ears = { type = "event", trigger = "a scenario runs a supported Nix command", system = "Billet", action = "resolve its flake reference relative to the working directory and answer from the resolved table" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-033"
+title = "Reject missing scenario blocks (BI009)"
+manual = false
+design = "design/documentation.md#annotations"
+ears = { type = "event", trigger = "a scenario names a documentation block that does not exist", system = "Billet", action = "fail the coverage check naming the missing block" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-034"
+title = "Push the image with copyToRegistry (BI004, BI011)"
+manual = true
+design = "design/documentation.md#exclusions"
+ears = { type = "event", trigger = "a reader runs the Docker guide copyToRegistry command for a registry image name", system = "Billet", action = "push the image under its reference; this is a manual record because the command needs the reader's registry" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-035"
+title = "Push the image with copyTo (BI004, BI011)"
+manual = true
+design = "design/documentation.md#exclusions"
+ears = { type = "event", trigger = "a reader runs the Docker guide copyTo command with a Skopeo destination", system = "Billet", action = "push the image to that destination; this is a manual record because the command needs the reader's registry" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-036"
+title = "Look up a published Compose port (BI004, BI011)"
+manual = true
+design = "design/documentation.md#exclusions"
+ears = { type = "event", trigger = "a reader runs the Compose guide port command for a service that publishes a container port", system = "Billet", action = "print the assigned host port; this is a manual record because the example services publish no port" }
+
+[[requirements]]
+id = "BILLET-PUBLIC-DOCS-037"
+title = "Check a reader's Bloomery workspace (BI009)"
+manual = true
+design = "design/documentation.md#exclusions"
+ears = { type = "event", trigger = "a reader runs the Bloomery guide bloomery check command in their workspace", system = "Billet", action = "validate every definition; this is a manual record, and tests/ci.sh runs the command in the catalog-report workspace" }

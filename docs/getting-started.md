@@ -14,6 +14,8 @@ done, follow the guide for your runtime.
 
 A Billet is a Nix module that describes one application:
 
+<!-- doctest: getting-started-application -->
+
 ```nix
 # application.nix
 { pkgs, ... }: {
@@ -36,6 +38,8 @@ values are required. Everything else has a default. See
 declaring credentials.
 
 ## 2. Export it from a flake
+
+<!-- doctest: getting-started-flake -->
 
 ```nix
 # flake.nix
@@ -66,6 +70,8 @@ Billets live at `billets.<system>.<name>`. The examples below use
 
 ## 3. Validate the definition
 
+<!-- doctest: getting-started-check -->
+
 ```sh
 nix flake check
 ```
@@ -79,6 +85,8 @@ error: billet: resources.cpuRequest: exceeds limit
 
 ## 4. Inspect the canonical definition
 
+<!-- doctest: getting-started-canonical -->
+
 ```sh
 nix eval --raw .#billets.x86_64-linux.hello.canonicalJSON
 ```
@@ -86,6 +94,8 @@ nix eval --raw .#billets.x86_64-linux.hello.canonicalJSON
 This is the normalized definition, with every default filled in. Every runtime
 renders from it, so it is the single description of what the service is.
 `manifestDigest` identifies it:
+
+<!-- doctest: getting-started-digest -->
 
 ```sh
 nix eval --raw .#billets.x86_64-linux.hello.manifestDigest
@@ -96,6 +106,8 @@ service as declared, such as `resources`, `shutdown`, or `rolling-rollout`.
 Adding probes, secrets, ports, or storage adds to that list.
 
 ## 5. Inspect the runtime closure
+
+<!-- doctest: getting-started-closure -->
 
 ```sh
 nix build .#billets.x86_64-linux.hello.closureDescriptor -o result-closure

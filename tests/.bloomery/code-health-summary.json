@@ -39,9 +39,22 @@
         "nesting": 0.0,
         "size": 0.0
       }
+    },
+    {
+      "manifest_path": "packages/rust/billet_doctest/Cargo.toml",
+      "name": "billet-doctest",
+      "overall_score": 99.83,
+      "sloc": 389,
+      "subscores": {
+        "complexity": 0.17,
+        "crateSize": 0.0,
+        "duplication": 0.0,
+        "nesting": 0.0,
+        "size": 0.0
+      }
     }
   ],
-  "input_digest": "aaab7c5bda376f1630c28e3ad751bf87ec238d6a2167df0a07612ff6f638ddf0",
+  "input_digest": "72a906ff36c4739d44efe615bebe320cd632cfe59508607e371afb424fdc179a",
   "policy": {
     "scoring": {
       "crateSlocLimit": 1500,
@@ -65,15 +78,15 @@
   },
   "schema_version": 4,
   "workspace": {
-    "crate_count": 3,
-    "overall_score": 95.32,
-    "sloc": 1051,
+    "crate_count": 4,
+    "overall_score": 96.54,
+    "sloc": 1440,
     "subscores": {
-      "complexity": 3.04,
+      "complexity": 2.27,
       "crateSize": 0.0,
       "duplication": 0.0,
       "nesting": 0.0,
-      "size": 1.63
+      "size": 1.19
     }
   }
 }

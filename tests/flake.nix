@@ -89,6 +89,12 @@
             inherit pkgs billetLib;
             catalogReport = catalogBillets.catalog-report.dockerCompose.bundle;
             catalogExecutable = "${catalogPackage}/bin/catalog";
+          })
+          // (import ./docs.test.nix {
+            inherit pkgs billet bloomery nixpkgs;
+            doctest = packages.billet-doctest;
+            hello = hello;
+            catalog = catalog;
           }));
         apps = eachSystem (system: let
           pkgs = nixpkgs.legacyPackages.${system};

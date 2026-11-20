@@ -11,7 +11,8 @@ CLI fixture, and the optional smoke app. It imports the public library as an
 input and exports each test as an individual Nix check with its requirement
 metadata. It uses Bloomery to build the Rust harness and check its
 specifications. The CI script runs the root, test, and example flakes through
-their public entry points.
+their public entry points. The [documentation qualification](documentation.md)
+executes the commands in the user documentation.
 
 ### CI app
 

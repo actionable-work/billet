@@ -3,6 +3,7 @@ members = [
   "packages/rust/billet",
   "packages/rust/billet_acceptance",
   "packages/rust/billet_core",
+  "packages/rust/billet_doctest",
 ]
 resolver = "2"
 
