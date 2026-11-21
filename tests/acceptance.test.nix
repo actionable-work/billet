@@ -112,7 +112,7 @@ in {
     '';
   "billet:rejection-diagnostics" =
     pkgs.runCommand "billet-rejection-diagnostics" {
-      passthru.bloomery = ["BILLET-IR-VALIDATION-029" "BILLET-IR-VALIDATION-030" "BILLET-IR-VALIDATION-031"];
+      passthru.bloomery = ["BILLET-IR-VALIDATION-029" "BILLET-IR-VALIDATION-030" "BILLET-IR-VALIDATION-031" "BILLET-IR-BANDWIDTH-007" "BILLET-IR-BANDWIDTH-008" "BILLET-IR-BANDWIDTH-009"];
       nativeBuildInputs = [pkgs.nix];
       source = ../.;
       nixpkgsSource = pkgs.path;

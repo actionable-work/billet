@@ -73,6 +73,7 @@
     (warning "MicrovmPublicEgress" "egress-policy" "network.publicEgress" "egress policy requires a consumer network mapping")
     ++ lib.optional (ir.network.egressRestrictions != [])
     (warning "MicrovmEgressRestrictions" "egress-policy" "network.egressRestrictions" "egress restrictions are consumer policy")
+    ++ import ./consumer-bandwidth-diagnostics.nix {inherit lib;} ir.network "MicrovmBandwidth"
     ++ lib.mapAttrsToList (name: claim:
       warning "MicrovmStorage" "storage-${claim.lifecycle}-${claim.medium}" "storage.${name}" "storage claims require a consumer mapping")
     ir.storage

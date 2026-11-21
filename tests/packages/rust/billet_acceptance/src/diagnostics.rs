@@ -8,7 +8,37 @@ const IMAGE_NAME: &str =
     "must be a lowercase image repository name; set it explicitly when identity.name is not one";
 
 /// The diagnostic each `fixtures.invalid` entry must produce: fixture, field path and reason.
-const REJECTIONS: [(&str, &str, &str); 37] = [
+const REJECTIONS: [(&str, &str, &str); 43] = [
+    (
+        "bandwidthMinimumType",
+        "network.bandwidth.ingress.minBitsPerSecond",
+        "expected nullable integer",
+    ),
+    (
+        "bandwidthMaximumType",
+        "network.bandwidth.egress.maxBitsPerSecond",
+        "expected nullable integer",
+    ),
+    (
+        "bandwidthZero",
+        "network.bandwidth.egress.minBitsPerSecond",
+        "must be positive",
+    ),
+    (
+        "bandwidthNegative",
+        "network.bandwidth.ingress.maxBitsPerSecond",
+        "must be positive",
+    ),
+    (
+        "bandwidthIngressOrder",
+        "network.bandwidth.ingress.minBitsPerSecond",
+        "must not exceed maxBitsPerSecond",
+    ),
+    (
+        "bandwidthEgressOrder",
+        "network.bandwidth.egress.minBitsPerSecond",
+        "must not exceed maxBitsPerSecond",
+    ),
     ("cpu", "resources.cpuRequest", "exceeds limit"),
     ("duplicateInit", "initialization.steps.id", "must be unique"),
     ("duplicateSecret", "secrets.target", "must be unique"),

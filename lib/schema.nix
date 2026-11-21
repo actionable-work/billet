@@ -55,6 +55,10 @@
     timeoutSeconds = int 1;
     failureThreshold = int 3;
   });
+  bandwidthDirection = record {
+    minBitsPerSecond = nullable (int 0);
+    maxBitsPerSecond = nullable (int 0);
+  };
   fields = {
     schemaVersion = int 1;
     identity = record {
@@ -68,6 +72,7 @@
       namespace = nullable str;
       createNamespace = bool false;
       workload = enum ["deployment" "job"] "deployment";
+      bandwidthProfile = nullable (enum ["pod-annotations"] "pod-annotations");
     };
     microvm = record {
       acceleration = enum ["kvm" "tcg"] "kvm";
@@ -142,6 +147,10 @@
       });
       publicEgress = bool true;
       egressRestrictions = list str;
+      bandwidth = record {
+        ingress = bandwidthDirection;
+        egress = bandwidthDirection;
+      };
     };
     secrets = attrs (record {
       external = str;

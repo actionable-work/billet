@@ -30,6 +30,11 @@ example, `resources` covers CPU and memory limits and memory reservation in
 standalone Compose. For a bundle, the report also includes per-service reports
 and service-scoped diagnostics.
 
+Compose bundles preserve bandwidth minimums and maximums in each canonical
+manifest. Preflight warns at every configured bound because enforcement requires
+consumer-managed networking. A consumer must enforce the requested bounds before
+admitting the service.
+
 ## Build the bundle
 
 <!-- doctest: compose-build -->

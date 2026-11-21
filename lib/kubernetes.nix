@@ -46,6 +46,14 @@
     inherit code capability field reason;
     severity = "error";
   };
+  bandwidth = ir.network.bandwidth or {};
+  bandwidthMaxima = lib.mapAttrs (_: rates: rates.maxBitsPerSecond) (
+    lib.filterAttrs (_: rates: rates ? maxBitsPerSecond) bandwidth
+  );
+  useBandwidthAnnotations = settings.bandwidthProfile == "pod-annotations";
+  bandwidthAnnotations = lib.mapAttrs' (direction: rate:
+    lib.nameValuePair "kubernetes.io/${direction}-bandwidth" (toString rate))
+  bandwidthMaxima;
 
   network = import ./kubernetes-network.nix {inherit lib ir name labels labelsFor hash warning;};
   # Kubelet projects variables from default/kubernetes even with service
@@ -144,6 +152,16 @@
     (warning "KubernetesPodInitialization" "initialization-every-start" "initialization.steps" "init containers run on Pod initialization with separate writable root filesystems; container restarts and declared step timeouts are outside this mapping")
     ++ lib.optional (ir.shutdown.stopSignal != "SIGTERM")
     (warning "KubernetesImageStopSignal" "shutdown" "shutdown.stopSignal" "the container runtime must honor the image stop signal")
+    ++ lib.mapAttrsToList (direction: _: error "KubernetesBandwidthReservation" "network-bandwidth-reservations" "network.bandwidth.${direction}.minBitsPerSecond" "the Kubernetes workload profile cannot reserve network bandwidth")
+    (lib.filterAttrs (_: rates: rates ? minBitsPerSecond) bandwidth)
+    ++ lib.concatLists (lib.mapAttrsToList (direction: rate:
+      lib.optional (rate < 1000 || rate > 1000000000000000)
+      (error "KubernetesBandwidthRange" "network-bandwidth-limits" "network.bandwidth.${direction}.maxBitsPerSecond" "must be in 1000..1000000000000000 bits per second for Kubernetes bandwidth annotations"))
+    bandwidthMaxima)
+    ++ lib.optional (bandwidthMaxima != {} && !useBandwidthAnnotations)
+    (error "KubernetesBandwidthProfile" "network-bandwidth-limits" "kubernetes.bandwidthProfile" "set to pod-annotations to render network bandwidth limits")
+    ++ lib.optional (bandwidthMaxima != {} && useBandwidthAnnotations)
+    (warning "KubernetesBandwidthCNI" "network-bandwidth-limits" "kubernetes.bandwidthProfile" "enforcement requires a cluster networking plugin configured for Pod bandwidth annotations")
     ++ network.diagnostics
     ++ mounts.diagnostics;
   errors = builtins.filter (item: item.severity == "error") diagnostics;
@@ -165,6 +183,7 @@
       ++ lib.optionals (!isJob) (["fixed-replicas" "readiness-hold" "rollout-deadline"] ++ lib.optional (!resources.strictSingleton) "rolling-rollout")
       ++ lib.optional (builtins.any (p: p != null) (builtins.attrValues ir.probes)) "probes"
       ++ lib.optional (ir.initialization.steps != []) "pod-initialization"
+      ++ lib.optional (bandwidthMaxima != {}) "network-bandwidth-limits"
       ++ network.supportedCapabilities
       ++ mounts.supportedCapabilities
     ));
@@ -233,7 +252,10 @@
           rollingUpdate = {inherit (rollout) maxSurge maxUnavailable;};
         };
       template = {
-        metadata = {inherit labels annotations;};
+        metadata = {
+          inherit labels;
+          annotations = annotations // bandwidthAnnotations;
+        };
         spec =
           {
             enableServiceLinks = false;

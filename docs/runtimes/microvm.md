@@ -84,5 +84,11 @@ Consumers can read the canonical manifest to obtain this policy and its
 reference-only secret metadata. Preflight errors prevent rendering and warnings
 allow it.
 
+The canonical manifest includes declared bandwidth minimums and maximums.
+Preflight warns at each bound. The consumer must provide networking and enforce
+the requested bounds before admission. A host TAP gives the operator a shaping
+point. Minimums additionally require capacity reservations and scheduling at
+shared bottlenecks.
+
 MicroVM.nix documents the native guest and runner options in its
 [configuration reference](https://microvm-nix.github.io/microvm.nix/options.html).

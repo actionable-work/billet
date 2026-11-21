@@ -161,6 +161,16 @@ reachability additionally depends on the cluster's policies, networking, DNS and
 the destination's readiness.
 [NetworkPolicy behavior](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
+Set `kubernetes.bandwidthProfile = "pod-annotations"` to render declared
+bandwidth maxima on Deployment and Job Pod templates. This profile accepts
+maximums of 1,000 through 1,000,000,000,000,000 bits per second. Verify that the
+cluster's networking plugin enforces the Pod bandwidth annotations on the paths
+your workload uses before deploying. The Kubernetes API can accept the
+annotations even when cluster enforcement is unavailable. Preflight rejects a
+minimum because this profile cannot reserve network capacity. The canonical
+manifest remains available for a consumer that supports reservations.
+[Kubernetes traffic shaping](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#support-traffic-shaping)
+
 Ephemeral claims use `emptyDir` with the declared size limit, backed by memory
 or node disk. Disk size enforcement depends on kubelet accounting. A persistent
 disk claim becomes one PVC shared by the application's replicas, with the

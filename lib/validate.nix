@@ -131,6 +131,15 @@ in
     (unique "network.ports.port" (map (p: p.port) (builtins.attrValues c.network.ports)))
     (map (p: map (key: require "network.privateConnections.${key}" (named p.${key}) "must be an identifier") ["sourceService" "destinationService" "destinationPort"]) c.network.privateConnections)
     (map (nonempty "network.egressRestrictions") c.network.egressRestrictions)
+    (allMap (direction: rates: let
+        field = "network.bandwidth.${direction}";
+        inherit (rates) minBitsPerSecond maxBitsPerSecond;
+      in [
+        (require "${field}.minBitsPerSecond" (minBitsPerSecond == null || minBitsPerSecond > 0) "must be positive")
+        (require "${field}.maxBitsPerSecond" (maxBitsPerSecond == null || maxBitsPerSecond > 0) "must be positive")
+        (require "${field}.minBitsPerSecond" (minBitsPerSecond == null || maxBitsPerSecond == null || minBitsPerSecond <= maxBitsPerSecond) "must not exceed maxBitsPerSecond")
+      ])
+      c.network.bandwidth)
     (allMap (name: s: [
         (require "secrets" (named name) "invalid logical name")
         (nonempty "secrets.${name}.external" s.external)

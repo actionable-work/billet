@@ -1,0 +1,303 @@
+schema_version = 1
+group = "BANDWIDTH"
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-001"
+title = "Omit unconfigured bandwidth (BI001, BI010)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "all network bandwidth fields are omitted or null", system = "Billet", action = "omit network.bandwidth from the canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-002"
+title = "Omit an unconfigured bandwidth direction (BI001, BI010)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "only one direction has a configured bandwidth rate", system = "Billet", action = "omit the unset direction from canonical network.bandwidth" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-003"
+title = "Omit an unconfigured bandwidth bound (BI001, BI010)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "an ingress or egress direction contains just one configured bound", system = "Billet", action = "omit the unset bound from the canonical direction record" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-004"
+title = "Preserve configured bandwidth values (BI001, BI010)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "a definition supplies bandwidth rates", system = "Billet", action = "record each rate as the exact decimal bits-per-second integer in the canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-005"
+title = "Derive the bandwidth reservations requirement (BI004, BI012)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "any bandwidth minimum is set", system = "Billet", action = "include network-bandwidth-reservations in the canonical required capabilities" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-006"
+title = "Derive the bandwidth limits requirement (BI004, BI012)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "any bandwidth maximum is set", system = "Billet", action = "include network-bandwidth-limits in the canonical required capabilities" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-007"
+title = "Reject a non-integer bandwidth rate (BI002)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "a bandwidth rate is supplied as a non-integer and non-null value", system = "Billet", action = "reject the particular bound with a nullable-integer diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-008"
+title = "Reject a nonpositive bandwidth rate (BI002)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "a bandwidth rate is zero or negative", system = "Billet", action = "reject the particular bound with a positive-rate diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-009"
+title = "Reject an inverted bandwidth range (BI002)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "a directional minimum exceeds the maximum in the same direction", system = "Billet", action = "reject the minimum field with a range-order diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-010"
+title = "Reject bandwidth minimums for Kubernetes workloads (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "a Kubernetes workload declares a bandwidth minimum", system = "Billet", action = "refuse to render with an error on each declared minimum" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-011"
+title = "Require opt-in for Kubernetes bandwidth maxima (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "a Kubernetes workload declares a bandwidth maximum without the annotation profile", system = "Billet", action = "refuse to render with a bandwidth profile error" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-012"
+title = "Reject Kubernetes maxima outside the annotation range (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "a declared bandwidth maximum is outside the consumer annotation range", system = "Billet", action = "refuse to render with a range error on each offending maximum" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-013"
+title = "Annotate Kubernetes ingress bandwidth (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "the opted-in workload declares an ingress maximum in range", system = "Billet", action = "write that rate as an exact decimal string in the Pod ingress bandwidth annotation" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-014"
+title = "Annotate Kubernetes egress bandwidth (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "the opted-in workload declares an egress maximum in range", system = "Billet", action = "write that rate as an exact decimal string in the Pod egress bandwidth annotation" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-015"
+title = "Annotate Kubernetes Job Pod templates (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "an opted-in Kubernetes Job declares a bandwidth maximum", system = "Billet", action = "write its bandwidth annotation on the Job Pod template" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-016"
+title = "Keep bandwidth annotations off enclosing Kubernetes objects (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "an opted-in Kubernetes workload includes a bandwidth maximum", system = "Billet", action = "omit bandwidth annotations from the top-level workload, Service and NetworkPolicy metadata" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-017"
+title = "Report the Kubernetes enforcement dependency (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "an opted-in Kubernetes workload declares a bandwidth maximum", system = "Billet", action = "warn that the profile requires a configured networking plugin" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-018"
+title = "Report native Kubernetes bandwidth limit mapping (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "an eligible Kubernetes workload projects a bandwidth maximum", system = "Billet", action = "include network-bandwidth-limits among its native mappings" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-019"
+title = "Report Compose bandwidth as consumer-managed (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a Compose service declares bandwidth bounds", system = "Billet", action = "warn on each configured bound that enforcement requires consumer-managed networking" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-020"
+title = "Scope Compose bundle bandwidth diagnostics (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a Compose bundle member declares bandwidth bounds", system = "Billet", action = "report each consumer-managed bandwidth warning on the corresponding service field" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-021"
+title = "Report microVM bandwidth as consumer-managed (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a Nix microVM guest declares bandwidth bounds", system = "Billet", action = "warn on each configured bound that enforcement requires consumer-managed networking" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-022"
+title = "Scope microVM bundle bandwidth diagnostics (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a Nix microVM bundle member declares bandwidth bounds", system = "Billet", action = "report each consumer-managed bandwidth warning on the corresponding service field" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-023"
+title = "Preserve bandwidth in the Docker image (BI001, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a Docker image includes bandwidth bounds", system = "Billet", action = "embed the exact bandwidth-bearing canonical manifest in the image" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-024"
+title = "Preserve bandwidth in the standalone Compose bundle (BI001, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a standalone Compose bundle includes bandwidth bounds", system = "Billet", action = "package the exact bandwidth-bearing canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-025"
+title = "Preserve bandwidth in a Compose project bundle (BI001, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a Compose project bundle member includes bandwidth bounds", system = "Billet", action = "package that member’s exact bandwidth-bearing canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-026"
+title = "Preserve bandwidth in the standalone microVM bundle (BI001, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a standalone microVM bundle includes bandwidth bounds", system = "Billet", action = "package the exact bandwidth-bearing canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-027"
+title = "Preserve bandwidth in a microVM project bundle (BI001, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a microVM project bundle member includes bandwidth bounds", system = "Billet", action = "package that member’s exact bandwidth-bearing canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-028"
+title = "Preserve bandwidth maxima in the Kubernetes bundle (BI001, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "a Kubernetes bundle member declares supported bandwidth maxima", system = "Billet", action = "package its exact bandwidth-bearing canonical manifest" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-029"
+title = "Qualify aggregate same-node Kubernetes ingress limits (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#qualification"
+ears = { type = "event", trigger = "a saturated bandwidth fixture uses direct IPv4/TCP between the workload Pod address and a Pod on the same node", system = "Billet", action = "produce a Pod whose configured ingress maximum is observed across concurrent flows in the qualified cluster profile" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-030"
+title = "Qualify aggregate same-node Kubernetes egress limits (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#qualification"
+ears = { type = "event", trigger = "a saturated bandwidth fixture uses direct IPv4/TCP between the workload Pod address and a Pod on the same node", system = "Billet", action = "produce a Pod whose configured egress maximum is observed across concurrent flows in the qualified cluster profile" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-031"
+title = "Qualify aggregate cross-node Kubernetes ingress limits (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#qualification"
+ears = { type = "event", trigger = "a saturated bandwidth fixture uses direct IPv4/TCP between the workload Pod address and a Pod on another node", system = "Billet", action = "produce a Pod whose configured ingress maximum is observed across concurrent flows in the qualified cluster profile" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-032"
+title = "Qualify aggregate cross-node Kubernetes egress limits (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#qualification"
+ears = { type = "event", trigger = "a saturated bandwidth fixture uses direct IPv4/TCP between the workload Pod address and a Pod on another node", system = "Billet", action = "produce a Pod whose configured egress maximum is observed across concurrent flows in the qualified cluster profile" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-033"
+title = "Qualify aggregate external Kubernetes ingress limits (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#qualification"
+ears = { type = "event", trigger = "a saturated bandwidth fixture uses direct IPv4/TCP between the workload Pod address and a host outside the cluster with a route to the Pod subnet", system = "Billet", action = "produce a Pod whose configured ingress maximum is observed across concurrent flows in the qualified cluster profile" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-034"
+title = "Qualify aggregate external Kubernetes egress limits (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#qualification"
+ears = { type = "event", trigger = "a saturated bandwidth fixture uses direct IPv4/TCP between the workload Pod address and a host outside the cluster with a route to the Pod subnet", system = "Billet", action = "produce a Pod whose configured egress maximum is observed across concurrent flows in the qualified cluster profile" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-035"
+title = "Omit unset Kubernetes annotation directions (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "an opted-in workload declares a maximum in just one direction", system = "Billet", action = "omit the opposite Pod bandwidth annotation" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-036"
+title = "Keep Kubernetes bandwidth profile out of canonical IR (BI001, BI010)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "a definition changes only the Kubernetes bandwidth profile setting", system = "Billet", action = "preserve the canonical manifest bytes" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-037"
+title = "Accept equal bandwidth minimum and maximum (BI002)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "a positive directional minimum equals its maximum", system = "Billet", action = "accept and preserve the equal rates" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-038"
+title = "Reject a Kubernetes bundle member bandwidth minimum (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#kubernetes-workload-mapping"
+ears = { type = "event", trigger = "a Kubernetes bundle member requests a minimum", system = "Billet", action = "refuse bundle rendering with a service-scoped minimum diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-039"
+title = "Preserve canonical identity without bandwidth (BI001, BI010)"
+manual = false
+design = "design/network-bandwidth.md#canonical-policy"
+ears = { type = "event", trigger = "a declaration explicitly sets every supplied bandwidth bound to null", system = "Billet", action = "produce the same canonical bytes and digest as when every bandwidth field is omitted" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-040"
+title = "Omit native Compose bandwidth capabilities (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a Compose service or bundle reports consumer-managed bandwidth bounds", system = "Billet", action = "keep the bandwidth requirements out of the native capability list" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-041"
+title = "Omit native microVM bandwidth capabilities (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a Nix microVM guest or bundle reports consumer-managed bandwidth bounds", system = "Billet", action = "keep the bandwidth requirements out of the native capability list" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-042"
+title = "Keep Compose artifacts eligible with bandwidth warnings (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a valid Compose service or bundle needs consumer-managed bandwidth", system = "Billet", action = "report the artifact as eligible to render" }
+
+[[requirements]]
+id = "BILLET-IR-BANDWIDTH-043"
+title = "Keep microVM artifacts eligible with bandwidth warnings (BI004, BI011)"
+manual = false
+design = "design/network-bandwidth.md#consumer-managed-networking"
+ears = { type = "event", trigger = "a valid Nix microVM guest or bundle needs consumer-managed bandwidth", system = "Billet", action = "report the artifact as eligible to render" }

@@ -86,6 +86,12 @@
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes-vm.test.nix {
             inherit pkgs billetLib;
           })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./bandwidth.test.nix {
+            inherit pkgs billetLib;
+          })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes-bandwidth.test.nix {
+            inherit pkgs billetLib;
+          })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./microvm.test.nix {
             inherit pkgs billetLib;
           })

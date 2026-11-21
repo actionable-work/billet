@@ -73,6 +73,11 @@ The image is configured from the definition:
 `docker run` arguments after the image name replace `process.argv`, as with any
 image.
 
+The image carries bandwidth minimums and maximums in
+`/etc/billet/manifest.json`. Enforcing those rates requires operator-managed
+networking at the container boundary. Minimums also require capacity admission
+and scheduling at shared bottlenecks.
+
 Docker doesn't read the rest of the definition. Apply resources, ports, and
 secrets with `docker run` options. For example, with the secret value in
 `./database`:

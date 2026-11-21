@@ -133,6 +133,7 @@
     (warning "UnsupportedComposeInitialization" "initialization.steps" "initialization-every-start" "Compose cannot run these steps in the application container on every start")
     ++ mapAttrsToList (name: _: warning "ComposeInternalPort" "network.ports.${name}.exposure" "network-ports" "Docker does not publish ports for a container attached only to an internal network")
     (filterAttrs (_: port: port.exposure == "public" && !network.publicEgress) network.ports)
+    ++ import ./consumer-bandwidth-diagnostics.nix {inherit lib;} network "ComposeBandwidth"
     ++ mapAttrsToList (name: _: warning "ComposeOptionalFileSecret" "secrets.${name}.required" "runtime-secrets" "Compose requires the host variable to be set for a file source; use an empty value to omit delivery")
     (filterAttrs (_: secret: !secret.required) fileSecrets)
     ++ mapAttrsToList (name: _: warning "ComposeDiskQuota" "storage.${name}.sizeBytes" "storage" "Compose local volumes do not have a size limit")

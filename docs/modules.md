@@ -33,11 +33,12 @@ budget affects layer grouping and image tags.
 
 These settings apply to the Kubernetes artifacts.
 
-| Field             | Default        | Description                                                                                     |
-| ----------------- | -------------- | ----------------------------------------------------------------------------------------------- |
-| `namespace`       | `null`         | Namespace written into each namespaced resource. With `null`, the Kubernetes client selects it. |
-| `createNamespace` | `false`        | Include a Namespace object for the explicitly set namespace.                                    |
-| `workload`        | `"deployment"` | Select `"job"` for a one-shot workload with one replica.                                        |
+| Field              | Default        | Description                                                                                     |
+| ------------------ | -------------- | ----------------------------------------------------------------------------------------------- |
+| `namespace`        | `null`         | Namespace written into each namespaced resource. With `null`, the Kubernetes client selects it. |
+| `createNamespace`  | `false`        | Include a Namespace object for the explicitly set namespace.                                    |
+| `workload`         | `"deployment"` | Select `"job"` for a one-shot workload with one replica.                                        |
+| `bandwidthProfile` | `null`         | Set to `"pod-annotations"` to render bandwidth maxima on a cluster configured to enforce them.  |
 
 See
 [Kubernetes namespace setup](runtimes/kubernetes.md#namespace-and-other-dependencies).
@@ -138,6 +139,26 @@ Steps the definition requests before the primary process on every start.
 | `privateConnections` | `[]`    | Requested connections, each with `sourceService`, `destinationService`, `destinationPort`, and `protocol`. |
 | `publicEgress`       | `true`  | Allow outbound internet access.                                                                            |
 | `egressRestrictions` | `[]`    | Egress restrictions.                                                                                       |
+| `bandwidth`          | `{}`    | Optional per-replica network bandwidth reservations and limits.                                            |
+
+The `ingress` and `egress` records under `network.bandwidth` each accept
+`minBitsPerSecond` and `maxBitsPerSecond`. Each field defaults to `null` and
+accepts a positive integer in decimal bits per second. A minimum must be at most
+the maximum when both are set in the same direction.
+
+```nix
+network.bandwidth.ingress = {
+  minBitsPerSecond = 100000000;
+  maxBitsPerSecond = 500000000;
+};
+```
+
+A minimum requires the runtime to reserve capacity and schedule traffic under
+contention within its supported network domain. A maximum caps sustained traffic
+with runtime-specific burst behavior. Rates apply to the aggregate of
+connections in each direction per replica. The manifest derives
+`network-bandwidth-reservations` for minimums and `network-bandwidth-limits` for
+maximums.
 
 ## `secrets`
 

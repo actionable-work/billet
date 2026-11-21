@@ -55,6 +55,9 @@ No application-list, supervisor or guest-module escape hatch exists. Workers may
 be children of the primary and share its lifecycle/resources. An application
 wrapper cannot turn independent applications into one supported Billet.
 
+Optional network rates follow the
+[bandwidth contract](network-bandwidth.md#canonical-policy).
+
 ## OCI packaging options
 
 `oci.imageName` names the image repository. It accepts lowercase path components

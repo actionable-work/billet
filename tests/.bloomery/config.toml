@@ -82,9 +82,19 @@ enable = true
 enable = true
 
 [checks.specifications.testExceptions.acceptance_fixtures]
-maxRequirements = 60
+maxRequirements = 63
 path = "acceptance.test.nix"
 reason = "This file exports separate CLI, executable, IR, rejection diagnostic, and closure checks with distinct assertions. The IR contract design identifies the rejection and golden witnesses."
+
+[checks.specifications.testExceptions.bandwidth_artifacts]
+maxRequirements = 34
+path = "bandwidth.test.nix"
+reason = "Separate derivations assert canonical IR, Kubernetes rendering, consumer diagnostics, and byte comparisons for each packaged manifest. The bandwidth design identifies the witnesses."
+
+[checks.specifications.testExceptions.bandwidth_vm]
+maxRequirements = 6
+path = "kubernetes-bandwidth.test.nix"
+reason = "The K3s VM measures each direction on each network path in a separate subtest, with an uncapped baseline and three parallel flows per measurement."
 
 [checks.specifications.testExceptions.compose_vm]
 maxRequirements = 75

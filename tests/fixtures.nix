@@ -66,6 +66,22 @@
       modules = [module];
     };
   invalid = {
+    bandwidthMinimumType = lib.recursiveUpdate base {network.bandwidth.ingress.minBitsPerSecond = "DO-NOT-ECHO-SECRET";};
+    bandwidthMaximumType = lib.recursiveUpdate base {network.bandwidth.egress.maxBitsPerSecond = 1.5;};
+    bandwidthZero = lib.recursiveUpdate base {network.bandwidth.egress.minBitsPerSecond = 0;};
+    bandwidthNegative = lib.recursiveUpdate base {network.bandwidth.ingress.maxBitsPerSecond = -1;};
+    bandwidthIngressOrder = lib.recursiveUpdate base {
+      network.bandwidth.ingress = {
+        minBitsPerSecond = 2;
+        maxBitsPerSecond = 1;
+      };
+    };
+    bandwidthEgressOrder = lib.recursiveUpdate base {
+      network.bandwidth.egress = {
+        minBitsPerSecond = 2;
+        maxBitsPerSecond = 1;
+      };
+    };
     schemaVersion = base // {schemaVersion = 0;};
     unknown = base // {applications = ["another"];};
     wrongType = lib.recursiveUpdate base {resources.cpuLimit = "DO-NOT-ECHO-SECRET";};

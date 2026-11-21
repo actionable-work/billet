@@ -52,6 +52,10 @@
             else command p.command;
         })
     c.probes;
+    bandwidth = lib.filterAttrs (_: rates: rates != {}) (
+      lib.mapAttrs (_: lib.filterAttrs (_: rate: rate != null)) c.network.bandwidth
+    );
+    hasBandwidthBound = bound: builtins.any (rates: builtins.hasAttr bound rates) (builtins.attrValues bandwidth);
     capabilities =
       ["resources" "process-tree-cleanup" "shutdown" "rolling-rollout" "readiness-hold" "rollout-deadline"]
       ++ lib.optional c.restart.enabled "bounded-durable-restart"
@@ -62,6 +66,8 @@
       ++ lib.optional (c.network.ports != {}) "network-ports"
       ++ lib.optional (c.network.privateConnections != []) "directional-private-network-policy"
       ++ lib.optional (!c.network.publicEgress || c.network.egressRestrictions != []) "egress-policy"
+      ++ lib.optional (hasBandwidthBound "minBitsPerSecond") "network-bandwidth-reservations"
+      ++ lib.optional (hasBandwidthBound "maxBitsPerSecond") "network-bandwidth-limits"
       ++ lib.optional (c.resources.replicas.min != 1 || c.resources.replicas.max != 1 || c.resources.targetMetric != null) "scaling"
       ++ lib.optional (c.resources.placement != [] || c.resources.strictSingleton) "placement"
       ++ map (s: "storage-${s.lifecycle}-${s.medium}") (builtins.attrValues c.storage);
@@ -78,11 +84,12 @@
       inherit probes;
       restart = c.restart // {triggers = sorted c.restart.triggers;};
       network =
-        c.network
+        (removeAttrs c.network ["bandwidth"])
         // {
           egressRestrictions = sorted c.network.egressRestrictions;
           privateConnections = lib.sort (a: b: builtins.toJSON a < builtins.toJSON b) (lib.unique c.network.privateConnections);
-        };
+        }
+        // lib.optionalAttrs (bandwidth != {}) {inherit bandwidth;};
       requiredCapabilities = sorted (c.requiredCapabilities ++ capabilities);
     };
     canonicalJSON = builtins.toJSON ir;
