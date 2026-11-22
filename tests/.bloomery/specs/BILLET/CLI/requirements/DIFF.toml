@@ -1,0 +1,128 @@
+schema_version = 1
+group = "DIFF"
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-001"
+title = "Recognize equivalent manifest JSON (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#comparing-manifests"
+ears = { type = "event", trigger = "two supported manifest files differ only by object key order or whitespace", system = "Billet", action = "output an empty JSON array and exit zero without invoking Nix" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-002"
+title = "Report replacement of a manifest value (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#comparing-manifests"
+ears = { type = "event", trigger = "a field's value changes in two supported manifests", system = "Billet", action = "output a replace operation at its path and exit one" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-003"
+title = "Escape manifest pointers (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#comparing-manifests"
+ears = { type = "event", trigger = "a changed manifest key contains a slash or tilde", system = "Billet", action = "escape the key in the reported path using RFC 6901" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-004"
+title = "Report a changed manifest array as one value (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#comparing-manifests"
+ears = { type = "event", trigger = "an array's contents change order", system = "Billet", action = "emit one replace operation at the array's path" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-005"
+title = "Report an added manifest field (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#comparing-manifests"
+ears = { type = "event", trigger = "a field is present only in the later manifest", system = "Billet", action = "emit an add operation at the added field's path" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-006"
+title = "Report a removed manifest field (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#comparing-manifests"
+ears = { type = "event", trigger = "a field is present only in the earlier manifest", system = "Billet", action = "emit a remove operation at the removed field's path" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-007"
+title = "Report manifest changes in deterministic order (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#comparing-manifests"
+ears = { type = "event", trigger = "multiple fields change in a manifest object", system = "Billet", action = "report their changes in lexical order by field name" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-008"
+title = "Reject incorrect manifest diff arity (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#reading-manifests"
+ears = { type = "event", trigger = "manifest diff receives other than two file arguments", system = "Billet", action = "exit two with usage on stderr and empty stdout" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-009"
+title = "Report unavailable manifest files (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#reading-manifests"
+ears = { type = "event", trigger = "either manifest file cannot be opened", system = "Billet", action = "exit two with the affected input side on stderr and empty stdout" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-010"
+title = "Reject malformed manifest JSON (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#reading-manifests"
+ears = { type = "event", trigger = "a manifest file is malformed JSON", system = "Billet", action = "exit two with the affected input side on stderr and empty stdout" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-011"
+title = "Reject a non-object manifest (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#reading-manifests"
+ears = { type = "event", trigger = "a manifest file parses as a non-object JSON value", system = "Billet", action = "exit two with the affected input side on stderr and empty stdout" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-012"
+title = "Reject unsupported diff schema versions (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#reading-manifests"
+ears = { type = "event", trigger = "a manifest schema version is absent or is not integer one", system = "Billet", action = "exit two with the schema version field and affected input side on stderr and empty stdout" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-013"
+title = "Reject unsupported diff normalization versions (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#reading-manifests"
+ears = { type = "event", trigger = "a manifest normalization version is absent or is not integer one", system = "Billet", action = "exit two with the normalization version field and affected input side on stderr and empty stdout" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-014"
+title = "Keep manifest values out of a diff (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#comparing-manifests"
+ears = { type = "event", trigger = "manifest diff reports operations", system = "Billet", action = "write only change operations and paths to stdout" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-015"
+title = "Compare signed 64-bit numbers exactly (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#comparing-manifests"
+ears = { type = "event", trigger = "supported manifests differ by one at a signed 64-bit integer field", system = "Billet", action = "report a change at that field without rounding" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-016"
+title = "Reject unsupported manifest number tokens (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#reading-manifests"
+ears = { type = "event", trigger = "a decoded manifest number is outside the signed 64-bit integer range or uses noncanonical integer syntax", system = "Billet", action = "exit two with the input side on stderr and empty stdout" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-017"
+title = "Open native manifest file paths (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#reading-manifests"
+ears = { type = "event", trigger = "diff receives filenames valid on the filesystem but not representable as UTF-8", system = "Billet", action = "open those paths using the original operating system arguments" }
+
+[[requirements]]
+id = "BILLET-CLI-DIFF-018"
+title = "Reject duplicate manifest object fields (BI003, BI010)"
+manual = false
+design = "design/manifest-diff.md#reading-manifests"
+ears = { type = "event", trigger = "a manifest JSON object contains the same decoded field name twice", system = "Billet", action = "exit two with the input side on stderr and empty stdout" }

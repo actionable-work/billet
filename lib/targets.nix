@@ -42,7 +42,9 @@
     manifestDigest,
     image,
     mapping,
-  }: {
+  }: let
+    canRender = image.supported && lib.all (item: (item.severity or "warning") != "error") mapping.diagnostics;
+  in {
     schemaVersion = 1;
     target = "dockerCompose";
     profile = "compose-artifact-v1";
@@ -53,10 +55,10 @@
     inherit manifestDigest image;
     requiredCapabilities = ir.requiredCapabilities;
     supportedCapabilities =
-      if image.supported
+      if canRender
       then mapping.supportedCapabilities
       else [];
-    canRender = image.supported;
+    inherit canRender;
     diagnostics = image.diagnostics ++ mapping.diagnostics;
   };
 }

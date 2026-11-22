@@ -79,6 +79,13 @@ references across both spellings and verifies precedence for an explicit
 
 ## Validation and runtime boundary
 
+When `initialization.steps` is empty, require `initialization.budgetSeconds=0`.
+Reject a positive unused budget at that field without echoing its value. This
+does not alter default canonical bytes or valid nonempty initialization budgets.
+`billet:rejection-diagnostics` evaluates the `unusedInitBudget` fixture in a
+separate evaluator. It checks the field, reason and absence of the rejected
+value for `VALIDATION-032`.
+
 Validation is deterministic and fails before producing artifacts on unknown
 fields, unsupported schema, invalid executable syntax, duplicate IDs/ports,
 conflicting mounts/delivery targets, missing probe ports, bad budgets/resources,

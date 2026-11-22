@@ -105,6 +105,13 @@ The `requiredCapabilities` field lists what a runtime must provide to run the
 service as declared, such as `resources`, `shutdown`, or `rolling-rollout`.
 Adding probes, secrets, ports, or storage adds to that list.
 
+To compare two saved manifests from the Billet repository root, run
+`nix run ./tests#billet -- diff before.json after.json`. The command prints a
+JSON array of changed paths and operations. It exits `0` for equivalent
+manifests, `1` for changes, and `2` for invalid input or usage. It accepts
+manifest schema and normalization version `1` with canonical signed 64-bit
+integer numbers and unique names within each JSON object.
+
 ## 5. Inspect the runtime closure
 
 <!-- doctest: getting-started-closure -->

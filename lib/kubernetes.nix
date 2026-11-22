@@ -152,6 +152,12 @@
     (warning "KubernetesPodInitialization" "initialization-every-start" "initialization.steps" "init containers run on Pod initialization with separate writable root filesystems; container restarts and declared step timeouts are outside this mapping")
     ++ lib.optional (ir.shutdown.stopSignal != "SIGTERM")
     (warning "KubernetesImageStopSignal" "shutdown" "shutdown.stopSignal" "the container runtime must honor the image stop signal")
+    ++ lib.optional (ir.shutdown.stopGracePeriodSeconds < 2)
+    (warning "KubernetesMinimumShutdownGrace" "shutdown-grace-period" "shutdown.stopGracePeriodSeconds" "kubelet gives the container runtime at least two seconds for shutdown")
+    # The default kubelet CRI timeout adds 120 seconds to a signed nanosecond duration.
+    ++ lib.optional (ir.shutdown.stopGracePeriodSeconds > 9223372036 - 120)
+    (error "KubernetesShutdownDuration" "shutdown-grace-period" "shutdown.stopGracePeriodSeconds" "exceeds the shutdown range with the default kubelet CRI request timeout")
+    ++ import ./container-mount-diagnostics.nix {inherit lib;} ir
     ++ lib.mapAttrsToList (direction: _: error "KubernetesBandwidthReservation" "network-bandwidth-reservations" "network.bandwidth.${direction}.minBitsPerSecond" "the Kubernetes workload profile cannot reserve network bandwidth")
     (lib.filterAttrs (_: rates: rates ? minBitsPerSecond) bandwidth)
     ++ lib.concatLists (lib.mapAttrsToList (direction: rate:
@@ -331,26 +337,27 @@
     kind = "Namespace";
     metadata.name = namespace;
   };
-  configuration =
+  requireRenderable = value:
     if capabilityReport.canRender
-    then {
-      apiVersion = "v1";
-      kind = "List";
-      items =
-        namespaceResource
-        ++ map (item:
-          item
-          // lib.optionalAttrs (namespace != null) {
-            metadata = item.metadata // {inherit namespace;};
-          })
-        namespacedResources;
-    }
+    then value
     else throw ("billet: UnsupportedTarget kubernetes: " + lib.concatMapStringsSep "; " (item: "${item.field}: ${item.reason}") errors);
-  file = pkgs.writeText "kubernetes.json" (builtins.unsafeDiscardStringContext (builtins.toJSON configuration) + "\n");
-  bundle = pkgs.runCommand "billet-${identity.name}-kubernetes-v1" {} ''
+  configuration = requireRenderable {
+    apiVersion = "v1";
+    kind = "List";
+    items =
+      namespaceResource
+      ++ map (item:
+        item
+        // lib.optionalAttrs (namespace != null) {
+          metadata = item.metadata // {inherit namespace;};
+        })
+      namespacedResources;
+  };
+  file = requireRenderable (pkgs.writeText "kubernetes.json" (builtins.unsafeDiscardStringContext (builtins.toJSON configuration) + "\n"));
+  bundle = requireRenderable (pkgs.runCommand "billet-${identity.name}-kubernetes-v1" {} ''
     mkdir -p "$out"
     cp ${file} "$out/kubernetes.json"
     cp ${oci.archive} "$out/image.tar"
     cp ${billet.manifest} "$out/manifest.json"
-  '';
+  '');
 in {inherit configuration file bundle capabilityReport;}

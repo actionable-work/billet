@@ -651,3 +651,45 @@ title = "Carry stop settings into the updated Compose service (BI004, BI011)"
 manual = false
 design = "design/targets.md#qualification"
 ears = { type = "event", trigger = "the second version of a Billet is rendered for Compose", system = "Billet", action = "render its declared stop signal and grace period in the configuration accepted by the consumer" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-094"
+title = "Reject an out-of-range Compose shutdown grace (BI004, BI011, BI016)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "a shutdown grace mapped to Compose exceeds 9223372036 seconds", system = "Billet", action = "refuse Compose artifacts with a duration range error at shutdown.stopGracePeriodSeconds" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-095"
+title = "Reject an out-of-range Compose exec health check interval (BI004, BI005, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an exec health check interval mapped to Compose exceeds 9223372036 seconds", system = "Billet", action = "refuse Compose artifacts with a duration range error at probes.<role>.intervalSeconds" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-096"
+title = "Reject an out-of-range Compose exec health check timeout (BI004, BI005, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an exec health check timeout mapped to Compose exceeds 9223372036 seconds", system = "Billet", action = "refuse Compose artifacts with a duration range error at probes.<role>.timeoutSeconds" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-097"
+title = "Render the maximum Compose shutdown grace (BI004, BI011, BI016)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "a shutdown grace mapped to Compose equals 9223372036 seconds", system = "Billet", action = "emit stop_grace_period as a duration the pinned Compose consumer parses as 9223372036 seconds" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-098"
+title = "Render the maximum Compose exec health check interval (BI004, BI005, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an exec health check interval mapped to Compose equals 9223372036 seconds", system = "Billet", action = "emit healthcheck.interval as a duration the pinned Compose consumer parses as 9223372036 seconds" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-099"
+title = "Render the maximum Compose exec health check timeout (BI004, BI005, BI011)"
+manual = false
+design = "design/targets.md#compose-lifecycle"
+ears = { type = "event", trigger = "an exec health check timeout mapped to Compose equals 9223372036 seconds", system = "Billet", action = "emit healthcheck.timeout as a duration the pinned Compose consumer parses as 9223372036 seconds" }

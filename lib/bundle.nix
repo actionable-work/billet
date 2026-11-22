@@ -17,7 +17,9 @@
       ++ lib.optional (ir.system != system)
       (diagnostic "BundleMemberSystemMismatch" "services.${name}.system" "the member must match the selected package-set system"))
     members);
+  linkDiagnostics = import ./bundle-link-diagnostics.nix {inherit lib;} members;
   context = {inherit pkgs billets members system structureDiagnostics;};
+  containerContext = context // {inherit linkDiagnostics;};
 in {
   inherit billets;
   validationCheck =
@@ -29,8 +31,8 @@ in {
           builtins.unsafeDiscardStringContext (builtins.toJSON (lib.mapAttrs (_: billet: billet.manifestDigest) billets)) + "\n"
         )
       );
-  dockerCompose = import ./compose-bundle.nix context;
-  kubernetes = import ./kubernetes-bundle.nix context;
+  dockerCompose = import ./compose-bundle.nix containerContext;
+  kubernetes = import ./kubernetes-bundle.nix containerContext;
   microvm = import ./microvm-bundle.nix (context
     // {
       microvm = microvmInput;

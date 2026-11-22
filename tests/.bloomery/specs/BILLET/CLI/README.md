@@ -8,3 +8,5 @@ description: Repository-owned Billet specification and acceptance requirements.
 # CLI
 
 Billet public cli contracts. See [design](design/contract.md).
+
+[Semantic manifest diff](design/manifest-diff.md).

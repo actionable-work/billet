@@ -1,6 +1,10 @@
 //! Thin, shell-free tooling for the Nix-owned Billet contract.
 
-use std::process::Command;
+mod manifest_diff;
+
+use std::{ffi::OsString, process::Command};
+
+const USAGE: &str = "usage: billet <validate|manifest|closure|image|layout|compose|capabilities> INSTALLABLE\n       billet diff BEFORE.json AFTER.json";
 
 /// A validated Nix command. Arguments are never interpreted by a shell.
 #[derive(Debug, PartialEq, Eq)]
@@ -11,8 +15,6 @@ pub struct Invocation {
 
 /// Build a Nix invocation from exactly one action and one installable.
 pub fn invocation(args: &[String]) -> Result<Invocation, &'static str> {
-    const USAGE: &str =
-        "usage: billet <validate|manifest|closure|image|layout|compose|capabilities> INSTALLABLE";
     if args.len() != 2 || args[1].is_empty() || args[1].starts_with('-') {
         return Err(USAGE);
     }
@@ -37,9 +39,18 @@ pub fn invocation(args: &[String]) -> Result<Invocation, &'static str> {
     Ok(Invocation { args: result })
 }
 
-/// Execute Nix, inheriting its diagnostics and output, and preserve its exit code.
-pub fn run(args: &[String]) -> i32 {
-    let invocation = match invocation(args) {
+/// Compare manifest files or execute Nix and preserve its exit code.
+pub fn run(args: &[OsString]) -> i32 {
+    if let [action, files @ ..] = args
+        && action == "diff"
+    {
+        return manifest_diff::run(files);
+    }
+    let text_args: Option<Vec<String>> = args
+        .iter()
+        .map(|arg| arg.to_str().map(str::to_owned))
+        .collect();
+    let invocation = match text_args.as_deref().ok_or(USAGE).and_then(invocation) {
         Ok(invocation) => invocation,
         Err(message) => {
             eprintln!("{message}");

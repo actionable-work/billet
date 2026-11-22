@@ -80,11 +80,11 @@ The single primary process. Additional workers run as its children.
 
 Steps the definition requests before the primary process on every start.
 
-| Field                     | Default | Description                                                                   |
-| ------------------------- | ------- | ----------------------------------------------------------------------------- |
-| `steps`                   | `[]`    | Each step has an `id`, `package`, `executable`, `argv`, and `timeoutSeconds`. |
-| `budgetSeconds`           | `0`     | Total time for all steps. Required when there are steps.                      |
-| `startupAllowanceSeconds` | `30`    | Upper bound for `budgetSeconds`.                                              |
+| Field                     | Default | Description                                                                           |
+| ------------------------- | ------- | ------------------------------------------------------------------------------------- |
+| `steps`                   | `[]`    | Each step has an `id`, `package`, `executable`, `argv`, and `timeoutSeconds`.         |
+| `budgetSeconds`           | `0`     | Total time for all steps. Required with steps and must be zero when `steps` is empty. |
+| `startupAllowanceSeconds` | `30`    | Upper bound for `budgetSeconds`.                                                      |
 
 ## `probes`
 

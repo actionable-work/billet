@@ -44,6 +44,10 @@
             inherit pkgs billetLib harness;
             cli = packages.billet;
           })
+          // (import ./manifest-diff.test.nix {
+            inherit pkgs;
+            cli = packages.billet;
+          })
           // (import ./oci.test.nix {inherit pkgs billetLib harness;})
           // (import ./image-name.test.nix {inherit pkgs billetLib harness;})
           // (import ./service-validation.test.nix {inherit pkgs billetLib;})
@@ -92,6 +96,9 @@
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes-bandwidth.test.nix {
             inherit pkgs billetLib;
           })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./consumer-boundaries.test.nix {
+            inherit pkgs billetLib;
+          })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./microvm.test.nix {
             inherit pkgs billetLib;
           })
@@ -106,6 +113,10 @@
             catalogReport = catalogBillets.catalog-report.dockerCompose.bundle;
             catalogExecutable = "${catalogPackage}/bin/catalog";
           })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux
+          (import ./compose-duration.test.nix {
+            inherit pkgs billetLib harness;
+          }).checks
           // (import ./docs.test.nix {
             inherit pkgs billet bloomery nixpkgs;
             doctest = packages.billet-doctest;

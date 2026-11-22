@@ -220,3 +220,10 @@ title = "Omit the canary from every rejection diagnostic (BI002)"
 manual = false
 design = "design/contract.md#rejection-diagnostics"
 ears = { type = "event", trigger = "any invalid acceptance fixture is rejected", system = "Billet", action = "emit error output that does not contain the DO-NOT-ECHO-SECRET canary" }
+
+[[requirements]]
+id = "BILLET-IR-VALIDATION-032"
+title = "Reject an unused initialization budget (BI002, BI013)"
+manual = false
+design = "design/contract.md#validation-and-runtime-boundary"
+ears = { type = "event", trigger = "initialization.steps is empty and initialization.budgetSeconds is positive", system = "Billet", action = "fail IR evaluation at initialization.budgetSeconds with the reason that the budget must be zero when no steps are declared" }

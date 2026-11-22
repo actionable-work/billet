@@ -12,6 +12,7 @@ billet_core = { default-features = false, path = "packages/rust/billet_core" }
 flate2 = { default-features = false, features = [
   "rust_backend",
 ], version = "1" }
+serde = { default-features = false, features = ["std"], version = "1" }
 serde_json = { default-features = false, features = ["std"], version = "1" }
 sha2 = { default-features = false, features = ["std"], version = "0.10" }
 tar = { default-features = false, version = "0.4" }

@@ -47,10 +47,20 @@ policies.
 
 ### Compose lifecycle
 
-Render `stop_signal` and `stop_grace_period` from shutdown settings. Render
-`restart: on-failure:N` for enabled unexpected-exit retries with a positive
-limit. Exit code zero ends the container. Disabled restart, zero retries, or a
-policy without unexpected-exit uses `restart: "no"`. Startup- and
+Render `stop_signal` and `stop_grace_period` from shutdown settings. The native
+duration range for whole seconds is 0 through 9223372036, inclusive. Reject a
+larger shutdown grace at `shutdown.stopGracePeriodSeconds` with an error before
+selecting a configuration, file or bundle. For the selected exec health probe,
+reject an interval or timeout above that same maximum at its
+`probes.<role>.intervalSeconds` or `probes.<role>.timeoutSeconds` path. Preserve
+the generic IR's broader integer range and do not reject an unmapped probe's
+timings solely for Compose representability. Bundle diagnostics retain the
+member service prefix. An unrepresentable direct mapping makes `canRender=false`
+and advertises no supported capabilities; it must not be silently clamped.
+
+Render `restart: on-failure:N` for enabled unexpected-exit retries with a
+positive limit. Exit code zero ends the container. Disabled restart, zero
+retries, or a policy without unexpected-exit uses `restart: "no"`. Startup- and
 liveness-failure restart triggers, backoff, jitter, the ready-reset window and
 rollout remain manifest policies.
 
@@ -161,8 +171,9 @@ IR-required capabilities for the consumer and lists supported native Compose
 mappings for the rendered configuration. The supported list does not establish
 conformance to the full IR capabilities. Image diagnostics for unsupported
 systems or users prevent rendering. Field-scoped mapping limitations have
-`severity = "warning"` and allow rendering. Evaluating a supported configuration
-or report does not realize the application package.
+`severity = "warning"` when rendering can proceed. Unrepresentable direct
+duration mappings have `severity = "error"` and prevent rendering. Evaluating a
+configuration or report does not realize the application package.
 
 ## Cross-system evaluation
 
@@ -251,3 +262,20 @@ number refers to a `BILLET-IR-TARGETS` record.
 | 072–074      | Native capabilities per service and across the bundle, required capability union, and successful rendering with warnings.                                                                                      |
 | 075–081      | Manifest retains directional links, egress restrictions, rollout, placement, singleton, target metric and restart timing. The rendered service contains only their applicable native directives.               |
 | 092–093      | The second `up` replaces the first container with one from the second image whose output reports the second argv. The parsed and inspected second service carry the declared stop signal and grace period.     |
+
+`tests/compose-duration.test.nix` qualifies the whole-second boundary with a
+fixture whose application image cannot build. Each check separately asserts the
+mapped value, evaluates refusal at maximum plus one on all Compose selectors,
+checks standalone and service-scoped diagnostics, and runs the pinned Compose
+CLI on the maximum.
+
+For records 094–096, `billet:compose-duration-diagnostics` also checks the exact
+exception on each configuration, file and bundle selector in a separate
+evaluator. Its bundle has a valid peer and a member with invalid durations. The
+expected error lists every offending field and applies the member prefix.
+
+| Records  | Witness                                                                                                                                                                                                                                      |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 094, 097 | `billet:compose-duration-grace` checks the standalone and bundle grace error and parses the maximum grace in standalone and bundle files.                                                                                                    |
+| 095, 098 | `billet:compose-duration-interval` checks the selected readiness and fallback liveness interval errors and parses the maximum healthcheck interval.                                                                                          |
+| 096, 099 | `billet:compose-duration-timeout` checks the selected readiness and fallback liveness timeout errors and parses the maximum healthcheck timeout. The overflow fixtures also exceed the interval bound to satisfy the portable ordering rule. |
