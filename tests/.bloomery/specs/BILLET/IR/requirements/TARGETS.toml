@@ -693,3 +693,17 @@ title = "Render the maximum Compose exec health check timeout (BI004, BI005, BI0
 manual = false
 design = "design/targets.md#compose-lifecycle"
 ears = { type = "event", trigger = "an exec health check timeout mapped to Compose equals 9223372036 seconds", system = "Billet", action = "emit healthcheck.timeout as a duration the pinned Compose consumer parses as 9223372036 seconds" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-100"
+title = "Mark bundle structure errors with error severity (BI004, BI011)"
+manual = false
+design = "design/targets.md#multi-service-bundles"
+ears = { type = "event", trigger = "a bundle is empty or has a member key or system mismatch", system = "Billet", action = "report the structure diagnostic with error severity in the Compose, Kubernetes and microVM bundle capability reports" }
+
+[[requirements]]
+id = "BILLET-IR-TARGETS-101"
+title = "Mark image eligibility errors with error severity (BI004, BI011)"
+manual = false
+design = "design/targets.md#artifact-preflight"
+ears = { type = "event", trigger = "the OCI adapter cannot package the declared process user", system = "Billet", action = "report UnsupportedImageUser with error severity in the OCI eligibility report and in the Compose and Kubernetes capability reports" }

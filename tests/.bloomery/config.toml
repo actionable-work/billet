@@ -167,9 +167,9 @@ path = "microvm.test.nix"
 reason = "Each requirement has a keyed configuration assertion or a standalone file comparison that builds with an unrealizable package."
 
 [checks.specifications.testExceptions.oci_fixtures]
-maxRequirements = 34
+maxRequirements = 36
 path = "oci.test.nix"
-reason = "This file exports separate preflight, OCI export, layer budget validation, and layer grouping checks. The OCI design identifies the layer assertions."
+reason = "This file exports separate preflight, OCI export, layer budget validation, and layer grouping checks. The OCI design identifies the layer assertions; the preflight check separately asserts error severity for each bundle structure diagnostic in every bundle report and for the image user diagnostic in each image, Compose and Kubernetes report."
 
 [checks.unusedDependencies]
 enable = true

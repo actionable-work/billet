@@ -101,7 +101,7 @@
       })
     ir.probes);
   diagnostics =
-    map (item: item // {severity = "error";}) imageEligibility.diagnostics
+    imageEligibility.diagnostics
     ++ lib.optional (imageEligibility.supported && builtins.any (id: id > int32Max) userParts)
     (error "KubernetesUserRange" "kubernetes-packaging" "process.user" "UID and GID must fit Kubernetes signed 32-bit identifiers")
     # The controller copies these annotations to ReplicaSets and adds revision

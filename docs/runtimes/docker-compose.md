@@ -19,7 +19,8 @@ nix eval --json .#billets.x86_64-linux.hello.dockerCompose.capabilityReport
 
 The report evaluates without building any packages. `canRender` indicates
 whether Billet can produce the artifacts. When it is `false`, check
-`diagnostics` for packaging or bundle errors. Diagnostics with
+`diagnostics` for packaging or bundle errors. Every diagnostic has a `severity`.
+Diagnostics with `severity = "error"` prevent rendering. Diagnostics with
 `severity = "warning"` describe mapping limitations and allow rendering. For
 example, the hello report warns about CPU reservations and still has
 `canRender = true`.

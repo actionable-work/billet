@@ -8,7 +8,10 @@
 }: let
   system = pkgs.stdenv.hostPlatform.system;
   members = lib.mapAttrs (_: billet: billet.ir) billets;
-  diagnostic = code: field: reason: {inherit code field reason;};
+  diagnostic = code: field: reason: {
+    inherit code field reason;
+    severity = "error";
+  };
   structureDiagnostics =
     lib.optional (billets == {}) (diagnostic "EmptyBilletBundle" "billets" "provide at least one Billet")
     ++ lib.concatLists (lib.mapAttrsToList (name: ir:

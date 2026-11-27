@@ -33,7 +33,7 @@
   };
   renderable =
     capabilityReport.canRender
-    || throw ("billet: UnsupportedTarget dockerCompose: " + formatDiagnostics (builtins.filter (item: (item.severity or "error") == "error") diagnostics));
+    || throw ("billet: UnsupportedTarget dockerCompose: " + formatDiagnostics (builtins.filter (item: item.severity == "error") diagnostics));
   configurations = lib.mapAttrs (_: billet: billet.dockerCompose.configuration) billets;
   merge = field: lib.mergeAttrsList (map (config: config.${field} or {}) (builtins.attrValues configurations));
   secrets = merge "secrets";

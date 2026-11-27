@@ -13,7 +13,7 @@
     inherit ir manifestDigest mapping;
     image = imageEligibility;
   };
-  renderable = capabilityReport.canRender || throw ("billet: UnsupportedTarget dockerCompose: " + lib.concatMapStringsSep "; " (d: "${d.field}: ${d.reason}") (builtins.filter (d: (d.severity or "error") == "error") capabilityReport.diagnostics));
+  renderable = capabilityReport.canRender || throw ("billet: UnsupportedTarget dockerCompose: " + lib.concatMapStringsSep "; " (d: "${d.field}: ${d.reason}") (builtins.filter (d: d.severity == "error") capabilityReport.diagnostics));
   configuration = assert renderable;
     project.configure {
       ${name} =

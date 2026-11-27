@@ -50,10 +50,7 @@
   errors =
     map (item:
       item
-      // {
-        severity = "error";
-        capability = "microvm-packaging";
-      })
+      // {capability = "microvm-packaging";})
     structureDiagnostics
     ++ map (name: error "MicrovmBundleMemberName" "services.${name}.identity.name" "a bundle member name must be a lowercase DNS label starting with a letter and distinct from localhost") (builtins.filter (name: !validName name) names)
     ++ lib.concatMap ({

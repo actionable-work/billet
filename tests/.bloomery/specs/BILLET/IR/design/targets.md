@@ -121,7 +121,9 @@ Billet's canonical application identity. The bundle exposes its members under
 `billets` and uses the same `dockerCompose` output selectors as `mkBillet`. Its
 preflight includes each member's report, the unions of required and supported
 capabilities, and service-scoped diagnostics. An invalid bundle or member
-prevents rendering before any image is built.
+prevents rendering before any image is built. Bundle structure diagnostics for
+an empty bundle, a member key mismatch or a member system mismatch carry error
+severity in the Compose, Kubernetes and microVM bundle reports.
 
 Merge the member services, secret definitions and volume definitions into one
 Compose file, with network membership calculated across the project. Combine
@@ -170,10 +172,12 @@ The versioned capability report measures artifact eligibility. It echoes the
 IR-required capabilities for the consumer and lists supported native Compose
 mappings for the rendered configuration. The supported list does not establish
 conformance to the full IR capabilities. Image diagnostics for unsupported
-systems or users prevent rendering. Field-scoped mapping limitations have
-`severity = "warning"` when rendering can proceed. Unrepresentable direct
-duration mappings have `severity = "error"` and prevent rendering. Evaluating a
-configuration or report does not realize the application package.
+systems or users prevent rendering and have `severity = "error"` in the OCI
+eligibility report and in each Compose and Kubernetes report. Field-scoped
+mapping limitations have `severity = "warning"` when rendering can proceed.
+Unrepresentable direct duration mappings have `severity = "error"` and prevent
+rendering. Evaluating a configuration or report does not realize the application
+package.
 
 ## Cross-system evaluation
 

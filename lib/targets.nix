@@ -11,6 +11,7 @@
     diagnostic = code: field: reason: {
       inherit code field reason;
       capability = "oci-packaging";
+      severity = "error";
     };
     numericUser = builtins.match "(0|[1-9][0-9]*):(0|[1-9][0-9]*)" ir.process.user != null;
     validUser =
@@ -43,7 +44,7 @@
     image,
     mapping,
   }: let
-    canRender = image.supported && lib.all (item: (item.severity or "warning") != "error") mapping.diagnostics;
+    canRender = image.supported && lib.all (item: item.severity != "error") mapping.diagnostics;
   in {
     schemaVersion = 1;
     target = "dockerCompose";

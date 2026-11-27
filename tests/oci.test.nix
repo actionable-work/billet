@@ -42,6 +42,20 @@
     && builtins.any (diagnostic: diagnostic.code == code && diagnostic.field == field) compose.capabilityReport.diagnostics
     && !(builtins.tryEval compose.configuration).success
     && !(builtins.tryEval compose.bundle).success;
+  hasError = report: code:
+    builtins.any (diagnostic: diagnostic.code == code && (diagnostic.severity or null) == "error") report.diagnostics;
+  structureError = billets: code: let
+    grouped = billetLib.mkBilletBundle {inherit pkgs billets;};
+  in
+    builtins.all (target: hasError grouped.${target}.capabilityReport code) ["dockerCompose" "kubernetes" "microvm"];
+  imageError = code:
+    builtins.all (report: hasError report code) [
+      badUser.dockerCompose.capabilityReport.image
+      badUser.dockerCompose.capabilityReport
+      badUser.kubernetes.capabilityReport.image
+      badUser.kubernetes.capabilityReport
+      (composeBundle {${badUser.ir.identity.name} = badUser;}).capabilityReport
+    ];
   reports = {
     full = sample.dockerCompose.capabilityReport;
     trap = trapped.dockerCompose.capabilityReport;
@@ -102,12 +116,16 @@
   assert rejectsBundle {} "EmptyBilletBundle" "billets";
   assert rejectsBundle {wrong = sample;} "BundleMemberNameMismatch" "services.wrong.identity.name";
   assert rejectsBundle {hello = foreign;} "BundleMemberSystemMismatch" "services.hello.system";
+  assert structureError {} "EmptyBilletBundle";
+  assert structureError {wrong = sample;} "BundleMemberNameMismatch";
+  assert structureError {hello = foreign;} "BundleMemberSystemMismatch";
+  assert imageError "UnsupportedImageUser";
   assert rejectsBundle {${badUser.ir.identity.name} = badUser;} "UnsupportedImageUser" "services.${badUser.ir.identity.name}.process.user"; true;
 in
   {
     "billet:compose-preflight" = assert acceptance;
       pkgs.runCommand "billet-compose-preflight" {
-        passthru.bloomery = ["BILLET-IR-TARGETS-001" "BILLET-IR-TARGETS-002" "BILLET-IR-TARGETS-003" "BILLET-IR-TARGETS-004" "BILLET-IR-TARGETS-005" "BILLET-IR-TARGETS-017" "BILLET-IR-TARGETS-018" "BILLET-IR-TARGETS-019" "BILLET-IR-TARGETS-020" "BILLET-IR-TARGETS-021"];
+        passthru.bloomery = ["BILLET-IR-TARGETS-001" "BILLET-IR-TARGETS-002" "BILLET-IR-TARGETS-003" "BILLET-IR-TARGETS-004" "BILLET-IR-TARGETS-005" "BILLET-IR-TARGETS-017" "BILLET-IR-TARGETS-018" "BILLET-IR-TARGETS-019" "BILLET-IR-TARGETS-020" "BILLET-IR-TARGETS-021" "BILLET-IR-TARGETS-100" "BILLET-IR-TARGETS-101"];
         nativeBuildInputs = [pkgs.nix];
         reportsJSON = builtins.unsafeDiscardStringContext (builtins.toJSON reports);
         source = ../.;
