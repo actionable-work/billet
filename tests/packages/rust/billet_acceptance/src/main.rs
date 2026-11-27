@@ -3,6 +3,7 @@ mod cli;
 mod common;
 mod contracts;
 mod diagnostics;
+mod engine;
 mod oci;
 mod smoke;
 
@@ -16,12 +17,13 @@ fn main() {
         Some("closure") => contracts::closure(),
         Some("rejections") => diagnostics::rejections(),
         Some("compose-durations") => diagnostics::compose_durations(),
+        Some("compose-engine-request") if args.len() == 4 => engine::verify(&args[1], &args[2], &args[3]),
         Some("systems") => diagnostics::systems(),
         Some("cli") => cli::verify(),
         Some("preflight") => contracts::preflight(),
         Some("oci") => oci::verify(),
         Some("smoke") if args.len() == 2 => smoke::run(std::path::Path::new(&args[1])),
-        _ => Err("usage: billet-acceptance <ir|diagnose FIXTURE FIELD [REASON]|closure|rejections|compose-durations|systems|cli|preflight|oci|smoke OCI_LAYOUT>".into()),
+        _ => Err("usage: billet-acceptance <ir|diagnose FIXTURE FIELD [REASON]|closure|rejections|compose-durations|compose-engine-request COMPOSE CONFIG ARCH|systems|cli|preflight|oci|smoke OCI_LAYOUT>".into()),
     };
     if let Err(error) = result {
         eprintln!("billet acceptance: {error}");

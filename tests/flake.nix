@@ -97,7 +97,7 @@
             inherit pkgs billetLib;
           })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./consumer-boundaries.test.nix {
-            inherit pkgs billetLib;
+            inherit pkgs billetLib harness;
           })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./microvm.test.nix {
             inherit pkgs billetLib;

@@ -1,6 +1,7 @@
 {
   pkgs,
   billetLib,
+  harness,
 }: let
   inherit (pkgs) lib;
   inherit (import ./fixtures.nix {inherit pkgs billetLib;}) base evaluate;
@@ -152,7 +153,7 @@ in {
     pkgs.runCommand "billet-compose-cpu-engine-request" {
       passthru.bloomery = ["BILLET-IR-CONSUMER-014" "BILLET-IR-CONSUMER-015"];
     } ''
-      ${pkgs.python3}/bin/python3 ${./compose-engine-request.py} \
+      ${harness}/bin/billet-acceptance compose-engine-request \
         ${pkgs.docker-compose}/bin/docker-compose ${cpuMaximum.dockerCompose.file} ${
         if pkgs.stdenv.hostPlatform.isAarch64
         then "arm64"
