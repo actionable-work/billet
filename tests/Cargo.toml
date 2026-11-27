@@ -4,11 +4,15 @@ members = [
   "packages/rust/billet_acceptance",
   "packages/rust/billet_core",
   "packages/rust/billet_doctest",
+  "packages/rust/billet_vm",
+  "packages/rust/billet_vm_compose",
+  "packages/rust/billet_vm_kubernetes",
 ]
 resolver = "2"
 
 [workspace.dependencies]
 billet_core = { default-features = false, path = "packages/rust/billet_core" }
+billet_vm = { default-features = false, path = "packages/rust/billet_vm" }
 flate2 = { default-features = false, features = [
   "rust_backend",
 ], version = "1" }

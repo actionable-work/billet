@@ -17,23 +17,23 @@
     {
       "manifest_path": "packages/rust/billet_acceptance/Cargo.toml",
       "name": "billet-acceptance",
-      "overall_score": 95.49,
-      "sloc": 1286,
+      "overall_score": 95.71,
+      "sloc": 1527,
       "subscores": {
-        "complexity": 2.93,
-        "crateSize": 0.0,
+        "complexity": 2.44,
+        "crateSize": 0.54,
         "duplication": 0.0,
         "nesting": 0.0,
-        "size": 1.58
+        "size": 1.31
       }
     },
     {
       "manifest_path": "packages/rust/billet_core/Cargo.toml",
       "name": "billet_core",
-      "overall_score": 99.17,
-      "sloc": 52,
+      "overall_score": 99.89,
+      "sloc": 181,
       "subscores": {
-        "complexity": 0.83,
+        "complexity": 0.11,
         "crateSize": 0.0,
         "duplication": 0.0,
         "nesting": 0.0,
@@ -52,9 +52,48 @@
         "nesting": 0.0,
         "size": 0.0
       }
+    },
+    {
+      "manifest_path": "packages/rust/billet_vm/Cargo.toml",
+      "name": "billet_vm",
+      "overall_score": 100.0,
+      "sloc": 299,
+      "subscores": {
+        "complexity": 0.0,
+        "crateSize": 0.0,
+        "duplication": 0.0,
+        "nesting": 0.0,
+        "size": 0.0
+      }
+    },
+    {
+      "manifest_path": "packages/rust/billet_vm_compose/Cargo.toml",
+      "name": "billet-vm-compose",
+      "overall_score": 99.57,
+      "sloc": 995,
+      "subscores": {
+        "complexity": 0.0,
+        "crateSize": 0.0,
+        "duplication": 0.0,
+        "nesting": 0.0,
+        "size": 0.43
+      }
+    },
+    {
+      "manifest_path": "packages/rust/billet_vm_kubernetes/Cargo.toml",
+      "name": "billet-vm-kubernetes",
+      "overall_score": 99.83,
+      "sloc": 657,
+      "subscores": {
+        "complexity": 0.0,
+        "crateSize": 0.0,
+        "duplication": 0.0,
+        "nesting": 0.0,
+        "size": 0.17
+      }
     }
   ],
-  "input_digest": "c86cb71acd6691ffc3fea296d6d4fd4278a88fb2fbaad76baade7594826c0651",
+  "input_digest": "9acd1849778c6e37ee4baf260e40141aec063dd2d50cddba562cc927b03fdc50",
   "policy": {
     "scoring": {
       "crateSlocLimit": 1500,
@@ -78,15 +117,15 @@
   },
   "schema_version": 4,
   "workspace": {
-    "crate_count": 4,
-    "overall_score": 96.59,
-    "sloc": 1732,
+    "crate_count": 7,
+    "overall_score": 98.23,
+    "sloc": 4053,
     "subscores": {
-      "complexity": 2.24,
-      "crateSize": 0.0,
+      "complexity": 0.94,
+      "crateSize": 0.2,
       "duplication": 0.0,
       "nesting": 0.0,
-      "size": 1.18
+      "size": 0.63
     }
   }
 }

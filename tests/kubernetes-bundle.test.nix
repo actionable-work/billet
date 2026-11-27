@@ -1,6 +1,7 @@
 {
   pkgs,
   billetLib,
+  checkers,
   catalogBillets,
 }: let
   inherit (pkgs) lib;
@@ -61,6 +62,13 @@
     && builtins.any (item: item.code == code && item.field == field && item.severity == "error") candidate.capabilityReport.diagnostics
     && !(builtins.tryEval candidate.configuration).success;
   live = catalogBillets.catalog-report.kubernetes;
+  members = ["catalog" "report"];
+  parameters = pkgs.writeText "kubernetes-catalog-bundle.json" (builtins.toJSON {
+    bundle = "${live.bundle}";
+    kubernetesFile = "${live.file}";
+    manifests = lib.genAttrs members (name: "${catalogBillets.${name}.manifest}");
+    images = lib.genAttrs members (name: "${catalogBillets.${name}.dockerImage}");
+  });
 in {
   "billet:kubernetes-bundle-file" = assert target.capabilityReport.profile == "kubernetes-artifact-bundle-v1" && target.capabilityReport.canRender;
   assert target.capabilityReport.services.report == report.kubernetes.capabilityReport;
@@ -117,33 +125,9 @@ in {
       };
     };
     testScript = ''
-      import json
-
       machine.start()
       machine.wait_for_unit("k3s.service")
-      machine.wait_until_succeeds("k3s kubectl get --raw=/readyz")
-      machine.wait_until_succeeds("k3s kubectl wait --for=condition=Ready node --all --timeout=10s", timeout=180)
-      machine.succeed("cmp ${live.file} ${live.bundle}/kubernetes.json")
-      ${lib.concatMapStringsSep "\n" (name: ''
-        machine.succeed("cmp ${catalogBillets.${name}.manifest} ${live.bundle}/manifests/${name}.json")
-        machine.succeed("cmp ${catalogBillets.${name}.dockerImage} ${live.bundle}/images/${name}.tar")
-        machine.succeed("k3s ctr images import ${live.bundle}/images/${name}.tar")
-      '') ["catalog" "report"]}
-      machine.succeed("k3s kubectl -n kube-system rollout status deployment/coredns --timeout=120s")
-      machine.succeed("k3s kubectl create namespace catalog-report")
-      kubectl = "k3s kubectl -n catalog-report"
-      machine.succeed(f"{kubectl} apply --server-side --validate=strict -f ${live.bundle}/kubernetes.json")
-      report = "-l billet.actionable.work/application=report"
-      status, output = machine.execute(f"{kubectl} wait --for=condition=Complete job {report} --timeout=120s")
-      if status:
-          machine.execute(f"{kubectl} describe pods")
-          machine.execute(f"{kubectl} logs {report} --all-containers=true")
-      assert status == 0, output
-      completed = json.loads(machine.succeed(f"{kubectl} get pods {report} --field-selector=status.phase=Succeeded -o json"))["items"]
-      assert len(completed) == 1
-      name = completed[0]["metadata"]["name"]
-      lines = machine.succeed(f"{kubectl} logs {name}").splitlines()
-      assert lines and json.loads(lines[-1]) == {"items": [{"inStock": True, "sku": "notebook"}]}, lines
+      machine.succeed("${checkers.kubernetes}/bin/billet-vm-kubernetes kubernetes-catalog-bundle ${parameters} >&2", timeout=1500)
     '';
   };
 }
