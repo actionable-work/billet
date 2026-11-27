@@ -104,6 +104,7 @@ in
     (require "resources.strictSingleton" (!c.resources.strictSingleton || (c.resources.replicas.max <= 1 && c.rollout.maxSurge == 0)) "singleton forbids concurrent replicas and positive surge")
     (positive "initialization.startupAllowanceSeconds" c.initialization.startupAllowanceSeconds)
     (nonnegative "initialization.budgetSeconds" c.initialization.budgetSeconds)
+    (require "initialization.budgetSeconds" (c.initialization.steps != [] || c.initialization.budgetSeconds == 0) "must be zero when no initialization steps are declared")
     (require "initialization.budgetSeconds" (c.initialization.budgetSeconds <= c.initialization.startupAllowanceSeconds && within c.initialization.budgetSeconds (map (s: s.timeoutSeconds) c.initialization.steps)) "must contain all step timeouts within startup allowance")
     (unique "initialization.steps.id" (map (s: s.id) c.initialization.steps))
     (lib.imap0 (i: s: [

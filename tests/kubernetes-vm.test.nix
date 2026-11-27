@@ -1,6 +1,7 @@
 {
   pkgs,
   billetLib,
+  checkers,
 }: let
   inherit (pkgs) lib;
   core = "${pkgs.coreutils}/bin";
@@ -215,6 +216,22 @@
   upgradeV1 = upgrade "1.0.0" "v1";
   upgradeV2 = upgrade "2.0.0" "v2";
   inherit (fixture.kubernetes) bundle;
+  parameters = pkgs.writeText "kubernetes-k3s.json" (builtins.toJSON {
+    inherit bundle core busybox tokenFile;
+    curl = lib.getExe pkgs.curl;
+    fixtureManifest = "${fixture.manifest}";
+    kubernetesFile = "${fixture.kubernetes.file}";
+    dockerImage = "${fixture.dockerImage}";
+    imageRef = fixture.ociImage.imageRefUnsafe;
+    peerImage = "${peer.dockerImage}";
+    peerFile = "${peer.kubernetes.file}";
+    upgradeV1Image = "${upgradeV1.dockerImage}";
+    upgradeV2Image = "${upgradeV2.dockerImage}";
+    upgradeV1File = "${upgradeV1.kubernetes.file}";
+    upgradeV2File = "${upgradeV2.kubernetes.file}";
+    upgradeV1Ref = upgradeV1.ociImage.imageRefUnsafe;
+    upgradeV2Ref = upgradeV2.ociImage.imageRefUnsafe;
+  });
 in {
   "billet:kubernetes-k3s" = pkgs.testers.runNixOSTest {
     name = "billet-kubernetes-k3s";
@@ -257,107 +274,9 @@ in {
       };
     };
     testScript = ''
-      import json
-
-      kubectl = "k3s kubectl -n billet-test"
       machine.start()
       machine.wait_for_unit("k3s.service")
-      machine.wait_until_succeeds("k3s kubectl get --raw=/readyz")
-      machine.wait_until_succeeds("k3s kubectl wait --for=condition=Ready node --all --timeout=10s", timeout=180)
-      assert machine.succeed("k3s kubectl get namespace billet-test --ignore-not-found -o name") == ""
-
-      machine.succeed("cmp ${fixture.manifest} ${bundle}/manifest.json")
-      machine.succeed("cmp ${fixture.kubernetes.file} ${bundle}/kubernetes.json")
-      machine.succeed("cmp ${fixture.dockerImage} ${bundle}/image.tar")
-      machine.succeed("k3s ctr images import ${bundle}/image.tar")
-      machine.succeed("k3s kubectl apply --server-side --validate=strict -f ${bundle}/kubernetes.json")
-      assert machine.succeed("k3s kubectl get namespace billet-test -o jsonpath='{.status.phase}'") == "Active"
-      machine.succeed("k3s kubectl apply --server-side --dry-run=server --validate=strict -f ${bundle}/kubernetes.json")
-      machine.succeed("printf '%s' \"$(cat /proc/sys/kernel/random/uuid)\" >/tmp/billet-token")
-      machine.succeed(f"{kubectl} create secret generic runtime --from-file=token=/tmp/billet-token")
-      status, rollout = machine.execute(f"{kubectl} rollout status deployment/kube-app --timeout=90s")
-      if status != 0:
-          machine.execute(f"{kubectl} describe pods")
-          machine.execute(f"{kubectl} logs deployment/kube-app --all-containers=true")
-      assert status == 0, rollout
-
-      pods = json.loads(machine.succeed(f"{kubectl} get pods -o json"))["items"]
-      assert len(pods) == 1
-      pod = pods[0]
-      assert [status["state"]["terminated"]["exitCode"]
-              for status in pod["status"]["initContainerStatuses"]] == [0, 0]
-      container = pod["status"]["containerStatuses"][0]
-      assert container["ready"] and container["started"]
-      assert container["image"] == "${fixture.ociImage.imageRefUnsafe}"
-      assert pod["spec"]["containers"][0]["startupProbe"]["tcpSocket"]["port"] == 8080
-      assert pod["spec"]["terminationGracePeriodSeconds"] == 7
-      service_ip = machine.succeed(f"{kubectl} get service kube-app -o jsonpath='{{.spec.clusterIP}}'").strip()
-      service_request = f"${lib.getExe pkgs.curl} --fail --silent --show-error --max-time 2 http://{service_ip}:8080/index.html"
-      assert machine.wait_until_succeeds(service_request, timeout=60) == "ready\n"
-      mount_info = machine.succeed(f"{kubectl} exec deployment/kube-app -- ${core}/cat /proc/mounts")
-      scratch = next(line.split() for line in mount_info.splitlines() if line.split()[1] == "/scratch")
-      assert scratch[2] == "tmpfs" and "size=4096k" in scratch[3].split(",")
-      secret = next(line.split() for line in mount_info.splitlines() if line.split()[1] == "${tokenFile}")
-      assert pod["spec"]["automountServiceAccountToken"] is False and "ro" in secret[3].split(",")
-
-      peer_args = "--image=${fixture.ociImage.imageRefUnsafe} --image-pull-policy=Never"
-      machine.succeed("k3s ctr images import ${peer.dockerImage}")
-      machine.succeed("k3s kubectl apply --server-side --validate=strict -f ${peer.kubernetes.file}")
-      machine.succeed(f"{kubectl} run denied {peer_args} --command -- ${core}/sleep infinity")
-      machine.succeed(f"{kubectl} rollout status deployment/kube-peer --timeout=90s")
-      machine.succeed(f"{kubectl} wait --for=condition=Ready pod/denied --timeout=60s")
-
-      def request(port):
-          return f"${busybox} wget -T 2 -qO- http://{service_ip}:{port}/index.html"
-
-      def wait_for_denial(peer_name, port):
-          denial = "'\"$@\"; test \"$?\" -eq 1'"
-          machine.wait_until_succeeds(f"{kubectl} exec {peer_name} -- ${busybox} sh -c {denial} sh {request(port)}", timeout=30)
-
-      assert machine.wait_until_succeeds(f"{kubectl} exec deployment/kube-peer -- {request(9090)}", timeout=60) == "ready\n"
-      assert machine.wait_until_succeeds(f"{kubectl} exec denied -- {request(8080)}", timeout=60) == "ready\n"
-      wait_for_denial("denied", 9090)
-      wait_for_denial("deployment/kube-peer", 8080)
-
-      with subtest("the consumer accepts a second Billet version"):
-          import time
-
-          upgrade = "k3s kubectl -n billet-upgrade"
-          machine.succeed("k3s ctr images import ${upgradeV1.dockerImage}")
-          machine.succeed("k3s ctr images import ${upgradeV2.dockerImage}")
-          machine.succeed("k3s kubectl apply --server-side --validate=strict -f ${upgradeV1.kubernetes.file}")
-          machine.succeed(f"{upgrade} rollout status deployment/kube-upgrade --timeout=90s")
-          first = json.loads(machine.succeed(f"{upgrade} get deployment kube-upgrade -o json"))
-          machine.succeed("k3s kubectl apply --server-side --validate=strict -f ${upgradeV2.kubernetes.file}")
-          machine.succeed(f"{upgrade} rollout status deployment/kube-upgrade --timeout=120s")
-
-          deployment = json.loads(machine.succeed(f"{upgrade} get deployment kube-upgrade -o json"))
-          spec = deployment["spec"]
-          assert deployment["metadata"]["generation"] > first["metadata"]["generation"]
-          assert spec["strategy"] == {"type": "RollingUpdate", "rollingUpdate": {"maxSurge": 1, "maxUnavailable": 0}}, spec["strategy"]
-          assert (spec["minReadySeconds"], spec["progressDeadlineSeconds"]) == (2, 120)
-          annotations = spec["template"]["metadata"]["annotations"]
-          assert annotations["billet.actionable.work/identity-version"] == "2.0.0"
-          assert first["spec"]["template"]["metadata"]["annotations"]["billet.actionable.work/identity-version"] == "1.0.0"
-
-          def second_version_pods():
-              pods = json.loads(machine.succeed(f"{upgrade} get pods -o json"))["items"]
-              statuses = [status for pod in pods for status in pod["status"].get("containerStatuses", [])]
-              ready = len(pods) == 1 and len(statuses) == 1 and all(
-                  status["ready"] and status["image"] == "${upgradeV2.ociImage.imageRefUnsafe}" for status in statuses
-              )
-              return pods if ready else None
-
-          deadline = time.monotonic() + 60
-          while (pods := second_version_pods()) is None:
-              assert time.monotonic() < deadline, machine.succeed(f"{upgrade} get pods -o wide")
-              time.sleep(1)
-          assert "${upgradeV1.ociImage.imageRefUnsafe}" != "${upgradeV2.ociImage.imageRefUnsafe}"
-          for pod in pods:
-              assert pod["metadata"]["annotations"]["billet.actionable.work/identity-version"] == "2.0.0"
-              # The container inherits the second image's argv; its output reports it.
-              assert {"command", "args"}.isdisjoint(pod["spec"]["containers"][0])
-              assert machine.succeed(f"{upgrade} logs {pod['metadata']['name']}") == "BILLET_UPGRADE v2\n"
+      machine.succeed("${checkers.kubernetes}/bin/billet-vm-kubernetes kubernetes-k3s ${parameters} >&2", timeout=1500)
     '';
   };
 }

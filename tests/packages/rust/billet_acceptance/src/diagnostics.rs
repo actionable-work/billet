@@ -8,7 +8,7 @@ const IMAGE_NAME: &str =
     "must be a lowercase image repository name; set it explicitly when identity.name is not one";
 
 /// The diagnostic each `fixtures.invalid` entry must produce: fixture, field path and reason.
-const REJECTIONS: [(&str, &str, &str); 43] = [
+const REJECTIONS: [(&str, &str, &str); 44] = [
     (
         "bandwidthMinimumType",
         "network.bandwidth.ingress.minBitsPerSecond",
@@ -147,11 +147,16 @@ const REJECTIONS: [(&str, &str, &str); 43] = [
     ),
     ("system", "systems", "selected system is not declared"),
     ("unknown", "applications", "unknown field"),
+    (
+        "unusedInitBudget",
+        "initialization.budgetSeconds",
+        "must be zero when no initialization steps are declared",
+    ),
     ("wrongType", "resources.cpuLimit", "expected integer"),
 ];
 
 /// Require evaluation to fail with `expected` in its error output and without the canary.
-fn rejects(expression: &str, expected: &str, subject: &str) -> Result {
+fn rejects(expression: &str, expected: &str, subject: &str) -> Result<String> {
     let result = evaluate(expression)?;
     let error = String::from_utf8(result.stderr)?;
     check(
@@ -161,7 +166,8 @@ fn rejects(expression: &str, expected: &str, subject: &str) -> Result {
     check(
         !error.contains(CANARY),
         &format!("{subject}: rejected value leaked to diagnostic"),
-    )
+    )?;
+    Ok(error)
 }
 
 /// Every invalid fixture fails with exactly its expected field path and reason.
@@ -181,16 +187,72 @@ pub fn rejections() -> Result {
     )?;
     let prefix = nix_expression();
     for (name, field, reason) in REJECTIONS {
-        rejects(
+        let error = rejects(
             &format!("{prefix}(f.evaluate f.invalid.{name}).ir"),
             &format!("billet: {field}: {reason}"),
             name,
         )?;
+        if name == "unusedInitBudget" {
+            check(
+                !error.contains("7319829"),
+                "unused initialization budget leaked to diagnostic",
+            )?;
+        }
     }
     println!(
         "{} invalid fixtures failed with their expected value-free diagnostics",
         fixtures.len()
     );
+    Ok(())
+}
+
+/// Direct and bundle selectors report only the field-specific mapping errors.
+pub fn compose_durations() -> Result {
+    let prefix = nix_expression();
+    let source = env("source");
+    let fixtures = format!(
+        "(import {source}/tests/compose-duration.test.nix {{ inherit pkgs billetLib; }}).selectorFixtures"
+    );
+    for (role, fields) in [
+        (
+            "readiness",
+            &[
+                "shutdown.stopGracePeriodSeconds",
+                "probes.readiness.intervalSeconds",
+                "probes.readiness.timeoutSeconds",
+            ][..],
+        ),
+        (
+            "liveness",
+            &[
+                "probes.liveness.intervalSeconds",
+                "probes.liveness.timeoutSeconds",
+            ][..],
+        ),
+    ] {
+        for (scope, field_prefix) in [("standalone", ""), ("bundle", "services.hello.")] {
+            let reasons = fields
+                .iter()
+                .map(|field| {
+                    format!("{field_prefix}{field}: exceeds the native Compose duration range")
+                })
+                .collect::<Vec<_>>()
+                .join("; ");
+            let expected = format!("error: billet: UnsupportedTarget dockerCompose: {reasons}");
+            for selector in ["configuration", "file.drvPath", "bundle.drvPath"] {
+                let subject = format!("{role}.{scope}.{selector}");
+                let error = rejects(
+                    &format!("{prefix}{fixtures}.{subject}"),
+                    &expected,
+                    &subject,
+                )?;
+                check(
+                    error.lines().any(|line| line.trim() == expected),
+                    &format!("{subject}: expected exact diagnostic `{expected}`, got:\n{error}"),
+                )?;
+            }
+        }
+    }
     Ok(())
 }
 

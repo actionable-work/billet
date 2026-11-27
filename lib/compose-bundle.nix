@@ -4,6 +4,7 @@
   members,
   system,
   structureDiagnostics,
+  linkDiagnostics,
 }: let
   inherit (pkgs) lib;
   reports = lib.mapAttrs (_: billet: billet.dockerCompose.capabilityReport) billets;
@@ -11,10 +12,10 @@
   memberReports = lib.concatLists (lib.mapAttrsToList (name: report:
     map (item: item // {field = "services.${name}.${item.field}";}) report.diagnostics)
   reports);
-  diagnostics = map (item: item // {capability = "compose-packaging";}) structureDiagnostics ++ memberReports ++ project.diagnostics;
+  diagnostics = map (item: item // {capability = "compose-packaging";}) structureDiagnostics ++ linkDiagnostics ++ memberReports ++ project.diagnostics;
   sorted = values: lib.sort builtins.lessThan (lib.unique values);
   formatDiagnostics = lib.concatMapStringsSep "; " (item: "${item.field}: ${item.reason}");
-  canRender = structureDiagnostics == [] && lib.all (report: report.canRender) (builtins.attrValues reports);
+  canRender = structureDiagnostics == [] && linkDiagnostics == [] && lib.all (report: report.canRender) (builtins.attrValues reports);
   capabilityReport = {
     schemaVersion = 1;
     target = "dockerCompose";
@@ -32,7 +33,7 @@
   };
   renderable =
     capabilityReport.canRender
-    || throw ("billet: UnsupportedTarget dockerCompose: " + formatDiagnostics (builtins.filter (item: (item.severity or "error") == "error") diagnostics));
+    || throw ("billet: UnsupportedTarget dockerCompose: " + formatDiagnostics (builtins.filter (item: item.severity == "error") diagnostics));
   configurations = lib.mapAttrs (_: billet: billet.dockerCompose.configuration) billets;
   merge = field: lib.mergeAttrsList (map (config: config.${field} or {}) (builtins.attrValues configurations));
   secrets = merge "secrets";

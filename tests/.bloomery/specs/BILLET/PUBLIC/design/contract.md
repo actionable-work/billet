@@ -31,9 +31,15 @@ acceptance evidence. Licensing is MIT OR Apache-2.0.
 
 Container construction uses the public flake-locked nix2container backend; its
 nixpkgs follows the project's pin. Repository-owned tooling and acceptance
-harnesses use Rust. The upstream NixOS test driver runs the isolated Docker
-qualification VM and its Compose consumer assertions through its Python test
-interface. Public artifact operations use `nix eval` and `nix build`.
+harnesses use Rust, including every qualification assertion. The upstream NixOS
+test driver boots the isolated qualification VMs. Its Python test script only
+starts machines, waits for services and runs a Rust checker binary
+(`billet-vm-compose` or `billet-vm-kubernetes`) in a guest with a JSON parameter
+file that Nix writes. The guest binary runs the consumer commands and makes the
+assertions. A multi-node test passes values between guests through that binary's
+output. Build-sandbox consumer fixtures, such as the Compose Engine request
+capture, are `billet-acceptance` subcommands. Public artifact operations use
+`nix eval` and `nix build`.
 
 ## Formatting
 

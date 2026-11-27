@@ -19,7 +19,8 @@ nix eval --json .#billets.x86_64-linux.hello.dockerCompose.capabilityReport
 
 The report evaluates without building any packages. `canRender` indicates
 whether Billet can produce the artifacts. When it is `false`, check
-`diagnostics` for packaging or bundle errors. Diagnostics with
+`diagnostics` for packaging or bundle errors. Every diagnostic has a `severity`.
+Diagnostics with `severity = "error"` prevent rendering. Diagnostics with
 `severity = "warning"` describe mapping limitations and allow rendering. For
 example, the hello report warns about CPU reservations and still has
 `canRender = true`.
@@ -128,14 +129,23 @@ manifest retains the full declaration.
 | Ephemeral disk storage                                      | An anonymous local volume.                                                                                                                                                                                        |
 | Persistent disk storage                                     | A named local volume scoped to the project and service. `docker compose down` retains it.                                                                                                                         |
 
-Billet caps a healthcheck start period that exceeds Compose's duration range and
+Compose can represent whole-second durations up to `9223372036` seconds. Billet
+rejects a larger shutdown grace period or a larger interval or timeout on the
+selected exec healthcheck. Preflight identifies the offending field. For a
+derived healthcheck start period above the limit, Billet caps the period and
 reports an advisory.
+
+Preflight rejects a CPU limit above `9223371264000` millicores. Higher values
+overflow the conversion to Engine nanocores. The Engine also checks requested
+CPU limits against the host's available CPUs.
 
 Docker Compose uses the declared storage target and honors `readOnlyMany` as a
 read-only mount. Volume access topology and driver class stay in the manifest.
-Disk claims generate a diagnostic for the missing size limit. To remove a
-project along with its declared named volumes and attached anonymous volumes,
-use `docker compose down --volumes`.
+Preflight rejects storage and file secret mounts that overlap `/nix/store`,
+`/etc/billet/manifest.json`, or `/etc/billet/closure.json`. Disk claims generate
+a diagnostic for the missing size limit. To remove a project along with its
+declared named volumes and attached anonymous volumes, use
+`docker compose down --volumes`.
 
 Rollout, placement, strict singleton, target-metric scaling, the replica maximum
 as a scaling bound, restart backoff and jitter, the restart ready-reset window,
@@ -217,11 +227,12 @@ network.
 
 Compose collects `privateConnections` links from all members. A link between
 distinct members makes its source wait for an exec readiness healthcheck on its
-destination, provided the destination declares the named port and has a positive
-replica count. Cyclic readiness dependencies are omitted with a diagnostic.
-Compose uses these dependencies for startup ordering. Directional network policy
-stays in the manifest. Secret and persistent volume keys are scoped by the
-encoded member and logical name so members can reuse logical names.
+destination when the destination has a positive replica count. Preflight rejects
+a link to a member if the named port is missing or its protocol differs. Cyclic
+readiness dependencies are omitted with a diagnostic. Compose uses these
+dependencies for startup ordering. Directional network policy stays in the
+manifest. Secret and persistent volume keys are scoped by the encoded member and
+logical name so members can reuse logical names.
 
 In the [catalog-report example](../../examples/catalog-report), `report` fetches
 `http://catalog:8080/items.json` over the shared network. The catalog's port

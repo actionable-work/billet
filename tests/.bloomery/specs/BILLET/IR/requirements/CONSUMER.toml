@@ -1,0 +1,107 @@
+schema_version = 1
+group = "CONSUMER"
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-001"
+title = "Reject protected Compose storage mounts (BI003, BI004, BI006, BI011)"
+manual = false
+design = "design/consumer-boundaries.md#protected-mount-targets"
+ears = { type = "event", trigger = "a Compose storage mount overlaps a protected image path", system = "Billet", action = "refuse Compose artifacts with a value-free storage mount diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-002"
+title = "Reject protected Compose file secret mounts (BI003, BI004, BI006, BI011)"
+manual = false
+design = "design/consumer-boundaries.md#protected-mount-targets"
+ears = { type = "event", trigger = "a Compose file secret target overlaps a protected image path", system = "Billet", action = "refuse Compose artifacts with a value-free file secret diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-003"
+title = "Reject protected Kubernetes storage mounts (BI003, BI004, BI006, BI011)"
+manual = false
+design = "design/consumer-boundaries.md#protected-mount-targets"
+ears = { type = "event", trigger = "a Kubernetes storage mount overlaps a protected image path", system = "Billet", action = "refuse Kubernetes artifacts with a value-free storage mount diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-004"
+title = "Reject protected Kubernetes file secret mounts (BI003, BI004, BI006, BI011)"
+manual = false
+design = "design/consumer-boundaries.md#protected-mount-targets"
+ears = { type = "event", trigger = "a Kubernetes file secret target overlaps a protected image path", system = "Billet", action = "refuse Kubernetes artifacts with a value-free file secret diagnostic" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-005"
+title = "Allow mounts at unrelated paths (BI004, BI006, BI011)"
+manual = false
+design = "design/consumer-boundaries.md#protected-mount-targets"
+ears = { type = "event", trigger = "declared mounts are path neighbors of protected image paths", system = "Billet", action = "allow Compose and Kubernetes single-service and bundled configurations" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-006"
+title = "Reject a missing bundle destination port (BI004, BI011)"
+manual = false
+design = "design/consumer-boundaries.md#known-bundle-destinations"
+ears = { type = "event", trigger = "a Compose or Kubernetes bundle connection names an existing member with no matching port name", system = "Billet", action = "refuse artifacts with an error at the declaring member's canonical destinationPort field" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-007"
+title = "Reject a bundle destination protocol mismatch (BI004, BI011)"
+manual = false
+design = "design/consumer-boundaries.md#known-bundle-destinations"
+ears = { type = "event", trigger = "a Compose or Kubernetes bundle connection names a known port with a different declared protocol", system = "Billet", action = "refuse artifacts with an error at the declaring member's canonical protocol field" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-008"
+title = "Allow a matching bundle destination port (BI004, BI011)"
+manual = false
+design = "design/consumer-boundaries.md#known-bundle-destinations"
+ears = { type = "event", trigger = "a Compose or Kubernetes bundle connection names a port with matching protocol on an existing member", system = "Billet", action = "allow configuration for the connection" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-009"
+title = "Retain external bundle connection eligibility (BI004, BI011)"
+manual = false
+design = "design/consumer-boundaries.md#known-bundle-destinations"
+ears = { type = "event", trigger = "a Compose or Kubernetes bundle connection names a destination outside the bundle", system = "Billet", action = "allow configuration under the target's existing external connection mapping" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-010"
+title = "Warn for Kubernetes grace below two seconds (BI004, BI011, BI016)"
+manual = false
+design = "design/consumer-boundaries.md#kubernetes-termination-grace"
+ears = { type = "event", trigger = "Kubernetes shutdown grace is zero or one second", system = "Billet", action = "warn at shutdown.stopGracePeriodSeconds for a Job or Deployment" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-011"
+title = "Preserve short Kubernetes grace declarations (BI004, BI011, BI016)"
+manual = false
+design = "design/consumer-boundaries.md#kubernetes-termination-grace"
+ears = { type = "event", trigger = "Kubernetes shutdown grace is zero or one second", system = "Billet", action = "render that exact grace in Job and Deployment Pod templates" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-012"
+title = "Reject Kubernetes grace above its duration ceiling (BI004, BI011, BI016)"
+manual = false
+design = "design/consumer-boundaries.md#kubernetes-termination-grace"
+ears = { type = "event", trigger = "Kubernetes shutdown grace exceeds 9223371916 seconds", system = "Billet", action = "refuse artifacts with a range error at shutdown.stopGracePeriodSeconds" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-013"
+title = "Render the maximum Kubernetes shutdown grace (BI004, BI011, BI016)"
+manual = false
+design = "design/consumer-boundaries.md#kubernetes-termination-grace"
+ears = { type = "event", trigger = "Kubernetes shutdown grace is 9223371916 seconds", system = "Billet", action = "render that exact grace in Job and Deployment Pod templates" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-014"
+title = "Reject CPU limits above the Compose nanocore ceiling (BI004, BI011, BI012)"
+manual = false
+design = "design/consumer-boundaries.md#compose-cpu-limits"
+ears = { type = "event", trigger = "a Compose CPU limit exceeds 9223371264000 millicores", system = "Billet", action = "refuse Compose artifacts with a conversion range error at resources.cpuLimit" }
+
+[[requirements]]
+id = "BILLET-IR-CONSUMER-015"
+title = "Encode the maximum Compose CPU limit for the Engine (BI004, BI011, BI012)"
+manual = false
+design = "design/consumer-boundaries.md#compose-cpu-limits"
+ears = { type = "event", trigger = "the pinned Compose consumes a rendered limit of 9223371264000 millicores", system = "Billet", action = "produce 9223370937343148032 nanocores in the Engine container create request" }

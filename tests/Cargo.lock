@@ -33,8 +33,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "billet-vm-compose"
+version = "0.1.0"
+dependencies = [
+ "billet_vm",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
+name = "billet-vm-kubernetes"
+version = "0.1.0"
+dependencies = [
+ "billet_vm",
+ "serde_json",
+]
+
+[[package]]
 name = "billet_core"
 version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "billet_vm"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "sha2",
+]
 
 [[package]]
 name = "block-buffer"

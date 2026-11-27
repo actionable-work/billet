@@ -37,11 +37,19 @@
           pkgs = nixpkgs.legacyPackages.${system};
           packages = perSystemWorkspace.${system}.packages;
           harness = packages.billet-acceptance;
+          checkers = {
+            compose = packages.billet-vm-compose;
+            kubernetes = packages.billet-vm-kubernetes;
+          };
           catalogBillets = catalog.billets.${system};
           catalogPackage = catalog.packages.${system}.catalog;
         in
           (import ./acceptance.test.nix {
             inherit pkgs billetLib harness;
+            cli = packages.billet;
+          })
+          // (import ./manifest-diff.test.nix {
+            inherit pkgs;
             cli = packages.billet;
           })
           // (import ./oci.test.nix {inherit pkgs billetLib harness;})
@@ -73,7 +81,7 @@
             catalogChecks = catalog.checks.${system};
           })
           // (import ./guestbook.test.nix {
-            inherit pkgs billetLib harness;
+            inherit pkgs billetLib harness checkers;
             guestbook = guestbook.billets.${system};
             guestbookChecks = guestbook.checks.${system};
           })
@@ -81,16 +89,19 @@
             inherit pkgs billetLib;
           })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes-bundle.test.nix {
-            inherit pkgs billetLib catalogBillets;
+            inherit pkgs billetLib checkers catalogBillets;
           })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes-vm.test.nix {
-            inherit pkgs billetLib;
+            inherit pkgs billetLib checkers;
           })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./bandwidth.test.nix {
             inherit pkgs billetLib;
           })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./kubernetes-bandwidth.test.nix {
-            inherit pkgs billetLib;
+            inherit pkgs billetLib checkers;
+          })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./consumer-boundaries.test.nix {
+            inherit pkgs billetLib harness;
           })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./microvm.test.nix {
             inherit pkgs billetLib;
@@ -102,10 +113,14 @@
             inherit pkgs billetLib catalogBillets;
           })
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (import ./compose.test.nix {
-            inherit pkgs billetLib;
+            inherit pkgs billetLib checkers;
             catalogReport = catalogBillets.catalog-report.dockerCompose.bundle;
             catalogExecutable = "${catalogPackage}/bin/catalog";
           })
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux
+          (import ./compose-duration.test.nix {
+            inherit pkgs billetLib harness;
+          }).checks
           // (import ./docs.test.nix {
             inherit pkgs billet bloomery nixpkgs;
             doctest = packages.billet-doctest;

@@ -3,6 +3,7 @@
   billets,
   system,
   structureDiagnostics,
+  linkDiagnostics,
   ...
 }: let
   inherit (pkgs) lib;
@@ -10,7 +11,7 @@
   memberReports = builtins.attrValues services;
   formatDiagnostics = lib.concatMapStringsSep "; " (item: "${item.field}: ${item.reason}");
   error = code: field: reason: {inherit code field reason;};
-  preflightOK = structureDiagnostics == [] && builtins.all (report: report.canRender) memberReports;
+  preflightOK = structureDiagnostics == [] && linkDiagnostics == [] && builtins.all (report: report.canRender) memberReports;
   resources = lib.optionals preflightOK (lib.concatMap (billet: billet.kubernetes.configuration.items) (builtins.attrValues billets));
   namespaceItems = lib.unique (builtins.filter (item: item.kind == "Namespace") resources);
   namespacedItems = builtins.filter (item: item.kind != "Namespace") resources;
@@ -36,6 +37,7 @@
   );
   diagnostics =
     errors
+    ++ linkDiagnostics
     ++ lib.concatLists (lib.mapAttrsToList (name: report:
       map (item: item // {field = "services.${name}.${item.field}";}) report.diagnostics)
     services);
@@ -50,7 +52,7 @@
     kind = "List";
     items = namespaceItems ++ workloadItems;
   };
-  file = pkgs.writeText "kubernetes.json" (builtins.unsafeDiscardStringContext (builtins.toJSON configuration) + "\n");
+  file = requireRenderable (pkgs.writeText "kubernetes.json" (builtins.unsafeDiscardStringContext (builtins.toJSON configuration) + "\n"));
 in {
   inherit configuration file;
   capabilityReport = {

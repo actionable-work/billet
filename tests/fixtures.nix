@@ -141,6 +141,10 @@
       };
     };
     initBudget = lib.recursiveUpdate full {initialization.budgetSeconds = 1;};
+    unusedInitBudget = lib.recursiveUpdate base {
+      initialization.budgetSeconds = 7319829;
+      initialization.startupAllowanceSeconds = 7319830;
+    };
     duplicateInit = lib.recursiveUpdate full {
       initialization = {
         steps = full.initialization.steps ++ full.initialization.steps;

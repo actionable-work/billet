@@ -94,7 +94,8 @@ used.
 `mkBilletBundle` produces one Kubernetes List, `images/<service>.tar`, and
 `manifests/<service>.json`. Members share a namespace. An explicit namespace on
 one member applies to members that omit it. Resource names and image tags can be
-read from `kubernetes.json`.
+read from `kubernetes.json`. Preflight rejects private connections to bundle
+members when the named destination port is missing or its protocol differs.
 
 For the catalog-report example on a single-node K3s cluster, build the bundle
 from the repository root, import both images, and apply it into an existing
@@ -127,6 +128,11 @@ container runtime.
 [Deployments](https://kubernetes.io/docs/reference/kubernetes-api/apps/deployment-v1/)
 and
 [Pod termination](https://kubernetes.io/docs/concepts/workloads/pods/pod-termination/)
+
+Job and Deployment templates retain the declared shutdown grace period. Billet
+warns for zero or one second because kubelet gives the container runtime at
+least two seconds to stop a container. Preflight rejects values above
+`9223371916` seconds, leaving room for the default kubelet CRI request timeout.
 
 Startup, readiness, and liveness probes support exec, TCP, HTTP, and gRPC. The
 gRPC application must implement the gRPC health checking protocol. Ordered init
@@ -178,7 +184,8 @@ requested storage class, access mode, and size. The Pod then sets `fsGroup` to
 the declared GID so the application user can write to a volume whose root is
 owned by another user. The cluster needs a matching provisioner and storage
 compatible with the replica topology, and the volume type must support ownership
-management.
+management. Preflight rejects storage and file secret mounts that overlap
+`/nix/store`, `/etc/billet/manifest.json`, or `/etc/billet/closure.json`.
 
 ## Provide secrets
 

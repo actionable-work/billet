@@ -82,9 +82,9 @@ enable = true
 enable = true
 
 [checks.specifications.testExceptions.acceptance_fixtures]
-maxRequirements = 63
+maxRequirements = 64
 path = "acceptance.test.nix"
-reason = "This file exports separate CLI, executable, IR, rejection diagnostic, and closure checks with distinct assertions. The IR contract design identifies the rejection and golden witnesses."
+reason = "This file exports separate CLI, executable, IR, rejection diagnostic, and closure checks with distinct assertions. The IR contract design identifies the rejection and golden witnesses; the unusedInitBudget case asserts the empty-step budget field and reason."
 
 [checks.specifications.testExceptions.bandwidth_artifacts]
 maxRequirements = 34
@@ -96,10 +96,20 @@ maxRequirements = 6
 path = "kubernetes-bandwidth.test.nix"
 reason = "The K3s VM measures each direction on each network path in a separate subtest, with an uncapped baseline and three parallel flows per measurement."
 
+[checks.specifications.testExceptions.compose_duration]
+maxRequirements = 6
+path = "compose-duration.test.nix"
+reason = "Three checks separately assert refusal at maximum plus one and successful pinned-consumer parsing at the maximum for grace, interval and timeout. A fourth check matches the exact error from each artifact selector."
+
 [checks.specifications.testExceptions.compose_vm]
 maxRequirements = 75
 path = "compose.test.nix"
 reason = "The Docker VM uses separate assertions for artifact integrity, Compose parsing and diagnostics, and live Docker behavior. The TARGETS design identifies the witnesses."
+
+[checks.specifications.testExceptions.consumer_boundaries]
+maxRequirements = 15
+path = "consumer-boundaries.test.nix"
+reason = "Four derivations assert protected mounts, bundle links, Kubernetes grace and the Compose CPU Engine request separately. The consumer boundaries design identifies each witness."
 
 [checks.specifications.testExceptions.cross_system]
 maxRequirements = 9
@@ -136,6 +146,11 @@ maxRequirements = 23
 path = "kubernetes-vm.test.nix"
 reason = "The K3s VM has separate bundle comparisons, strict API validation, and live workload assertions. The Kubernetes design identifies the witnesses."
 
+[checks.specifications.testExceptions.manifest_diff]
+maxRequirements = 18
+path = "manifest-diff.test.nix"
+reason = "Separate derivations assert the operation array, invalid inputs, exact integer comparison, numeric encoding errors, and native paths."
+
 [checks.specifications.testExceptions.microvm_boot]
 maxRequirements = 22
 path = "microvm-boot.test.nix"
@@ -152,9 +167,9 @@ path = "microvm.test.nix"
 reason = "Each requirement has a keyed configuration assertion or a standalone file comparison that builds with an unrealizable package."
 
 [checks.specifications.testExceptions.oci_fixtures]
-maxRequirements = 34
+maxRequirements = 36
 path = "oci.test.nix"
-reason = "This file exports separate preflight, OCI export, layer budget validation, and layer grouping checks. The OCI design identifies the layer assertions."
+reason = "This file exports separate preflight, OCI export, layer budget validation, and layer grouping checks. The OCI design identifies the layer assertions; the preflight check separately asserts error severity for each bundle structure diagnostic in every bundle report and for the image user diagnostic in each image, Compose and Kubernetes report."
 
 [checks.unusedDependencies]
 enable = true

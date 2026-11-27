@@ -10,3 +10,5 @@ description: Repository-owned Billet specification and acceptance requirements.
 Billet public ir contracts. See [design](design/contract.md).
 
 [Network bandwidth reservations and limits](design/network-bandwidth.md).
+
+[Container consumer boundaries](design/consumer-boundaries.md).

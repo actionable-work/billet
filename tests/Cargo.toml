@@ -4,14 +4,19 @@ members = [
   "packages/rust/billet_acceptance",
   "packages/rust/billet_core",
   "packages/rust/billet_doctest",
+  "packages/rust/billet_vm",
+  "packages/rust/billet_vm_compose",
+  "packages/rust/billet_vm_kubernetes",
 ]
 resolver = "2"
 
 [workspace.dependencies]
 billet_core = { default-features = false, path = "packages/rust/billet_core" }
+billet_vm = { default-features = false, path = "packages/rust/billet_vm" }
 flate2 = { default-features = false, features = [
   "rust_backend",
 ], version = "1" }
+serde = { default-features = false, features = ["std"], version = "1" }
 serde_json = { default-features = false, features = ["std"], version = "1" }
 sha2 = { default-features = false, features = ["std"], version = "0.10" }
 tar = { default-features = false, version = "0.4" }

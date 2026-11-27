@@ -36,7 +36,7 @@
   refused = report: code:
     report.system
     == "aarch64-darwin"
-    && builtins.any (d: d.code == code && d.field == "systems" && (d.severity or "error") == "error") report.diagnostics;
+    && builtins.any (d: d.code == code && d.field == "systems" && (d.severity or null) == "error") report.diagnostics;
   assertions = {
     "TARGETS-086" =
       darwin.ir.system

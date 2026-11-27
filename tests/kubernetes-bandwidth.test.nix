@@ -1,6 +1,7 @@
 {
   pkgs,
   billetLib,
+  checkers,
 }: let
   inherit (pkgs) lib;
   fixtures = import ./fixtures.nix {inherit pkgs billetLib;};
@@ -89,6 +90,13 @@
       }
     ];
   });
+  parameters = pkgs.writeText "kubernetes-bandwidth.json" (builtins.toJSON {
+    inherit ingressRate egressRate;
+    iperf3 = "${pkgs.iperf3}";
+    baselineFile = "${baseline.kubernetes.file}";
+    cappedFile = "${capped.kubernetes.file}";
+    peers = "${peers}";
+  });
   clusterNode = {config, ...}: let
     interface = builtins.head (builtins.filter (iface: iface.assignIP) (builtins.attrValues config.virtualisation.allInterfaces));
   in {
@@ -138,58 +146,15 @@ in {
       environment.systemPackages = [pkgs.iperf3];
     };
     testScript = {nodes, ...}: ''
-      from datetime import timedelta
-      import ipaddress
-      import json
-      import math
-
-      kubectl = "k3s kubectl -n default"
+      check = "${checkers.kubernetes}/bin/billet-vm-kubernetes"
       start_all()
       server.wait_for_unit("k3s.service")
-      server.wait_until_succeeds(f"{kubectl} wait --for=condition=Ready node/server node/worker --timeout=10s", timeout=timedelta(minutes=3))
-      server.succeed(f"{kubectl} apply --server-side --validate=strict -f ${baseline.kubernetes.file} -f ${capped.kubernetes.file} -f ${peers}")
-      server.succeed(f"{kubectl} rollout status deployment/baseline --timeout=120s")
-      server.succeed(f"{kubectl} rollout status deployment/capped --timeout=120s")
-      server.succeed(f"{kubectl} wait --for=condition=Ready pod/same-peer pod/cross-peer --timeout=120s")
-
-      targets = {}
-      for workload in ["baseline", "capped"]:
-          pods = json.loads(server.succeed(f"{kubectl} get pod -l billet.actionable.work/application={workload} -o json"))
-          [pod] = pods["items"]
-          assert pod["spec"]["nodeName"] == "server", pod["spec"]["nodeName"]
-          targets[workload] = str(ipaddress.IPv4Address(pod["status"]["podIP"]))
-      for peer, node in [("same-peer", "server"), ("cross-peer", "worker")]:
-          assert server.succeed(f"{kubectl} get pod {peer} -o jsonpath='{{.spec.nodeName}}'") == node
-      pod_cidr = ipaddress.IPv4Network(server.succeed(f"{kubectl} get node server -o jsonpath='{{.spec.podCIDR}}'"))
-      external.succeed(f"ip route add {pod_cidr} via ${nodes.server.networking.primaryIPAddress}")
-
-      def through(machine, command, workload, reverse, warmup, duration):
-          direction = "--reverse" if reverse else ""
-          result = json.loads(machine.succeed(
-              f"{command} --client {targets[workload]} --parallel 3 --json "
-              f"--omit {warmup} --time {duration} {direction}", timeout=timedelta(minutes=2)
-          ))
-          streams = result["end"]["streams"]
-          assert len(streams) == 3 and all(stream["receiver"]["bytes"] > 0 for stream in streams), result
-          return result["end"]["sum_received"]["bits_per_second"]
-
-      for route, machine, command in [
-          ("same-node", server, f"{kubectl} exec same-peer -- ${pkgs.iperf3}/bin/iperf3"),
-          ("cross-node", server, f"{kubectl} exec cross-peer -- ${pkgs.iperf3}/bin/iperf3"),
-          ("external", external, "iperf3"),
-      ]:
-          for direction, reverse, limit in [("ingress", False, ${toString ingressRate}), ("egress", True, ${toString egressRate})]:
+      cidr, baseline, capped = server.succeed(f"{check} kubernetes-bandwidth-setup ${parameters}", timeout=900).split()
+      external.succeed(f"{check} kubernetes-bandwidth-route {cidr} ${nodes.server.networking.primaryIPAddress}")
+      for route, machine in [("same-node", server), ("cross-node", server), ("external", external)]:
+          for direction in ["ingress", "egress"]:
               with subtest(f"{route} {direction} aggregate maximum"):
-                  uncapped = through(machine, command, "baseline", reverse, 1, 3)
-                  assert uncapped > limit * 1.5, f"baseline {uncapped:.0f} cannot distinguish limit {limit}"
-                  # containerd supplies up to 2^32-1 initial burst bits. Allow twice
-                  # the estimated drain time so the measurement covers sustained traffic.
-                  warmup = max(3, math.ceil(2 * (2**32 - 1) / (uncapped - limit)))
-                  measured = through(machine, command, "capped", reverse, warmup, 6)
-                  print(f"{route} {direction}: uncapped={uncapped:.0f}, capped={measured:.0f}, limit={limit}")
-                  assert 0.75 * limit <= measured <= 1.12 * limit, (
-                      f"uncapped={uncapped:.0f}, capped={measured:.0f}, limit={limit}, warmup={warmup}"
-                  )
+                  machine.succeed(f"{check} kubernetes-bandwidth-measure ${parameters} {route} {direction} {baseline} {capped} >&2", timeout=600)
     '';
   };
 }
