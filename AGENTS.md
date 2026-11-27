@@ -24,19 +24,20 @@ here. Test fixtures may invoke the actual artifact consumer in isolation.
 
 Keep specification and design work in the Bloomery specs under
 `tests/.bloomery/specs/BILLET/`. Write design, then bounded root PLAN.md, then
-implementation. Record progress and evidence in commit messages, not in files.
-`docs/` holds user-facing documentation only; update it when public behavior
-changes. Write fine-grained Bloomery requirements: one independently verifiable
-behavior per record, with an explicit condition/outcome, source BI lineage, and
-a precise owning design reference. Link automated records to tests that actually
-assert the behavior; document the witness when a check covers several records.
-Prefer executable qualification, including isolated Linux/Docker VM checks for
-live behavior, over manual records. Use manual qualification only when no
-adequate automated witness is available, and state that limitation explicitly.
-Keep diagnostic smoke runs, static trace bindings and actually executed
-automated qualification distinct. Do not use umbrella records or passing check
-counts as substitutes for granular specifications. Preserve existing requirement
-IDs; add atomic records without recycling or silently narrowing old IDs.
+implementation. PLAN.md is an ignored local working file; never commit it.
+Record progress and evidence in commit messages, not in files. `docs/` holds
+user-facing documentation only; update it when public behavior changes. Write
+fine-grained Bloomery requirements: one independently verifiable behavior per
+record, with an explicit condition/outcome, source BI lineage, and a precise
+owning design reference. Link automated records to tests that actually assert
+the behavior; document the witness when a check covers several records. Prefer
+executable qualification, including isolated Linux/Docker VM checks for live
+behavior, over manual records. Use manual qualification only when no adequate
+automated witness is available, and state that limitation explicitly. Keep
+diagnostic smoke runs, static trace bindings and actually executed automated
+qualification distinct. Do not use umbrella records or passing check counts as
+substitutes for granular specifications. Preserve existing requirement IDs; add
+atomic records without recycling or silently narrowing old IDs.
 
 Preserve BI source IDs and public/private boundaries. Never pass secret values
 to Nix; use runtime references only. One Billet has one primary application.
